@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Events &amp; Activities Gallery - Darul Hidaya Dars</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1d4d8b",
+                        "primary-light": "#e8f0f9", // Based on primary hue
+                        "primary-dark": "#0f2a4d",
+                        "neutral-light": "#f0f2f5", // Cool gray based on blue
+                        "neutral-dark": "#1a2430", // Dark slate based on blue
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#121820",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                    backgroundImage: {
+                        'islamic-pattern': "url('data:image/svg+xml,%3Csvg width=\\'60\\' height=\\'60\\' viewBox=\\'0 0 60 60\\' xmlns=\\'http://www.w3.org/2000/svg\\'%3E%3Cg fill=\\'none\\' fill-rule=\\'evenodd\\'%3E%3Cg fill=\\'%231d4d8b\\' fill-opacity=\\'0.03\\'%3E%3Cpath d=\\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')",
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-100 antialiased min-h-screen flex flex-col relative overflow-x-hidden">
+<!-- Decorative Background Pattern -->
+<div class="fixed inset-0 pointer-events-none bg-islamic-pattern z-0 opacity-100 dark:opacity-50"></div>
+<!-- Navigation -->
+<nav class="sticky top-0 z-50 bg-white/90 dark:bg-background-dark/90 backdrop-blur-md border-b border-primary/10 dark:border-primary/20">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-20">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-primary flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-primary/30">
+                        D
+                    </div>
+<span class="font-bold text-xl tracking-tight text-primary dark:text-white">Darul Hidaya Dars</span>
+</div>
+<div class="hidden md:flex space-x-8">
+<a class="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" href="#">Home</a>
+<a class="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" href="#">About</a>
+<a class="text-sm font-bold text-primary dark:text-white border-b-2 border-primary pb-1" href="#">Events</a>
+<a class="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" href="#">Contact</a>
+</div>
+<button class="md:hidden p-2 text-slate-600 dark:text-slate-300">
+<span class="material-icons">menu</span>
+</button>
+</div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-grow z-10 py-12 px-4 sm:px-6 lg:px-8 relative">
+<div class="max-w-7xl mx-auto">
+<!-- Hero Section -->
+<div class="text-center mb-16 relative">
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-primary/5 rounded-full blur-3xl -z-10"></div>
+<span class="inline-block py-1 px-3 rounded-full bg-primary/10 text-primary dark:text-blue-300 text-xs font-semibold mb-4 uppercase tracking-wider">Our Community</span>
+<h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white mb-6 leading-tight">
+                    Events &amp; Activities Gallery
+                </h1>
+<p class="text-lg md:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
+                    Exploring the vibrant life at Darul Hidaya Dars through our academic gatherings, cultural festivals, and spiritual assemblies.
+                </p>
+</div>
+<!-- Filter Bar -->
+<div class="bg-white dark:bg-neutral-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 mb-12 flex flex-col md:flex-row justify-between items-center gap-4 sticky top-24 z-30 transition-shadow hover:shadow-md">
+<div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+<!-- Year Filter -->
+<div class="relative group w-full sm:w-48">
+<span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none group-focus-within:text-primary transition-colors">calendar_today</span>
+<select class="form-select pl-10 pr-10 py-2.5 w-full rounded-lg border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:border-primary focus:ring-primary text-sm font-medium shadow-sm transition-all cursor-pointer">
+<option>All Years</option>
+<option>2024</option>
+<option>2023</option>
+<option>2022</option>
+</select>
+<span class="material-icons absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">expand_more</span>
+</div>
+<!-- Category Filter -->
+<div class="relative group w-full sm:w-48">
+<span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none group-focus-within:text-primary transition-colors">category</span>
+<select class="form-select pl-10 pr-10 py-2.5 w-full rounded-lg border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:border-primary focus:ring-primary text-sm font-medium shadow-sm transition-all cursor-pointer">
+<option>All Categories</option>
+<option>Academic</option>
+<option>Cultural</option>
+<option>Religious</option>
+<option>Sports</option>
+</select>
+<span class="material-icons absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="flex gap-3 w-full md:w-auto justify-end">
+<button class="px-5 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-2">
+<span class="material-icons text-sm">restart_alt</span>
+                        Reset
+                    </button>
+<button class="px-6 py-2.5 bg-primary hover:bg-primary-dark text-white text-sm font-semibold rounded-lg shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all flex items-center gap-2">
+<span class="material-icons text-sm">search</span>
+                        Find Events
+                    </button>
+</div>
+</div>
+<!-- Events Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Card 1 -->
+<div class="group bg-white dark:bg-neutral-dark rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer flex flex-col h-full">
+<div class="relative h-56 overflow-hidden">
+<img alt="Graduates throwing caps in the air during convocation" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" data-alt="Graduation caps thrown in the air by students" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPyGDIkJNoY9S2VwOCNQGKG2vtnLl4Z6EVTWOizCIFKWnf3fS4ATQivPdML6X4UKk2B5lC5ICUYIlaKVORvPgOEs4pGu29awXdGCkVj0iFA0t1oq99PMLsLd7GNHhHi7JDRaoqHHDUK5H6OuTU0Z1Buz2ZYl5HlDF7DR7w8QYAwBPnm1RFbwwqlma3FgEXueqMdZzUJ4VG51e5Hj2XkeK6kR1e68teyqF3TAd4CbSF3a5c8OBKB_Y8OprGai34e2FL7nISXrBM3A"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>
+<div class="absolute top-4 left-4">
+<span class="bg-primary text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm backdrop-blur-sm bg-opacity-90">Academic</span>
+</div>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<div class="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wide mb-3">
+<span class="material-icons text-sm text-primary">event</span>
+                            15 Oct 2023
+                        </div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-primary transition-colors line-clamp-2">Annual Convocation Ceremony 2023</h3>
+<p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-6 line-clamp-2 flex-grow">
+                            Celebrating the academic excellence of our graduating scholars. A momentous day filled with inspiration and pride.
+                        </p>
+<div class="mt-auto pt-4 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center">
+<span class="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
+<span class="material-icons text-sm">photo_library</span> 24 Photos
+                            </span>
+<span class="text-primary text-sm font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
+                                View Gallery <span class="material-icons text-sm">arrow_forward</span>
+</span>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group bg-white dark:bg-neutral-dark rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer flex flex-col h-full">
+<div class="relative h-56 overflow-hidden">
+<img alt="Traditional lanterns glowing warmly in the dark" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" data-alt="Glowing lanterns hanging in the dark" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBO7-UKnkXSkjD203dtg2ABcI4jhZeIp3nyQ5vbyMWdBpv44njYn0CspOJz2eBG3BwpUN94Rhr45ZzW7XmW6AY0URgNiZ5ccKyTE_4kVdr29DwK7gVstoHNqt-l7o451EgDSw0jY5128vMk0RCplEOMvYpJgV-XKD03lpIb8oubnDWV2Ri6MYWW-_frXAOPxp6WbxInL4PEtJ8GaspcA6NWKMdGn3B5fViByzPZeE8r0XKfzgBnBHCYrwyFRhs1n-iwybkJovBjRg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>
+<div class="absolute top-4 left-4">
+<span class="bg-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm backdrop-blur-sm bg-opacity-90">Religious</span>
+</div>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<div class="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wide mb-3">
+<span class="material-icons text-sm text-primary">event</span>
+                            22 Mar 2023
+                        </div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-primary transition-colors line-clamp-2">Ramadan Grand Iftar Gathering</h3>
+<p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-6 line-clamp-2 flex-grow">
+                            Bringing the community together for a blessed evening of prayer and breaking fast under the stars.
+                        </p>
+<div class="mt-auto pt-4 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center">
+<span class="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
+<span class="material-icons text-sm">photo_library</span> 18 Photos
+                            </span>
+<span class="text-primary text-sm font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
+                                View Gallery <span class="material-icons text-sm">arrow_forward</span>
+</span>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group bg-white dark:bg-neutral-dark rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer flex flex-col h-full">
+<div class="relative h-56 overflow-hidden">
+<img alt="Artistic Islamic calligraphy on a wall" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" data-alt="Beautiful arabic calligraphy art piece" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIF2BvipgMbRTA_fGO4hrCnXE5qtEArPJF3oR1xKd1znokq67_WoxAvzMdGyB8hoDwJw9x1AoKgVAr7ouWjoY_Y8Nmm5u6YDVs6wL1P5wPae1oa_tn_W_kfr13BuWuyUVKHUiG8lMy_y8nwofiG_J74U-C-G5wuF0MHQfrqLeGpFDNaAd-ThZ--53OVt1ybhHdqtUECloViUxV_VpXAT_gO8vahjeFaXJnHJdwhjcgGIz3cVKZPrOS1KvNB-R_nMpEdqmyFOg0lw"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>
+<div class="absolute top-4 left-4">
+<span class="bg-amber-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm backdrop-blur-sm bg-opacity-90">Cultural</span>
+</div>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<div class="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wide mb-3">
+<span class="material-icons text-sm text-primary">event</span>
+                            05 Feb 2023
+                        </div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-primary transition-colors line-clamp-2">Islamic Arts &amp; Calligraphy Workshop</h3>
+<p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-6 line-clamp-2 flex-grow">
+                            Students exploring the intricate beauty of traditional Islamic arts through hands-on sessions.
+                        </p>
+<div class="mt-auto pt-4 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center">
+<span class="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
+<span class="material-icons text-sm">photo_library</span> 32 Photos
+                            </span>
+<span class="text-primary text-sm font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
+                                View Gallery <span class="material-icons text-sm">arrow_forward</span>
+</span>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="group bg-white dark:bg-neutral-dark rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer flex flex-col h-full">
+<div class="relative h-56 overflow-hidden">
+<img alt="People running on a sports track" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" data-alt="Athletes running on a track field" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHFf_mizV69vDcDKBpon11FMKIo4Hv-whdtTTJmUC8TRdMgtShz_VB8Q-jHHosXQKOzRTHsLh0g9Ys-L4L_kkxEwgUcFOmp8hrR6h7aGhy7MplpFfeo56ctXs4QXAsSgekNelg-Sj-AwAhd_dNOUf-dsn4tDyetqB5M_AwOgAvy8qZXR0hjZ3mlR86CyfSnJEx6OmiyM1EFexp345sOD_qfK4v51NgXg0NCuYBzn_gfbF8m0mQY7yttmdeHSn3b53ymMgGwX5GEA"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>
+<div class="absolute top-4 left-4">
+<span class="bg-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm backdrop-blur-sm bg-opacity-90">Sports</span>
+</div>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<div class="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wide mb-3">
+<span class="material-icons text-sm text-primary">event</span>
+                            12 Jan 2023
+                        </div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-primary transition-colors line-clamp-2">Annual Sports Meet</h3>
+<p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-6 line-clamp-2 flex-grow">
+                            Fostering team spirit and physical health through friendly competition and athletic excellence.
+                        </p>
+<div class="mt-auto pt-4 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center">
+<span class="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
+<span class="material-icons text-sm">photo_library</span> 45 Photos
+                            </span>
+<span class="text-primary text-sm font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
+                                View Gallery <span class="material-icons text-sm">arrow_forward</span>
+</span>
+</div>
+</div>
+</div>
+<!-- Card 5 -->
+<div class="group bg-white dark:bg-neutral-dark rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer flex flex-col h-full">
+<div class="relative h-56 overflow-hidden">
+<img alt="Open books in a library setting" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" data-alt="Books stacked in a scholarly library" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCykHvJ5pmSxoPQd0lMDbgovlrl5nqFlX5wPhCf6w7Rf4XOk3jL26K8b-tQTB5fyhS9SZiRqmeqwS5jvue89UP_IIegER6O1VqjAnwLzDV36FIyyNN42JFmxHYczW5ZgBJj44SPoOWTWZBHk-aLLUpy7NqhJ06Jj21lK4neg3iHq2gwLX9gDJYCoUgccUzI12J5nqxRMD5hZF74wJHy4rBkUmhGZN4zBFnpAAi8VpIB5I6SnUDcjg-yPaFbaN_t2On1py1PdPmqdA"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>
+<div class="absolute top-4 left-4">
+<span class="bg-primary text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm backdrop-blur-sm bg-opacity-90">Academic</span>
+</div>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<div class="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wide mb-3">
+<span class="material-icons text-sm text-primary">event</span>
+                            20 Dec 2022
+                        </div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-primary transition-colors line-clamp-2">Library Inauguration Day</h3>
+<p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-6 line-clamp-2 flex-grow">
+                            Opening the doors to a new world of knowledge with our expanded library facilities.
+                        </p>
+<div class="mt-auto pt-4 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center">
+<span class="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
+<span class="material-icons text-sm">photo_library</span> 12 Photos
+                            </span>
+<span class="text-primary text-sm font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
+                                View Gallery <span class="material-icons text-sm">arrow_forward</span>
+</span>
+</div>
+</div>
+</div>
+<!-- Card 6 -->
+<div class="group bg-white dark:bg-neutral-dark rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer flex flex-col h-full">
+<div class="relative h-56 overflow-hidden">
+<img alt="Microphone on a podium at an event" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" data-alt="Microphone on stage for a speech" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUoH14QVn6Mdqd_KYYwFREHJBpvHUJ_iNu_YoxsMaJRxAsL83M-QfdhrvVn10k3EiKH5kHk8lT6ZC9fWKpnpHenNUj17DkRMgutCVwTCAlnyN96d0jFcqkx0elke6xQMKWvPqadQ1HA2U_ZMfIjxPzPCM-Ixf3XJJ2hiiFpKBPegY25ETbdiKQ9QifDjrbsY0aQXjZ14AIdC3ThiadikFHjpFcaAUW-y_Pko_AJdifiihoeENYuUVKTfemjwKF8cuY8pcgdXnOfQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>
+<div class="absolute top-4 left-4">
+<span class="bg-amber-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm backdrop-blur-sm bg-opacity-90">Cultural</span>
+</div>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<div class="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wide mb-3">
+<span class="material-icons text-sm text-primary">event</span>
+                            10 Nov 2022
+                        </div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-primary transition-colors line-clamp-2">Debate &amp; Public Speaking Contest</h3>
+<p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-6 line-clamp-2 flex-grow">
+                            Students articulating their thoughts on contemporary issues with eloquence and confidence.
+                        </p>
+<div class="mt-auto pt-4 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center">
+<span class="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
+<span class="material-icons text-sm">photo_library</span> 15 Photos
+                            </span>
+<span class="text-primary text-sm font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
+                                View Gallery <span class="material-icons text-sm">arrow_forward</span>
+</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="mt-16 text-center">
+<button class="inline-flex items-center px-8 py-3 border border-primary/20 bg-white dark:bg-neutral-dark text-primary dark:text-white text-sm font-bold rounded-lg hover:bg-primary hover:text-white dark:hover:bg-primary transition-all shadow-sm hover:shadow-md">
+                    Load More Events
+                    <span class="material-icons ml-2">refresh</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-white dark:bg-neutral-dark border-t border-slate-200 dark:border-slate-800 pt-16 pb-8 relative z-10">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+<div>
+<div class="flex items-center gap-2 mb-6">
+<div class="w-8 h-8 rounded bg-primary flex items-center justify-center text-white font-bold text-lg">
+                            D
+                        </div>
+<span class="font-bold text-lg text-slate-900 dark:text-white">Darul Hidaya Dars</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                        An institute dedicated to fostering knowledge, character, and community spirit through holistic education.
+                    </p>
+</div>
+<div>
+<h4 class="font-bold text-slate-900 dark:text-white mb-6">Quick Links</h4>
+<ul class="space-y-3 text-sm text-slate-500 dark:text-slate-400">
+<li><a class="hover:text-primary transition-colors" href="#">About Us</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Admissions</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Events Gallery</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Contact</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-bold text-slate-900 dark:text-white mb-6">Contact Us</h4>
+<div class="flex items-start gap-3 mb-4 text-sm text-slate-500 dark:text-slate-400">
+<span class="material-icons text-primary text-sm mt-1">location_on</span>
+<span>123 Knowledge Lane,<br/>Education City, EC 56789</span>
+</div>
+<div class="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
+<span class="material-icons text-primary text-sm">email</span>
+<span>info@darulhidaya.com</span>
+</div>
+</div>
+</div>
+<div class="border-t border-slate-100 dark:border-slate-800 pt-8 text-center">
+<p class="text-xs text-slate-400">© 2024 Darul Hidaya Dars. All rights reserved.</p>
+</div>
+</div>
+</footer>
+<!-- Lightbox Modal (Simulated) -->
+<!-- Hidden by default, unhide to see design -->
+<div class="fixed inset-0 z-[100] bg-black/90 hidden backdrop-blur-sm flex items-center justify-center p-4" id="lightbox">
+<button class="absolute top-6 right-6 text-white hover:text-gray-300 focus:outline-none">
+<span class="material-icons text-4xl">close</span>
+</button>
+<button class="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white focus:outline-none hidden md:block">
+<span class="material-icons text-5xl">chevron_left</span>
+</button>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white focus:outline-none hidden md:block">
+<span class="material-icons text-5xl">chevron_right</span>
+</button>
+<div class="max-w-5xl w-full bg-white dark:bg-neutral-dark rounded-xl overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh]">
+<div class="md:w-2/3 bg-black flex items-center justify-center">
+<img alt="Full view of graduation ceremony" class="max-h-[60vh] md:max-h-full w-auto object-contain" data-alt="Detailed view of students graduating" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAA1BbGcEs9Us6OwNPBLiic4XJVRLUf833DvLHRDMO2rInre1txiwn0OI6W6RISjpNw4SNJOUf-BiM5bGMkCE9VsFYBZvKk15rHOisbm8LeEBOG1hHmg_aFCGTQCGQ36jJ04amcMUkiHzW--kygh7XriRm_7o93Pb6hD20NgtsT5xSdHHrfbezcLb6jcl7FxL4nJlFVoJGdlWbMZlbbTX3Lm1Ap7ahiu1OgVhlGcyUKDYboNwFDn4eviKBoNxzO0OutjGfNPkmpQw"/>
+</div>
+<div class="md:w-1/3 p-6 md:p-8 flex flex-col overflow-y-auto">
+<div class="flex items-center gap-2 mb-4">
+<span class="bg-primary/10 text-primary text-xs font-bold px-2 py-1 rounded">Academic</span>
+<span class="text-slate-400 text-xs font-medium">15 Oct 2023</span>
+</div>
+<h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">Annual Convocation Ceremony 2023</h2>
+<p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-6">
+                    Celebrating the academic excellence of our graduating scholars. A momentous day filled with inspiration and pride as we send forth the next generation of leaders equipped with knowledge and values. The ceremony was graced by distinguished scholars and community leaders.
+                </p>
+<div class="mt-auto">
+<h4 class="font-bold text-sm text-slate-900 dark:text-white mb-3">Gallery (24)</h4>
+<div class="grid grid-cols-4 gap-2">
+<div class="aspect-square rounded bg-slate-200 dark:bg-slate-700 overflow-hidden cursor-pointer ring-2 ring-primary">
+<img alt="thumb 1" class="w-full h-full object-cover" data-alt="Thumbnail 1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWHlUIw6aH2M8YmbIwnCPoGkJPTKg_l3VXp6RdHiX_G9iFnG6pl2gh1nYJfPChjetId-FMMMhT8hMYllsatUl8wG3SD9mGN_o1Be0XK7y2efw5vSkd-R6eCIpqaZ1aXZkHTkkKtSCXXuLlpLHBkOVIcWOOkQ2DlpjN4JcPwLFXIVnpzcGYyk8y_4jOYodKN0AiFkoNGsYN73JdaX3V23xN1r_zbgB73n7fUAURJFnrRQ1emnQ0ipziZVwvxFjuumHG-a-QtxeCgw"/>
+</div>
+<div class="aspect-square rounded bg-slate-200 dark:bg-slate-700 overflow-hidden cursor-pointer opacity-70 hover:opacity-100">
+<img alt="thumb 2" class="w-full h-full object-cover" data-alt="Thumbnail 2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqa8fMWc-Bq91hrZg6mXoXnDKCu4FpHhbEc6zlkQMAlWQuWWd0atIzZUinK_L0Hx_5zPK1BL7TjjZG5rGYJIiLRTnw4XuoSAfutzh6oITV3O6nD5ZoNDBJ8B2ViGap8fGzuEgweV1oktGar78zfmB2_lXRYeikGUh4imGLFYtXMKz9YUBodcSBOv7PZ-5f0DZ79j7SZ-nMp-iAM6Y9jnUBdAQ1OkPssDuNNZ-fVtoR9p6R3YUhdQslw3AbzKmY9GxdadupFk4EdA"/>
+</div>
+<div class="aspect-square rounded bg-slate-200 dark:bg-slate-700 overflow-hidden cursor-pointer opacity-70 hover:opacity-100">
+<img alt="thumb 3" class="w-full h-full object-cover" data-alt="Thumbnail 3" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCt69tUOyEmo81hETXd2ZLyDDz5C2RgQmnoF8Q4E5RFnTpWdp213UDrOlOsh15kzcFemkUuHrYw4g0e9zwyVXBolP-QCpqec_P0qx34yOua8t4a6LGeRj23JFw7e9Lihsxf5O4yvcSoatNosXPd3q8eY2IORIOocKoEzzkwIzQdQJT2lGA-Gm1q-f9HLSuwYzS4sTR_9U4NYWQUaPKjFwcAsi9Xq0g97cY2oy9CxPs_Y2F9MUV7aHKxF3WMM3I0O9TDXzWR7amXSQ"/>
+</div>
+<div class="aspect-square rounded bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-500 cursor-pointer hover:bg-slate-300 transition-colors">
+                            +21
+                        </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>
