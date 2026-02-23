@@ -1,7 +1,5 @@
 import "./globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import ThemeProvider from "@/components/ThemeProvider";
+import Providers from "@/components/Providers";
 
 export const metadata = {
   title: "Darul Hidaya Dars - Preserving Heritage, Enlightening Minds",
@@ -29,11 +27,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 flex flex-col min-h-screen antialiased">
-        <ThemeProvider>
-          <Header />
-          <main className="grow">{children}</main>
-          <Footer />
-        </ThemeProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

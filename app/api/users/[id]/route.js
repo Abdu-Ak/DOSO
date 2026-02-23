@@ -1,0 +1,142 @@
+import { NextResponse } from "next/server";
+import dbConnect from "@/lib/mongodb";
+import User from "@/models/User";
+import cloudinary from "@/lib/cloudinary";
+import bcrypt from "bcryptjs";
+
+export async function GET(request, { params }) {
+  try {
+    await dbConnect();
+    const { id } = await params;
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(user);
+  } catch (error) {
+    console.error("GET User Error:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch user" },
+      { status: 500 },
+    );
+  }
+}
+
+export async function PUT(request, { params }) {
+  try {
+    await dbConnect();
+    const { id } = await params;
+    const data = await request.formData();
+
+    const user = await User.findById(id).select("+password");
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const name = data.get("name");
+    const username = data.get("username");
+    const email = data.get("email");
+    const password = data.get("password");
+    const role = data.get("role");
+    const phone = data.get("phone");
+    const dob = data.get("dob");
+    const status = data.get("status");
+    const imageFile = data.get("image");
+
+    // Check if new email/username is taken by another user
+    const existingUser = await User.findOne({
+      _id: { $ne: id },
+      $or: [{ email: email.toLowerCase() }, { username }],
+    });
+
+    if (existingUser) {
+      return NextResponse.json(
+        { error: "Email or username already in use" },
+        { status: 400 },
+      );
+    }
+
+    let updateData = {
+      name,
+      username,
+      email: email.toLowerCase(),
+      role,
+      phone,
+      dob: dob ? new Date(dob) : null,
+      status,
+    };
+
+    if (password) {
+      updateData.password = await bcrypt.hash(password, 10);
+    }
+
+    if (imageFile && imageFile.size > 0) {
+      // Destroy old image if exists
+      if (user.imagePublicId) {
+        await cloudinary.uploader.destroy(user.imagePublicId);
+      }
+
+      // Upload new image
+      const arrayBuffer = await imageFile.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      const uploadResult = await new Promise((resolve, reject) => {
+        cloudinary.uploader
+          .upload_stream({ folder: "doso_users" }, (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          })
+          .end(buffer);
+      });
+
+      updateData.image = uploadResult.secure_url;
+      updateData.imagePublicId = uploadResult.public_id;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
+
+    return NextResponse.json({
+      message: "User updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("PUT User Error:", error);
+    return NextResponse.json(
+      { error: error.message || "Failed to update user" },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(request, { params }) {
+  try {
+    await dbConnect();
+    const { id } = await params;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Destroy image in Cloudinary
+    if (user.imagePublicId) {
+      await cloudinary.uploader.destroy(user.imagePublicId);
+    }
+
+    await User.findByIdAndDelete(id);
+
+    return NextResponse.json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("DELETE User Error:", error);
+    return NextResponse.json(
+      { error: "Failed to delete user" },
+      { status: 500 },
+    );
+  }
+}

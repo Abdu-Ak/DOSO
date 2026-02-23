@@ -66,9 +66,12 @@ const Header = () => {
           {/* Right Side Actions & Mobile Toggle */}
           <div className="flex items-center gap-4">
             {/* Desktop Login */}
-            <button className="hidden md:block bg-primary text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 text-sm">
-              Alumni Login
-            </button>
+            <Link
+              href="/login"
+              className="hidden md:block bg-primary text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 text-sm text-center"
+            >
+              Login
+            </Link>
 
             <ThemeToggle />
 
@@ -109,9 +112,13 @@ const Header = () => {
             );
           })}
           <div className="pt-4 px-3">
-            <button className="w-full bg-primary text-white px-5 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 text-sm">
-              Alumni Login
-            </button>
+            <Link
+              href="/login"
+              onClick={() => setIsOpen(false)}
+              className="block w-full bg-primary text-white px-5 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 text-sm text-center"
+            >
+              Login
+            </Link>
           </div>
         </div>
       </div>

@@ -1,10 +1,14 @@
-@import "tailwindcss";
+ @import "tailwindcss";
+ @plugin '../heroUi.js';
+/* Note: You may need to change the path to fit your project structure */
+ @source '../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
+ @custom-variant dark (&:is(.dark *));
 
 @theme {
   --color-primary: #1d4d8b;
   --color-primary-dark: #163a69;
   --color-accent: #0f766e;
-  --color-accent-green: #2E8B57;
+  --color-accent-green: #2e8b57;
   --color-background-light: #f6f7f8;
   --color-background-dark: #121820;
   --color-surface-light: #ffffff;
