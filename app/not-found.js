@@ -3,8 +3,11 @@
 import React from "react";
 import Link from "next/link";
 import { Home, ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function NotFound() {
+  const router = useRouter();
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark bg-islamic-pattern py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Decorative Ornaments (consistent with Login page) */}
@@ -35,7 +38,7 @@ export default function NotFound() {
             Back to Home
           </Link>
           <button
-            onClick={() => window.history.back()}
+            onClick={() => router.push("/")}
             className="flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-semibold px-6 py-3 transition-colors"
           >
             <ArrowLeft size={20} />

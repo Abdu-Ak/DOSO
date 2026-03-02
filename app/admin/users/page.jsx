@@ -5,21 +5,39 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import axios from "axios";
 import { addToast } from "@heroui/toast";
-import { Search, Edit2, Trash2, UserPlus, Eye, Loader2 } from "lucide-react";
+import {
+  Search,
+  Edit2,
+  Trash2,
+  UserPlus,
+  Eye,
+  Loader2,
+  UserPen,
+} from "lucide-react";
 import { Chip } from "@heroui/chip";
 import { User as UserComponent } from "@heroui/user";
-import { Tooltip } from "@heroui/tooltip";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
 import { Pagination } from "@heroui/pagination";
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@heroui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
+} from "@heroui/table";
+import CustomTooltip from "@/components/admin/ui/CustomTooltip";
+import ConfirmModal from "@/components/admin/ui/ConfirmModal";
 
 export default function UserManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [role, setRole] = useState("");
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
 
   const queryClient = useQueryClient();
 
@@ -36,9 +54,7 @@ export default function UserManagement() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
-      if (confirm("Are you sure you want to delete this user?")) {
-        await axios.delete(`/api/users/${id}`);
-      }
+      await axios.delete(`/api/users/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
@@ -47,6 +63,8 @@ export default function UserManagement() {
         description: "User deleted successfully",
         color: "success",
       });
+      setIsDeleteModalOpen(false);
+      setUserToDelete(null);
     },
     onError: () => {
       addToast({
@@ -70,7 +88,7 @@ export default function UserManagement() {
                 src: user.image,
                 fallback: user.name.charAt(0),
               }}
-              description={`@${user.username}`}
+              description={`@${user.userId}`}
               name={cellValue}
             >
               {user.email}
@@ -112,7 +130,7 @@ export default function UserManagement() {
         case "actions":
           return (
             <div className="relative flex items-center justify-end gap-2">
-              <Tooltip content="View Details">
+              <CustomTooltip content="View Details">
                 <Button
                   isIconOnly
                   as={Link}
@@ -123,30 +141,33 @@ export default function UserManagement() {
                 >
                   <Eye size={18} />
                 </Button>
-              </Tooltip>
-              <Tooltip content="Edit User">
+              </CustomTooltip>
+              <CustomTooltip content="Edit User">
                 <Button
                   isIconOnly
                   as={Link}
                   href={`/admin/users/${user._id}/edit`}
                   size="sm"
                   variant="light"
-                  className="text-slate-400 hover:text-amber-500"
+                  className="text-slate-400 hover:text-primary"
                 >
-                  <Edit2 size={18} />
+                  <UserPen size={18} />
                 </Button>
-              </Tooltip>
-              <Tooltip color="danger" content="Delete User">
+              </CustomTooltip>
+              <CustomTooltip color="danger" content="Delete User">
                 <Button
                   isIconOnly
-                  onClick={() => deleteMutation.mutate(user._id)}
+                  onClick={() => {
+                    setUserToDelete(user);
+                    setIsDeleteModalOpen(true);
+                  }}
                   size="sm"
                   variant="light"
-                  className="text-slate-400 hover:text-red-500"
+                  className="text-slate-400 hover:text-danger"
                 >
                   <Trash2 size={18} />
                 </Button>
-              </Tooltip>
+              </CustomTooltip>
             </div>
           );
         default:
@@ -158,12 +179,12 @@ export default function UserManagement() {
 
   const topContent = useMemo(() => {
     return (
-      <div className="flex flex-col gap-4">
-        <div className="flex justify-between gap-3 items-end">
+      <div className="flex flex-col gap-4 p-6 pb-2">
+        <div className="flex flex-col sm:flex-row justify-between gap-4 items-start sm:items-center">
           <Input
             isClearable
-            className="w-full sm:max-w-[44%]"
-            placeholder="Search by name, email or username..."
+            className="w-full sm:max-w-[400px]"
+            placeholder="Search by name, email or user ID..."
             startContent={<Search size={18} className="text-slate-400" />}
             value={searchTerm}
             onClear={() => setSearchTerm("")}
@@ -174,9 +195,9 @@ export default function UserManagement() {
             variant="bordered"
             radius="lg"
           />
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3 w-full sm:w-auto">
             <Select
-              className="w-40"
+              className="w-full sm:w-40"
               placeholder="All Roles"
               variant="bordered"
               radius="lg"
@@ -204,7 +225,7 @@ export default function UserManagement() {
               href="/admin/users/create"
               color="primary"
               endContent={<UserPlus size={18} />}
-              className="font-bold shadow-lg shadow-primary/20"
+              className="font-bold shadow-lg shadow-primary/20 w-full sm:w-auto"
               radius="lg"
             >
               Add New User
@@ -216,21 +237,24 @@ export default function UserManagement() {
   }, [searchTerm, role]);
 
   const bottomContent = useMemo(() => {
+    const totalPages = data?.pages || 1;
     return (
-      <div className="py-2 px-2 flex justify-between items-center">
+      <div className="py-4 px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
         <span className="text-small text-slate-500 font-bold">
           Showing {data?.users?.length || 0} of {data?.total || 0} users
         </span>
-        <Pagination
-          isCompact
-          showControls
-          showShadow
-          color="primary"
-          page={page}
-          total={data?.pages || 1}
-          onChange={setPage}
-          radius="lg"
-        />
+        {totalPages > 1 && (
+          <Pagination
+            isCompact
+            showControls
+            showShadow
+            color="primary"
+            page={page}
+            total={totalPages}
+            onChange={setPage}
+            radius="lg"
+          />
+        )}
       </div>
     );
   }, [data, page]);
@@ -245,11 +269,11 @@ export default function UserManagement() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+      <div className="px-1">
+        <h2 className="text-lg font-body! font-bold text-slate-900 dark:text-white">
           User Management
         </h2>
-        <p className="text-slate-600 dark:text-slate-400 mt-1">
+        <p className="text-slate-600 text-sm dark:text-slate-400">
           Manage and monitor all users across the platform.
         </p>
       </div>
@@ -257,15 +281,15 @@ export default function UserManagement() {
       <Table
         aria-label="User Management Table"
         bottomContent={bottomContent}
-        bottomContentPlacement="outside"
+        bottomContentPlacement="inside"
         classNames={{
           wrapper:
-            "bg-surface-light dark:bg-surface-dark border-slate-200 dark:border-slate-800 shadow-sm rounded-2xl",
-          th: "bg-slate-50 dark:bg-slate-900/50 text-slate-500 font-bold text-xs uppercase tracking-wider h-14",
-          td: "py-4",
+            "bg-surface-light dark:bg-surface-dark border-slate-200 dark:border-slate-800 shadow-sm rounded-2xl p-0",
+          th: "bg-slate-50 dark:bg-slate-900/50 text-slate-500 font-bold text-xs uppercase tracking-wider h-14 px-6",
+          td: "py-4 px-6",
         }}
         topContent={topContent}
-        topContentPlacement="outside"
+        topContentPlacement="inside"
       >
         <TableHeader columns={columns}>
           {(column) => (
@@ -294,6 +318,24 @@ export default function UserManagement() {
           )}
         </TableBody>
       </Table>
+
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setUserToDelete(null);
+        }}
+        onConfirm={() => deleteMutation.mutate(userToDelete?._id)}
+        isLoading={deleteMutation.isPending}
+        message={
+          <>
+            <p>
+              Do you want to delete the user &quot;{userToDelete?.name}&quot;?
+            </p>
+            <p className="mt-1">This process can&apos;t be undone.</p>
+          </>
+        }
+      />
     </div>
   );
 }

@@ -2,12 +2,6 @@ import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema(
   {
-    username: {
-      type: String,
-      required: [true, "Please provide a username"],
-      unique: true,
-      trim: true,
-    },
     email: {
       type: String,
       required: [true, "Please provide an email"],
@@ -18,11 +12,11 @@ const UserSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, "Please provide a password"],
-      select: false, // Don't return password by default
+      select: false,
     },
     role: {
       type: String,
-      enum: ["admin", "alumni", "student"],
+      enum: ["super_admin", "admin", "alumni", "student"],
       default: "student",
     },
     name: {
@@ -42,6 +36,32 @@ const UserSchema = new mongoose.Schema(
       type: String,
       enum: ["Active", "Pending", "Inactive"],
       default: "Active",
+    },
+    // Student specific fields
+    madrasa_name: String,
+    house_name: String,
+    address: String,
+    district: String,
+    custom_district: String,
+    father_name: String,
+    guardian_name: String,
+    guardian_phone: String,
+    guardian_relation: String,
+    guardian_occupation: String,
+    date_of_admission: Date,
+
+    // Alumni specific fields
+    post_office: String,
+    pincode: String,
+    batch: String,
+    education: String,
+
+    // Backend generated ID or Admin Username
+    userId: {
+      type: String,
+      unique: true,
+      required: true,
+      trim: true,
     },
   },
   {

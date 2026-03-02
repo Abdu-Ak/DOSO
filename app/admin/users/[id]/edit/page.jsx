@@ -61,13 +61,13 @@ export default function EditUserPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <div className="p-2 bg-primary/10 rounded-lg text-primary">
-          <Users size={24} />
+          <Users size={25} />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+          <h2 className="text-lg font-body! font-bold text-slate-900 dark:text-white">
             Edit User
           </h2>
-          <p className="text-slate-600 dark:text-slate-400">
+          <p className="text-slate-600 text-sm dark:text-slate-400">
             Update account information for {user?.name}.
           </p>
         </div>

@@ -15,16 +15,16 @@ export const authOptions = {
       async authorize(credentials) {
         await dbConnect();
 
-        // Search by email or username
+        // Search by email or userId
         const user = await User.findOne({
           $or: [
             { email: credentials.username.toLowerCase() },
-            { username: credentials.username },
+            { userId: credentials.username },
           ],
         }).select("+password");
 
         if (!user) {
-          throw new Error("No user found with this email/username");
+          throw new Error("No user found with this email/userId");
         }
 
         const isPasswordCorrect = await bcrypt.compare(
@@ -38,7 +38,7 @@ export const authOptions = {
 
         return {
           id: user._id.toString(),
-          name: user.name || user.username,
+          name: user.name,
           email: user.email,
           role: user.role,
         };
