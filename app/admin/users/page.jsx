@@ -1,51 +1,58 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import axios from "axios";
 import { addToast } from "@heroui/toast";
-import {
-  Search,
-  Edit2,
-  Trash2,
-  UserPlus,
-  Eye,
-  Loader2,
-  UserPen,
-} from "lucide-react";
+import { Trash2, Eye, UserPen } from "lucide-react";
 import { Chip } from "@heroui/chip";
 import { User as UserComponent } from "@heroui/user";
 import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
-import { Pagination } from "@heroui/pagination";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-} from "@heroui/table";
 import CustomTooltip from "@/components/admin/ui/CustomTooltip";
 import ConfirmModal from "@/components/admin/ui/ConfirmModal";
+import DataTable from "@/components/admin/ui/DataTable";
+import UserHeader from "./_components/UserHeader";
+import UserFilters from "./_components/UserFilters";
+import { useDebounce } from "@/lib/hooks";
 
 export default function UserManagement() {
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [role, setRole] = useState("");
+  const [status, setStatus] = useState("");
+  const [district, setDistrict] = useState("");
+  const [batch, setBatch] = useState("");
+  const [phone, setPhone] = useState("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
 
   const queryClient = useQueryClient();
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["users", page, limit, searchTerm, role],
+    queryKey: [
+      "users",
+      page,
+      limit,
+      debouncedSearchTerm,
+      role,
+      status,
+      district,
+      batch,
+    ],
     queryFn: async () => {
       const response = await axios.get("/api/users", {
-        params: { page, limit, search: searchTerm, role },
+        params: {
+          page,
+          limit,
+          search: debouncedSearchTerm,
+          role,
+          status,
+          district,
+          batch,
+        },
       });
       return response.data;
     },
@@ -75,12 +82,13 @@ export default function UserManagement() {
     },
   });
 
-  const renderCell = useCallback(
-    (user, columnKey) => {
-      const cellValue = user[columnKey];
-
-      switch (columnKey) {
-        case "name":
+  const userColumns = useMemo(
+    () => [
+      {
+        header: "User",
+        accessorKey: "name",
+        cell: (info) => {
+          const user = info.row.original;
           return (
             <UserComponent
               avatarProps={{
@@ -89,23 +97,92 @@ export default function UserManagement() {
                 fallback: user.name.charAt(0),
               }}
               description={`@${user.userId}`}
-              name={cellValue}
+              name={info.getValue()}
             >
               {user.email}
             </UserComponent>
           );
-        case "role":
+        },
+      },
+      {
+        header: "Role",
+        accessorKey: "role",
+        cell: (info) => (
+          <Chip
+            className="capitalize font-black text-[10px] tracking-wider"
+            color="primary"
+            size="sm"
+            variant="flat"
+          >
+            {info.getValue()}
+          </Chip>
+        ),
+      },
+      {
+        header: "Contact",
+        id: "contact",
+        cell: (info) => {
+          const user = info.row.original;
           return (
-            <Chip
-              className="capitalize font-black text-[10px] tracking-wider"
-              color="primary"
-              size="sm"
-              variant="flat"
-            >
-              {cellValue}
-            </Chip>
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                {user.email || "N/A"}
+              </span>
+              <span className="text-[10px] text-slate-500">
+                {user.phone || "N/A"}
+              </span>
+            </div>
           );
-        case "status":
+        },
+      },
+      {
+        header: "Admission/Joined",
+        id: "dates",
+        cell: (info) => {
+          const user = info.row.original;
+          const joined = user.createdAt
+            ? new Date(user.createdAt).toLocaleDateString()
+            : "N/A";
+          const admission = user.date_of_admission
+            ? new Date(user.date_of_admission).toLocaleDateString()
+            : null;
+          return (
+            <div className="flex flex-col gap-1">
+              <span className="text-xs text-slate-600 dark:text-slate-400">
+                Created: {joined}
+              </span>
+              {admission && (
+                <span className="text-[10px] text-primary font-medium">
+                  Adm: {admission}
+                </span>
+              )}
+            </div>
+          );
+        },
+      },
+      {
+        header: "District",
+        accessorKey: "district",
+        cell: (info) => (
+          <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
+            {info.getValue() || "N/A"}
+          </span>
+        ),
+      },
+      {
+        header: "Batch",
+        accessorKey: "batch",
+        cell: (info) => (
+          <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
+            {info.getValue() || "N/A"}
+          </span>
+        ),
+      },
+      {
+        header: "Status",
+        accessorKey: "status",
+        cell: (info) => {
+          const status = info.getValue();
           const statusColors = {
             Active: "success",
             Pending: "warning",
@@ -114,20 +191,21 @@ export default function UserManagement() {
           return (
             <Chip
               className="capitalize font-black text-[10px] tracking-wider"
-              color={statusColors[user.status]}
+              color={statusColors[status] || "default"}
               size="sm"
               variant="flat"
             >
-              {cellValue}
+              {status}
             </Chip>
           );
-        case "createdAt":
-          return (
-            <span className="text-sm font-medium text-slate-500">
-              {new Date(cellValue).toLocaleDateString()}
-            </span>
-          );
-        case "actions":
+        },
+      },
+      {
+        header: "Actions",
+        id: "actions",
+        meta: { align: "end" },
+        cell: (info) => {
+          const user = info.row.original;
           return (
             <div className="relative flex items-center justify-end gap-2">
               <CustomTooltip content="View Details">
@@ -170,154 +248,49 @@ export default function UserManagement() {
               </CustomTooltip>
             </div>
           );
-        default:
-          return cellValue;
-      }
-    },
-    [deleteMutation],
+        },
+      },
+    ],
+    [],
   );
-
-  const topContent = useMemo(() => {
-    return (
-      <div className="flex flex-col gap-4 p-6 pb-2">
-        <div className="flex flex-col sm:flex-row justify-between gap-4 items-start sm:items-center">
-          <Input
-            isClearable
-            className="w-full sm:max-w-[400px]"
-            placeholder="Search by name, email or user ID..."
-            startContent={<Search size={18} className="text-slate-400" />}
-            value={searchTerm}
-            onClear={() => setSearchTerm("")}
-            onValueChange={(value) => {
-              setSearchTerm(value);
-              setPage(1);
-            }}
-            variant="bordered"
-            radius="lg"
-          />
-          <div className="flex flex-wrap gap-3 w-full sm:w-auto">
-            <Select
-              className="w-full sm:w-40"
-              placeholder="All Roles"
-              variant="bordered"
-              radius="lg"
-              selectedKeys={role ? [role] : []}
-              onSelectionChange={(keys) => {
-                setRole(Array.from(keys)[0] || "");
-                setPage(1);
-              }}
-            >
-              <SelectItem key="" value="">
-                All Roles
-              </SelectItem>
-              <SelectItem key="admin" value="admin">
-                Admin
-              </SelectItem>
-              <SelectItem key="alumni" value="alumni">
-                Alumni
-              </SelectItem>
-              <SelectItem key="student" value="student">
-                Student
-              </SelectItem>
-            </Select>
-            <Button
-              as={Link}
-              href="/admin/users/create"
-              color="primary"
-              endContent={<UserPlus size={18} />}
-              className="font-bold shadow-lg shadow-primary/20 w-full sm:w-auto"
-              radius="lg"
-            >
-              Add New User
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }, [searchTerm, role]);
-
-  const bottomContent = useMemo(() => {
-    const totalPages = data?.pages || 1;
-    return (
-      <div className="py-4 px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <span className="text-small text-slate-500 font-bold">
-          Showing {data?.users?.length || 0} of {data?.total || 0} users
-        </span>
-        {totalPages > 1 && (
-          <Pagination
-            isCompact
-            showControls
-            showShadow
-            color="primary"
-            page={page}
-            total={totalPages}
-            onChange={setPage}
-            radius="lg"
-          />
-        )}
-      </div>
-    );
-  }, [data, page]);
-
-  const columns = [
-    { name: "USER", uid: "name" },
-    { name: "ROLE", uid: "role" },
-    { name: "STATUS", uid: "status" },
-    { name: "JOINED", uid: "createdAt" },
-    { name: "ACTIONS", uid: "actions" },
-  ];
 
   return (
     <div className="space-y-6">
-      <div className="px-1">
-        <h2 className="text-lg font-body! font-bold text-slate-900 dark:text-white">
-          User Management
-        </h2>
-        <p className="text-slate-600 text-sm dark:text-slate-400">
-          Manage and monitor all users across the platform.
-        </p>
-      </div>
+      <UserHeader />
 
-      <Table
-        aria-label="User Management Table"
-        bottomContent={bottomContent}
-        bottomContentPlacement="inside"
-        classNames={{
-          wrapper:
-            "bg-surface-light dark:bg-surface-dark border-slate-200 dark:border-slate-800 shadow-sm rounded-2xl p-0",
-          th: "bg-slate-50 dark:bg-slate-900/50 text-slate-500 font-bold text-xs uppercase tracking-wider h-14 px-6",
-          td: "py-4 px-6",
+      <DataTable
+        data={data?.users || []}
+        columns={userColumns}
+        isLoading={isLoading}
+        search={{
+          placeholder: "Search by name, email or user ID...",
+          value: searchTerm,
+          onChange: (value) => {
+            setSearchTerm(value);
+            setPage(1);
+          },
         }}
-        topContent={topContent}
-        topContentPlacement="inside"
-      >
-        <TableHeader columns={columns}>
-          {(column) => (
-            <TableColumn
-              key={column.uid}
-              align={column.uid === "actions" ? "end" : "start"}
-            >
-              {column.name}
-            </TableColumn>
-          )}
-        </TableHeader>
-        <TableBody
-          emptyContent={isLoading ? " " : "No users found"}
-          items={data?.users || []}
-          loadingContent={
-            <Loader2 className="animate-spin text-primary" size={32} />
-          }
-          loadingState={isLoading ? "loading" : "idle"}
-        >
-          {(item) => (
-            <TableRow key={item._id}>
-              {(columnKey) => (
-                <TableCell>{renderCell(item, columnKey)}</TableCell>
-              )}
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+        pagination={{
+          page: page,
+          total: data?.pages || 1,
+          onChange: setPage,
+          totalItems: data?.total || 0,
+          label: `Showing ${data?.users?.length || 0} of ${data?.total || 0} users`,
+        }}
+        topContent={
+          <UserFilters
+            role={role}
+            setRole={setRole}
+            status={status}
+            setStatus={setStatus}
+            district={district}
+            setDistrict={setDistrict}
+            batch={batch}
+            setBatch={setBatch}
+            setPage={setPage}
+          />
+        }
+      />
 
       <ConfirmModal
         isOpen={isDeleteModalOpen}

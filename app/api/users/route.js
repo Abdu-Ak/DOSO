@@ -14,6 +14,8 @@ export async function GET(request) {
     const search = searchParams.get("search") || "";
     const role = searchParams.get("role") || "";
     const status = searchParams.get("status") || "";
+    const district = searchParams.get("district") || "";
+    const batch = searchParams.get("batch") || "";
 
     const skip = (page - 1) * limit;
 
@@ -26,6 +28,9 @@ export async function GET(request) {
         { name: { $regex: search, $options: "i" } },
         { email: { $regex: search, $options: "i" } },
         { userId: { $regex: search, $options: "i" } },
+        { phone: { $regex: search, $options: "i" } },
+        { father_name: { $regex: search, $options: "i" } },
+        { batch: { $regex: search, $options: "i" } },
       ];
     }
 
@@ -35,6 +40,14 @@ export async function GET(request) {
 
     if (status) {
       query.status = status;
+    }
+
+    if (district) {
+      query.district = district;
+    }
+
+    if (batch) {
+      query.batch = batch;
     }
 
     const total = await User.countDocuments(query);
