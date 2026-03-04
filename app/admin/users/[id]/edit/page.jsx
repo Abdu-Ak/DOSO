@@ -8,10 +8,13 @@ import UserForm from "@/components/admin/UserForm";
 import { Users, Loader2 } from "lucide-react";
 import { addToast } from "@heroui/toast";
 
+import { useSession } from "next-auth/react";
+
 export default function EditUserPage() {
   const { id } = useParams();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { data: session, update } = useSession();
 
   const { data: user, isLoading } = useQuery({
     queryKey: ["user", id],
@@ -30,9 +33,15 @@ export default function EditUserPage() {
       });
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       queryClient.invalidateQueries({ queryKey: ["user", id] });
+
+      // Update session if editing self
+      if (session?.user?.id === id || session?.user?._id === id) {
+        update({ image: data.user?.image });
+      }
+
       addToast({
         title: "Success",
         description: "User updated successfully",

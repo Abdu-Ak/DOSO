@@ -16,16 +16,50 @@ import {
   ArrowLeft,
   Clock,
   Loader2,
+  MapPin,
+  Home,
+  School,
+  Briefcase,
+  Users as UsersIcon,
+  GraduationCap,
+  MapPinned,
+  MailboxIcon,
+  ScrollText,
 } from "lucide-react";
 import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/card";
 import { Avatar } from "@heroui/avatar";
 import { Chip } from "@heroui/chip";
+import { useSession } from "next-auth/react";
+import { canManageUser } from "@/lib/permissions";
+
+const DetailItem = ({ icon: Icon, label, value, color = "primary" }) => (
+  <div className="space-y-1.5 group">
+    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 flex items-center gap-2 mb-1">
+      {Icon && <Icon size={12} className={`text-${color}`} />}
+      {label}
+    </p>
+    <p className="text-slate-900 dark:text-white font-bold text-sm leading-tight break-words min-w-0">
+      {value || "—"}
+    </p>
+  </div>
+);
+
+const SectionHeader = ({ title, icon: Icon }) => (
+  <h3 className="text-base font-black text-slate-900 dark:text-white mb-6 flex items-center gap-3">
+    <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+      {Icon && <Icon size={18} />}
+    </div>
+    {title}
+  </h3>
+);
 
 export default function UserDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { data: session } = useSession();
+  const currentUser = session?.user;
 
   const { data: user, isLoading } = useQuery({
     queryKey: ["user", id],
@@ -89,165 +123,266 @@ export default function UserDetailPage() {
     Inactive: "danger",
   };
 
+  const formatDate = (date) => {
+    if (!date) return null;
+    return new Date(date).toLocaleDateString("en-US", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
+
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="max-w-6xl mx-auto px-4 md:px-0 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Top Navigation */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <Button
           variant="light"
           onPress={() => router.back()}
           startContent={<ArrowLeft size={18} />}
-          className="font-bold text-slate-500 hover:text-primary"
+          className="font-bold text-slate-500 hover:text-primary pl-0"
         >
-          Back to List
+          Back to User Management
         </Button>
         <div className="flex items-center gap-3">
-          <Button
-            as={Link}
-            href={`/admin/users/${id}/edit`}
-            color="primary"
-            startContent={<Edit2 size={18} />}
-            className="font-bold shadow-lg shadow-primary/20"
-            radius="xl"
-          >
-            Edit Profile
-          </Button>
-          <Button
-            onPress={() => deleteMutation.mutate()}
-            variant="flat"
-            color="danger"
-            startContent={<Trash2 size={18} />}
-            className="font-bold border border-red-200 dark:border-red-900/30"
-            radius="xl"
-          >
-            Delete
-          </Button>
+          {canManageUser(currentUser, user) && (
+            <Button
+              as={Link}
+              href={`/admin/users/${id}/edit`}
+              color="primary"
+              startContent={<Edit2 size={18} />}
+              className="font-bold shadow-lg shadow-primary/20"
+              radius="xl"
+            >
+              Edit Profile
+            </Button>
+          )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Profile Card */}
-        <Card className="bg-surface-light dark:bg-surface-dark p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden mosque-arch-card">
-          <CardBody className="relative z-10 flex flex-col items-center text-center p-8">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Left Column: Profile Overview */}
+        <div className="lg:col-span-4 space-y-6">
+          <Card className="bg-surface-light dark:bg-surface-dark border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden mosque-arch-card">
+            <CardBody className="relative z-10 flex flex-col items-center text-center p-8 overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-12 -mt-12"></div>
 
-            <Avatar
-              src={user.image}
-              name={user.name}
-              className="w-40 h-40 text-4xl font-black mb-6 shadow-xl"
-              radius="3xl"
-              isBordered
-              color="primary"
-            />
-
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white capitalize tracking-tight">
-              {user.name}
-            </h1>
-            <p className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-xs mt-1">
-              @{user.username}
-            </p>
-
-            <div className="flex flex-col gap-3 mt-6 w-full">
-              <Chip
-                startContent={<ShieldCheck size={14} />}
-                variant="flat"
+              <Avatar
+                src={user.image}
+                name={user.name}
+                className="w-40 h-40 text-4xl font-black mb-6 shadow-xl border-4 border-white dark:border-slate-800"
+                radius="3xl"
                 color="primary"
-                className="capitalize font-black text-[10px] tracking-wider w-full justify-center h-8"
-              >
-                {user.role}
-              </Chip>
+              />
 
-              <Chip
-                variant="flat"
-                color={statusColors[user.status]}
-                className="capitalize font-black text-[10px] tracking-wider w-full justify-center h-8"
-              >
-                {user.status}
-              </Chip>
-            </div>
-          </CardBody>
-        </Card>
+              <h1 className="text-2xl font-black text-slate-900 dark:text-white capitalize tracking-tight">
+                {user.name}
+              </h1>
+              <p className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
+                @{user.userId}
+              </p>
 
-        {/* Details Grid */}
-        <div className="lg:col-span-2 space-y-8">
-          <Card className="bg-surface-light dark:bg-surface-dark border-slate-200 dark:border-slate-800 shadow-sm rounded-3xl">
-            <CardBody className="p-8">
-              <h3 className="text-lg font-black text-slate-900 dark:text-white mb-8 flex items-center gap-2">
-                <div className="w-1.5 h-6 bg-primary rounded-full"></div>
-                Personal Information
-              </h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-10 gap-x-8">
-                <div className="space-y-1.5">
-                  <p className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                    <Mail size={14} className="text-primary" />
-                    Email Address
-                  </p>
-                  <p className="text-slate-900 dark:text-white font-bold">
-                    {user.email}
-                  </p>
+              <div className="flex flex-col gap-3 mt-8 w-full">
+                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                    Role
+                  </span>
+                  <Chip
+                    startContent={<ShieldCheck size={14} />}
+                    variant="flat"
+                    color="primary"
+                    className="capitalize font-black text-[10px] tracking-wider"
+                    size="sm"
+                  >
+                    {user.role}
+                  </Chip>
                 </div>
-
-                <div className="space-y-1.5">
-                  <p className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                    <Phone size={14} className="text-primary" />
-                    Phone Number
-                  </p>
-                  <p className="text-slate-900 dark:text-white font-bold">
-                    {user.phone || "Not provided"}
-                  </p>
-                </div>
-
-                <div className="space-y-1.5">
-                  <p className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                    <Calendar size={14} className="text-primary" />
-                    Date of Birth
-                  </p>
-                  <p className="text-slate-900 dark:text-white font-bold">
-                    {user.dob
-                      ? new Date(user.dob).toLocaleDateString("en-US", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })
-                      : "Not provided"}
-                  </p>
-                </div>
-
-                <div className="space-y-1.5">
-                  <p className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                    <Clock size={14} className="text-primary" />
-                    Account Created
-                  </p>
-                  <p className="text-slate-900 dark:text-white font-bold">
-                    {new Date(user.createdAt).toLocaleDateString("en-US", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </p>
+                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                    Status
+                  </span>
+                  <Chip
+                    variant="flat"
+                    color={statusColors[user.status]}
+                    className="capitalize font-black text-[10px] tracking-wider"
+                    size="sm"
+                  >
+                    {user.status}
+                  </Chip>
                 </div>
               </div>
             </CardBody>
           </Card>
 
+          {/* Quick Stats Card */}
           <Card className="bg-primary/5 dark:bg-primary/10 border-primary/10 shadow-sm rounded-3xl border">
+            <CardBody className="p-6 space-y-6">
+              <DetailItem
+                icon={Clock}
+                label="Account Created"
+                value={formatDate(user.createdAt)}
+              />
+              {user.date_of_admission && (
+                <DetailItem
+                  icon={Calendar}
+                  label="Admission Date"
+                  value={formatDate(user.date_of_admission)}
+                />
+              )}
+            </CardBody>
+          </Card>
+        </div>
+
+        {/* Right Column: Detailed Information */}
+        <div className="lg:col-span-8 space-y-8">
+          {/* Section 1: Personal & Contact */}
+          <Card className="bg-surface-light dark:bg-surface-dark border-slate-200 dark:border-slate-800 shadow-sm rounded-3xl overflow-visible">
             <CardBody className="p-8">
-              <div className="flex items-center gap-6">
-                <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20 flex-shrink-0">
-                  <ShieldCheck size={32} />
-                </div>
-                <div>
-                  <h4 className="text-lg font-black text-slate-900 dark:text-white">
-                    Security & Access
-                  </h4>
-                  <p className="text-slate-600 dark:text-slate-400 font-medium">
-                    This user has {user.role} privileges on the Darul Hidaya
-                    Dars platform.
-                  </p>
-                </div>
+              <SectionHeader title="Personal & Contact" icon={UsersIcon} />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <DetailItem
+                  icon={Mail}
+                  label="Email Address"
+                  value={user.email}
+                />
+                <DetailItem
+                  icon={Phone}
+                  label="Phone Number"
+                  value={user.phone}
+                />
+                <DetailItem
+                  icon={Calendar}
+                  label="Date of Birth"
+                  value={formatDate(user.dob)}
+                />
+                {user.father_name && (
+                  <DetailItem
+                    icon={UsersIcon}
+                    label="Father's Name"
+                    value={user.father_name}
+                  />
+                )}
               </div>
             </CardBody>
           </Card>
+
+          {/* Section 2: Academic Info (Role Specific) */}
+          {(user.role === "student" || user.role === "alumni") && (
+            <Card className="bg-surface-light dark:bg-surface-dark border-slate-200 dark:border-slate-800 shadow-sm rounded-3xl">
+              <CardBody className="p-8">
+                <SectionHeader
+                  title={
+                    user.role === "student"
+                      ? "Academic Information"
+                      : "Education & Batch"
+                  }
+                  icon={user.role === "student" ? School : GraduationCap}
+                />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {user.role === "student" && (
+                    <DetailItem
+                      icon={School}
+                      label="Madrasa Name"
+                      value={user.madrasa_name}
+                    />
+                  )}
+                  {user.role === "alumni" && (
+                    <>
+                      <DetailItem
+                        icon={ScrollText}
+                        label="Education"
+                        value={user.education}
+                      />
+                      <DetailItem
+                        icon={GraduationCap}
+                        label="Batch"
+                        value={user.batch}
+                      />
+                    </>
+                  )}
+                </div>
+              </CardBody>
+            </Card>
+          )}
+
+          {/* Section 3: Guardian Details (Only for Students) */}
+          {user.role === "student" && (
+            <Card className="bg-surface-light dark:bg-surface-dark border-slate-200 dark:border-slate-800 shadow-sm rounded-3xl">
+              <CardBody className="p-8">
+                <SectionHeader title="Guardian Details" icon={Briefcase} />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  <DetailItem
+                    icon={UsersIcon}
+                    label="Guardian Name"
+                    value={user.guardian_name}
+                  />
+                  <DetailItem
+                    icon={Phone}
+                    label="Guardian Phone"
+                    value={user.guardian_phone}
+                  />
+                  <DetailItem
+                    icon={UsersIcon}
+                    label="Relation"
+                    value={user.guardian_relation}
+                  />
+                  <DetailItem
+                    icon={Briefcase}
+                    label="Occupation"
+                    value={user.guardian_occupation}
+                  />
+                </div>
+              </CardBody>
+            </Card>
+          )}
+
+          {/* Section 4: Address & Location */}
+          {(user.address || user.district) && (
+            <Card className="bg-surface-light dark:bg-surface-dark border-slate-200 dark:border-slate-800 shadow-sm rounded-3xl">
+              <CardBody className="p-8">
+                <SectionHeader title="Address & Location" icon={MapPin} />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="md:col-span-2">
+                    <DetailItem
+                      icon={Home}
+                      label="House Name"
+                      value={user.house_name}
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <DetailItem
+                      icon={MapPin}
+                      label="Full Address"
+                      value={user.address}
+                    />
+                  </div>
+                  <DetailItem
+                    icon={MapPinned}
+                    label="District"
+                    value={
+                      user.district === "Other"
+                        ? user.custom_district
+                        : user.district
+                    }
+                  />
+                  {user.post_office && (
+                    <DetailItem
+                      icon={MailboxIcon}
+                      label="Post Office"
+                      value={user.post_office}
+                    />
+                  )}
+                  {user.pincode && (
+                    <DetailItem
+                      icon={MapPin}
+                      label="Pincode"
+                      value={user.pincode}
+                    />
+                  )}
+                </div>
+              </CardBody>
+            </Card>
+          )}
         </div>
       </div>
     </div>

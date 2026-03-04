@@ -15,8 +15,12 @@ import DataTable from "@/components/admin/ui/DataTable";
 import UserHeader from "./_components/UserHeader";
 import UserFilters from "./_components/UserFilters";
 import { useDebounce } from "@/lib/hooks";
+import { useSession } from "next-auth/react";
+import { canManageUser } from "@/lib/permissions";
 
 export default function UserManagement() {
+  const { data: session } = useSession();
+  const currentUser = session?.user;
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [page, setPage] = useState(1);
@@ -206,6 +210,8 @@ export default function UserManagement() {
         meta: { align: "end" },
         cell: (info) => {
           const user = info.row.original;
+          const showActions = canManageUser(currentUser, user);
+
           return (
             <div className="relative flex items-center justify-end gap-2">
               <CustomTooltip content="View Details">
@@ -220,38 +226,42 @@ export default function UserManagement() {
                   <Eye size={18} />
                 </Button>
               </CustomTooltip>
-              <CustomTooltip content="Edit User">
-                <Button
-                  isIconOnly
-                  as={Link}
-                  href={`/admin/users/${user._id}/edit`}
-                  size="sm"
-                  variant="light"
-                  className="text-slate-400 hover:text-primary"
-                >
-                  <UserPen size={18} />
-                </Button>
-              </CustomTooltip>
-              <CustomTooltip color="danger" content="Delete User">
-                <Button
-                  isIconOnly
-                  onClick={() => {
-                    setUserToDelete(user);
-                    setIsDeleteModalOpen(true);
-                  }}
-                  size="sm"
-                  variant="light"
-                  className="text-slate-400 hover:text-danger"
-                >
-                  <Trash2 size={18} />
-                </Button>
-              </CustomTooltip>
+              {showActions && (
+                <>
+                  <CustomTooltip content="Edit User">
+                    <Button
+                      isIconOnly
+                      as={Link}
+                      href={`/admin/users/${user._id}/edit`}
+                      size="sm"
+                      variant="light"
+                      className="text-slate-400 hover:text-primary"
+                    >
+                      <UserPen size={18} />
+                    </Button>
+                  </CustomTooltip>
+                  <CustomTooltip color="danger" content="Delete User">
+                    <Button
+                      isIconOnly
+                      onClick={() => {
+                        setUserToDelete(user);
+                        setIsDeleteModalOpen(true);
+                      }}
+                      size="sm"
+                      variant="light"
+                      className="text-slate-400 hover:text-danger"
+                    >
+                      <Trash2 size={18} />
+                    </Button>
+                  </CustomTooltip>
+                </>
+              )}
             </div>
           );
         },
       },
     ],
-    [],
+    [currentUser],
   );
 
   return (
