@@ -37,7 +37,7 @@ export async function PUT(request, { params }) {
     }
 
     const name = data.get("name");
-    const username = data.get("username");
+    const userId = data.get("userId");
     const email = data.get("email");
     const password = data.get("password");
     const role = data.get("role");
@@ -46,34 +46,70 @@ export async function PUT(request, { params }) {
     const status = data.get("status");
     const imageFile = data.get("image");
 
-    // Check if new email/username is taken by another user
+    // Madrasa/Student fields
+    const madrasa_name = data.get("madrasa_name");
+    const house_name = data.get("house_name");
+    const address = data.get("address");
+    const district = data.get("district");
+    const custom_district = data.get("custom_district");
+    const father_name = data.get("father_name");
+    const guardian_name = data.get("guardian_name");
+    const guardian_phone = data.get("guardian_phone");
+    const guardian_relation = data.get("guardian_relation");
+    const guardian_occupation = data.get("guardian_occupation");
+    const date_of_admission = data.get("date_of_admission");
+
+    // Alumni fields
+    const post_office = data.get("post_office");
+    const pincode = data.get("pincode");
+    const batch = data.get("batch");
+    const education = data.get("education");
+
+    // Check if new email/userId is taken by another user
     const existingUser = await User.findOne({
       _id: { $ne: id },
-      $or: [{ email: email.toLowerCase() }, { username }],
+      $or: [{ email: email.toLowerCase() }, { userId }],
     });
 
     if (existingUser) {
       return NextResponse.json(
-        { error: "Email or username already in use" },
+        { error: "Email or User ID already in use" },
         { status: 400 },
       );
     }
 
     let updateData = {
       name,
-      username,
+      userId,
       email: email.toLowerCase(),
       role,
       phone,
       dob: dob ? new Date(dob) : null,
       status,
+      // student fields
+      madrasa_name,
+      house_name,
+      address,
+      district,
+      custom_district,
+      father_name,
+      guardian_name,
+      guardian_phone,
+      guardian_relation,
+      guardian_occupation,
+      date_of_admission: date_of_admission ? new Date(date_of_admission) : null,
+      // alumni fields
+      post_office,
+      pincode,
+      batch,
+      education,
     };
 
     if (password) {
       updateData.password = await bcrypt.hash(password, 10);
     }
 
-    if (imageFile && imageFile.size > 0) {
+    if (imageFile && imageFile.name && imageFile.size > 0) {
       // Destroy old image if exists
       if (user.imagePublicId) {
         await cloudinary.uploader.destroy(user.imagePublicId);

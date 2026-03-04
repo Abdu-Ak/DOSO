@@ -121,7 +121,9 @@ const StudentSection = ({ register, errors, control, watch, isEdit }) => {
                 <PopoverContent className="p-0">
                   <Calendar
                     aria-label="DOB"
-                    value={field.value ? parseDate(field.value) : null}
+                    value={
+                      field.value ? parseDate(field.value.split("T")[0]) : null
+                    }
                     onChange={(date) => {
                       field.onChange(date.toString());
                       setIsCalendarOpen(false);
@@ -295,7 +297,9 @@ const StudentSection = ({ register, errors, control, watch, isEdit }) => {
                 <PopoverContent className="p-0">
                   <Calendar
                     aria-label="Admission"
-                    value={field.value ? parseDate(field.value) : null}
+                    value={
+                      field.value ? parseDate(field.value.split("T")[0]) : null
+                    }
                     onChange={(date) => {
                       field.onChange(date.toString());
                       setIsAdmissionCalendarOpen(false);

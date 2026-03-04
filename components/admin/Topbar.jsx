@@ -2,13 +2,18 @@
 
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, User, Menu, Globe, ArrowLeft } from "lucide-react";
+import { Bell, User, Menu, Globe, ArrowLeft, LogOut } from "lucide-react";
 import ThemeToggle from "../ThemeToggle";
 import CustomTooltip from "./ui/CustomTooltip";
+import { useSession, signOut } from "next-auth/react";
+import Link from "next/link";
 
 const Topbar = ({ onMenuClick }) => {
+  const { data: session } = useSession();
   const pathname = usePathname();
   const router = useRouter();
+
+  const user = session?.user;
 
   const getPageTitle = () => {
     const parts = pathname.split("/").filter(Boolean);
@@ -55,7 +60,7 @@ const Topbar = ({ onMenuClick }) => {
               <ArrowLeft size={20} />
             </button>
           )}
-          <h1 className="text-xl font-body! font-bold text-slate-800 dark:text-white">
+          <h1 className="text-xl font-body! font-bold text-slate-800 dark:text-white truncate">
             {getPageTitle()}
           </h1>
         </div>
@@ -85,19 +90,34 @@ const Topbar = ({ onMenuClick }) => {
             </button>
           </CustomTooltip>
 
-          <div className="flex items-center gap-3 px-2 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer group">
+          <Link
+            href={
+              user?._id || user?.id
+                ? `/admin/users/${user?._id || user?.id}`
+                : "/admin/profile"
+            }
+            className="flex items-center gap-3 px-3 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer group shrink-0"
+          >
             <div className="w-9 h-9 bg-primary/10 rounded-lg flex items-center justify-center border border-primary/20">
-              <User size={20} className="text-primary" />
+              {user?.image ? (
+                <img
+                  src={user.image}
+                  alt={user.name}
+                  className="w-full h-full object-cover rounded-lg"
+                />
+              ) : (
+                <User size={20} className="text-primary" />
+              )}
             </div>
             <div className="hidden sm:block">
-              <p className="text-xs font-bold text-slate-800 dark:text-white">
-                Admin User
+              <p className="text-xs font-bold text-slate-800 dark:text-white truncate max-w-[100px]">
+                {user?.name || "Admin User"}
               </p>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                Administrator
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium capitalize">
+                {user?.role || "Administrator"}
               </p>
             </div>
-          </div>
+          </Link>
         </div>
       </div>
     </header>
