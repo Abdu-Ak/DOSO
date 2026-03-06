@@ -5,8 +5,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import axios from "axios";
 import { addToast } from "@heroui/toast";
-import { Trash2, Eye, UserPen } from "lucide-react";
+import { Trash2, Eye, UserPen, ChevronDown } from "lucide-react";
 import { Chip } from "@heroui/chip";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from "@heroui/dropdown";
 import { User as UserComponent } from "@heroui/user";
 import { Button } from "@heroui/button";
 import CustomTooltip from "@/components/admin/ui/CustomTooltip";
@@ -81,6 +87,27 @@ export default function UserManagement() {
       addToast({
         title: "Error",
         description: "Failed to delete user",
+        color: "danger",
+      });
+    },
+  });
+
+  const statusMutation = useMutation({
+    mutationFn: async ({ id, status }) => {
+      await axios.patch(`/api/users/${id}/status`, { status });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      addToast({
+        title: "Success",
+        description: "Status updated successfully",
+        color: "success",
+      });
+    },
+    onError: (error) => {
+      addToast({
+        title: "Error",
+        description: error?.response?.data?.error || "Failed to update status",
         color: "danger",
       });
     },
@@ -186,21 +213,84 @@ export default function UserManagement() {
         header: "Status",
         accessorKey: "status",
         cell: (info) => {
+          const user = info.row.original;
           const status = info.getValue();
           const statusColors = {
             Active: "success",
             Pending: "warning",
             Inactive: "danger",
           };
+
+          const showActions = canManageUser(currentUser, user);
+
+          if (!showActions) {
+            return (
+              <Chip
+                className="capitalize font-black text-[10px] tracking-wider"
+                color={statusColors[status] || "default"}
+                size="sm"
+                variant="flat"
+              >
+                {status}
+              </Chip>
+            );
+          }
+
+          let availableStatuses = [];
+          if (status === "Pending") {
+            availableStatuses = ["Active", "Inactive"];
+          } else if (status === "Active") {
+            availableStatuses = ["Inactive"];
+          } else if (status === "Inactive") {
+            availableStatuses = ["Active"];
+          }
+
+          if (availableStatuses.length === 0) {
+            return (
+              <Chip
+                className="capitalize font-black text-[10px] tracking-wider"
+                color={statusColors[status] || "default"}
+                size="sm"
+                variant="flat"
+              >
+                {status}
+              </Chip>
+            );
+          }
+
           return (
-            <Chip
-              className="capitalize font-black text-[10px] tracking-wider"
-              color={statusColors[status] || "default"}
-              size="sm"
-              variant="flat"
-            >
-              {status}
-            </Chip>
+            <Dropdown>
+              <DropdownTrigger>
+                <Chip
+                  as="button"
+                  className="capitalize font-black text-[10px] tracking-wider cursor-pointer hover:opacity-80 transition-opacity"
+                  color={statusColors[status] || "default"}
+                  size="sm"
+                  variant="flat"
+                  endContent={
+                    <ChevronDown size={12} className="ml-1 opacity-70" />
+                  }
+                >
+                  {status}
+                </Chip>
+              </DropdownTrigger>
+              <DropdownMenu
+                aria-label="Status actions"
+                onAction={(key) =>
+                  statusMutation.mutate({ id: user._id, status: key })
+                }
+              >
+                {availableStatuses.map((s) => (
+                  <DropdownItem
+                    key={s}
+                    className="text-xs font-bold"
+                    color={statusColors[s]}
+                  >
+                    Set to {s}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
           );
         },
       },
@@ -261,7 +351,7 @@ export default function UserManagement() {
         },
       },
     ],
-    [currentUser],
+    [currentUser, statusMutation],
   );
 
   return (
