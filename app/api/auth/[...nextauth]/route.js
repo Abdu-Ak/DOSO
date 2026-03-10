@@ -27,6 +27,12 @@ export const authOptions = {
           throw new Error("No user found with this email/userId");
         }
 
+        if (user.status !== "Active") {
+          throw new Error(
+            `Access Denied: Your account is currently ${user.status}. Please contact an administrator.`,
+          );
+        }
+
         const isPasswordCorrect = await bcrypt.compare(
           credentials.password,
           user.password,

@@ -1,26 +1,27 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
+import React, { useState, useMemo, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { addToast } from "@heroui/toast";
-import { Trash2, Eye, UserPen } from "lucide-react";
-import { Chip } from "@heroui/chip";
-import { User as UserComponent } from "@heroui/user";
-import { Button } from "@heroui/button";
-import CustomTooltip from "@/components/admin/ui/CustomTooltip";
+import { useDisclosure } from "@heroui/modal";
+import { useSession } from "next-auth/react";
+import { canManageUser } from "@/lib/permissions";
+import { useDebounce } from "@/lib/hooks";
+
+import DeactivateConfirmModal from "@/components/admin/DeactivateConfirmModal";
 import ConfirmModal from "@/components/admin/ui/ConfirmModal";
 import DataTable from "@/components/admin/ui/DataTable";
 import UserHeader from "./_components/UserHeader";
 import UserFilters from "./_components/UserFilters";
-import { useDebounce } from "@/lib/hooks";
-import { useSession } from "next-auth/react";
-import { canManageUser } from "@/lib/permissions";
+import MobileUserList from "./_components/MobileUserList";
+import RejectModal from "./_components/RejectModal";
+import { getUserColumns } from "./_components/UserTableColumns";
+import { useUserMutations } from "./_hooks/useUserMutations";
 
 export default function UserManagement() {
   const { data: session } = useSession();
   const currentUser = session?.user;
+
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [page, setPage] = useState(1);
@@ -29,295 +30,152 @@ export default function UserManagement() {
   const [status, setStatus] = useState("");
   const [district, setDistrict] = useState("");
   const [batch, setBatch] = useState("");
-  const [phone, setPhone] = useState("");
+
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+  const [rejectModalUser, setRejectModalUser] = useState(null);
+  const [pendingDeactivation, setPendingDeactivation] = useState(null);
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-  const queryClient = useQueryClient();
+  const { deleteMutation, statusMutation, approveMutation, rejectMutation } =
+    useUserMutations(currentUser);
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: [
-      "users",
-      page,
-      limit,
-      debouncedSearchTerm,
-      role,
-      status,
-      district,
-      batch,
-    ],
+  const { data, isLoading } = useQuery({
+    queryKey: ["users", page, limit, debouncedSearchTerm, role, status, district, batch],
     queryFn: async () => {
       const response = await axios.get("/api/users", {
-        params: {
-          page,
-          limit,
-          search: debouncedSearchTerm,
-          role,
-          status,
-          district,
-          batch,
-        },
+        params: { page, limit, search: debouncedSearchTerm, role, status, district, batch },
       });
       return response.data;
     },
-    placeholderData: (previousData) => previousData,
+    placeholderData: (prev) => prev,
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: async (id) => {
-      await axios.delete(`/api/users/${id}`);
+  const handleStatusChange = useCallback(
+    (userId, newStatus) => {
+      const currentUserId = (currentUser?._id || currentUser?.id)?.toString();
+      if (currentUserId === userId?.toString() && newStatus === "Inactive") {
+        setPendingDeactivation({ id: userId, status: newStatus });
+        onOpen();
+      } else {
+        statusMutation.mutate({ id: userId, status: newStatus });
+      }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      addToast({
-        title: "Success",
-        description: "User deleted successfully",
-        color: "success",
-      });
-      setIsDeleteModalOpen(false);
-      setUserToDelete(null);
-    },
-    onError: () => {
-      addToast({
-        title: "Error",
-        description: "Failed to delete user",
-        color: "danger",
-      });
-    },
-  });
+    [currentUser, onOpen, statusMutation],
+  );
+
+  const confirmDeactivation = useCallback(() => {
+    if (pendingDeactivation) {
+      statusMutation.mutate(pendingDeactivation);
+      setPendingDeactivation(null);
+    }
+  }, [pendingDeactivation, statusMutation]);
+
+  const handleDelete = (user) => {
+    setUserToDelete(user);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleReject = ({ id, reason }) => {
+    rejectMutation.mutate({ id, reason });
+    setRejectModalUser(null);
+  };
+
+  const handleSearch = (value) => {
+    setSearchTerm(value);
+    setPage(1);
+  };
 
   const userColumns = useMemo(
-    () => [
-      {
-        header: "User",
-        accessorKey: "name",
-        cell: (info) => {
-          const user = info.row.original;
-          return (
-            <UserComponent
-              avatarProps={{
-                radius: "lg",
-                src: user.image,
-                fallback: user.name.charAt(0),
-              }}
-              description={`@${user.userId}`}
-              name={info.getValue()}
-            >
-              {user.email}
-            </UserComponent>
-          );
-        },
-      },
-      {
-        header: "Role",
-        accessorKey: "role",
-        cell: (info) => (
-          <Chip
-            className="capitalize font-black text-[10px] tracking-wider"
-            color="primary"
-            size="sm"
-            variant="flat"
-          >
-            {info.getValue()}
-          </Chip>
-        ),
-      },
-      {
-        header: "Contact",
-        id: "contact",
-        cell: (info) => {
-          const user = info.row.original;
-          return (
-            <div className="flex flex-col gap-1">
-              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                {user.email || "N/A"}
-              </span>
-              <span className="text-[10px] text-slate-500">
-                {user.phone || "N/A"}
-              </span>
-            </div>
-          );
-        },
-      },
-      {
-        header: "Admission/Joined",
-        id: "dates",
-        cell: (info) => {
-          const user = info.row.original;
-          const joined = user.createdAt
-            ? new Date(user.createdAt).toLocaleDateString()
-            : "N/A";
-          const admission = user.date_of_admission
-            ? new Date(user.date_of_admission).toLocaleDateString()
-            : null;
-          return (
-            <div className="flex flex-col gap-1">
-              <span className="text-xs text-slate-600 dark:text-slate-400">
-                Created: {joined}
-              </span>
-              {admission && (
-                <span className="text-[10px] text-primary font-medium">
-                  Adm: {admission}
-                </span>
-              )}
-            </div>
-          );
-        },
-      },
-      {
-        header: "District",
-        accessorKey: "district",
-        cell: (info) => (
-          <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
-            {info.getValue() || "N/A"}
-          </span>
-        ),
-      },
-      {
-        header: "Batch",
-        accessorKey: "batch",
-        cell: (info) => (
-          <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
-            {info.getValue() || "N/A"}
-          </span>
-        ),
-      },
-      {
-        header: "Status",
-        accessorKey: "status",
-        cell: (info) => {
-          const status = info.getValue();
-          const statusColors = {
-            Active: "success",
-            Pending: "warning",
-            Inactive: "danger",
-          };
-          return (
-            <Chip
-              className="capitalize font-black text-[10px] tracking-wider"
-              color={statusColors[status] || "default"}
-              size="sm"
-              variant="flat"
-            >
-              {status}
-            </Chip>
-          );
-        },
-      },
-      {
-        header: "Actions",
-        id: "actions",
-        meta: { align: "end" },
-        cell: (info) => {
-          const user = info.row.original;
-          const showActions = canManageUser(currentUser, user);
-
-          return (
-            <div className="relative flex items-center justify-end gap-2">
-              <CustomTooltip content="View Details">
-                <Button
-                  isIconOnly
-                  as={Link}
-                  href={`/admin/users/${user._id}`}
-                  size="sm"
-                  variant="light"
-                  className="text-slate-400 hover:text-primary"
-                >
-                  <Eye size={18} />
-                </Button>
-              </CustomTooltip>
-              {showActions && (
-                <>
-                  <CustomTooltip content="Edit User">
-                    <Button
-                      isIconOnly
-                      as={Link}
-                      href={`/admin/users/${user._id}/edit`}
-                      size="sm"
-                      variant="light"
-                      className="text-slate-400 hover:text-primary"
-                    >
-                      <UserPen size={18} />
-                    </Button>
-                  </CustomTooltip>
-                  <CustomTooltip color="danger" content="Delete User">
-                    <Button
-                      isIconOnly
-                      onClick={() => {
-                        setUserToDelete(user);
-                        setIsDeleteModalOpen(true);
-                      }}
-                      size="sm"
-                      variant="light"
-                      className="text-slate-400 hover:text-danger"
-                    >
-                      <Trash2 size={18} />
-                    </Button>
-                  </CustomTooltip>
-                </>
-              )}
-            </div>
-          );
-        },
-      },
-    ],
-    [currentUser],
+    () =>
+      getUserColumns({
+        currentUser,
+        handleStatusChange,
+        approveMutation,
+        onReject: setRejectModalUser,
+        onDelete: handleDelete,
+      }),
+    [currentUser, handleStatusChange, approveMutation],
   );
+
+  const users = data?.users || [];
+  const totalPages = data?.pages || 1;
+  const totalItems = data?.total || 0;
+
+  const filterProps = {
+    role, setRole,
+    status, setStatus,
+    district, setDistrict,
+    batch, setBatch,
+    setPage,
+  };
+
+  const paginationProps = {
+    page,
+    total: totalPages,
+    onChange: setPage,
+    totalItems,
+    label: `Showing ${users.length} of ${totalItems} users`,
+  };
 
   return (
     <div className="space-y-6">
       <UserHeader />
 
-      <DataTable
-        data={data?.users || []}
-        columns={userColumns}
+      {/* Desktop */}
+      <div className="hidden lg:block">
+        <DataTable
+          data={users}
+          columns={userColumns}
+          isLoading={isLoading}
+          search={{ placeholder: "Search by name, email or user ID...", value: searchTerm, onChange: handleSearch }}
+          pagination={paginationProps}
+          topContent={<UserFilters {...filterProps} />}
+        />
+      </div>
+
+      {/* Mobile */}
+      <MobileUserList
+        users={users}
         isLoading={isLoading}
-        search={{
-          placeholder: "Search by name, email or user ID...",
-          value: searchTerm,
-          onChange: (value) => {
-            setSearchTerm(value);
-            setPage(1);
-          },
-        }}
-        pagination={{
-          page: page,
-          total: data?.pages || 1,
-          onChange: setPage,
-          totalItems: data?.total || 0,
-          label: `Showing ${data?.users?.length || 0} of ${data?.total || 0} users`,
-        }}
-        topContent={
-          <UserFilters
-            role={role}
-            setRole={setRole}
-            status={status}
-            setStatus={setStatus}
-            district={district}
-            setDistrict={setDistrict}
-            batch={batch}
-            setBatch={setBatch}
-            setPage={setPage}
-          />
-        }
+        currentUser={currentUser}
+        canManageUser={canManageUser}
+        searchTerm={searchTerm}
+        onSearchChange={handleSearch}
+        filters={filterProps}
+        pagination={paginationProps}
+        onStatusChange={handleStatusChange}
+        onDelete={handleDelete}
+        onApprove={(id) => approveMutation.mutate(id)}
+        onReject={setRejectModalUser}
+        approvePending={approveMutation.isPending}
       />
 
       <ConfirmModal
         isOpen={isDeleteModalOpen}
-        onClose={() => {
+        onClose={() => { setIsDeleteModalOpen(false); setUserToDelete(null); }}
+        onConfirm={() => {
+          deleteMutation.mutate(userToDelete?._id);
           setIsDeleteModalOpen(false);
           setUserToDelete(null);
         }}
-        onConfirm={() => deleteMutation.mutate(userToDelete?._id)}
         isLoading={deleteMutation.isPending}
+        title="Delete User"
         message={
           <>
-            <p>
-              Do you want to delete the user &quot;{userToDelete?.name}&quot;?
-            </p>
+            <p>Do you want to delete the user &quot;{userToDelete?.name}&quot;?</p>
             <p className="mt-1">This process can&apos;t be undone.</p>
           </>
         }
+      />
+
+      <DeactivateConfirmModal isOpen={isOpen} onOpenChange={onOpenChange} onConfirm={confirmDeactivation} />
+
+      <RejectModal
+        user={rejectModalUser}
+        onClose={() => setRejectModalUser(null)}
+        onReject={handleReject}
+        isLoading={rejectMutation.isPending}
       />
     </div>
   );

@@ -40,7 +40,7 @@ const KERALA_DISTRICTS = [
   "Other",
 ];
 
-const StudentSection = ({ register, errors, control, watch, isEdit }) => {
+const StudentSection = ({ register, errors, control, watch, isEdit, isPublic }) => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isAdmissionCalendarOpen, setIsAdmissionCalendarOpen] = useState(false);
   const selectedDistrict = watch("district");
@@ -80,15 +80,17 @@ const StudentSection = ({ register, errors, control, watch, isEdit }) => {
         error={errors.phone}
       />
 
-      <InputField
-        {...register("password")}
-        type="password"
-        label="Password"
-        placeholder="Enter password"
-        startContent={<Lock size={18} className="text-slate-400" />}
-        error={errors.password}
-        isEdit={isEdit}
-      />
+      {!isPublic && (
+        <InputField
+          {...register("password")}
+          type="password"
+          label="Password"
+          placeholder="Enter password"
+          startContent={<Lock size={18} className="text-slate-400" />}
+          error={errors.password}
+          isEdit={isEdit}
+        />
+      )}
 
       <div className="space-y-1">
         <Controller
@@ -317,40 +319,42 @@ const StudentSection = ({ register, errors, control, watch, isEdit }) => {
         />
       </div>
 
-      <div className="space-y-1">
-        <Controller
-          name="status"
-          control={control}
-          render={({ field }) => (
-            <Select
-              {...field}
-              label={
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Status <span className="text-red-500">*</span>
-                </span>
-              }
-              labelPlacement="outside"
-              variant="bordered"
-              placeholder="Select status"
-              radius="sm"
-              isInvalid={!!errors.status}
-              errorMessage={errors.status?.message}
-              selectedKeys={field.value ? [field.value] : []}
-              onSelectionChange={(keys) => field.onChange(Array.from(keys)[0])}
-            >
-              <SelectItem key="Active" textValue="Active">
-                Active
-              </SelectItem>
-              <SelectItem key="Pending" textValue="Pending">
-                Pending
-              </SelectItem>
-              <SelectItem key="Inactive" textValue="Inactive">
-                Inactive
-              </SelectItem>
-            </Select>
-          )}
-        />
-      </div>
+      {!isPublic && (
+        <div className="space-y-1">
+          <Controller
+            name="status"
+            control={control}
+            render={({ field }) => (
+              <Select
+                {...field}
+                label={
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    Status <span className="text-red-500">*</span>
+                  </span>
+                }
+                labelPlacement="outside"
+                variant="bordered"
+                placeholder="Select status"
+                radius="sm"
+                isInvalid={!!errors.status}
+                errorMessage={errors.status?.message}
+                selectedKeys={field.value ? [field.value] : []}
+                onSelectionChange={(keys) => field.onChange(Array.from(keys)[0])}
+              >
+                <SelectItem key="Active" textValue="Active">
+                  Active
+                </SelectItem>
+                <SelectItem key="Pending" textValue="Pending">
+                  Pending
+                </SelectItem>
+                <SelectItem key="Inactive" textValue="Inactive">
+                  Inactive
+                </SelectItem>
+              </Select>
+            )}
+          />
+        </div>
+      )}
     </>
   );
 };
