@@ -45,7 +45,10 @@ const Topbar = ({ onMenuClick }) => {
       const res = await axios.get("/api/notifications");
       return res.data;
     },
-    refetchInterval: 30000,
+    refetchInterval: 60000,
+    refetchIntervalInBackground: false, // Stop polling when tab is hidden
+    refetchOnWindowFocus: true, // Refresh when user returns to tab
+    staleTime: 30000, // Consider data fresh for 30s to avoid redundant fetches
   });
 
   const notifCount = notifData?.count || 0;
