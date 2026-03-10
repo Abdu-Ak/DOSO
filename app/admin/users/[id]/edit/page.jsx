@@ -5,8 +5,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useParams } from "next/navigation";
 import axios from "axios";
 import UserForm from "@/components/admin/UserForm";
-import { Users, Loader2 } from "lucide-react";
+import { Users, Loader2, AlertCircle } from "lucide-react";
 import { addToast } from "@heroui/toast";
+import { Button } from "@heroui/button";
+import { canManageUser } from "@/lib/permissions";
 
 import { useSession } from "next-auth/react";
 
@@ -15,6 +17,7 @@ export default function EditUserPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: session, update } = useSession();
+  const currentUser = session?.user;
 
   const { data: user, isLoading } = useQuery({
     queryKey: ["user", id],
@@ -62,6 +65,21 @@ export default function EditUserPage() {
     return (
       <div className="min-h-[400px] flex items-center justify-center">
         <Loader2 className="animate-spin text-primary" size={40} />
+      </div>
+    );
+  }
+
+  if (!user || !canManageUser(currentUser, user, "edit")) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <AlertCircle size={48} className="text-danger" />
+        <h2 className="text-xl font-bold">Unauthorized Access</h2>
+        <p className="text-slate-500">
+          You do not have permission to edit this profile.
+        </p>
+        <Button color="primary" onPress={() => router.push("/admin/users")}>
+          Go Back
+        </Button>
       </div>
     );
   }

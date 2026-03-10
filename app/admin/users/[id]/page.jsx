@@ -25,12 +25,21 @@ import {
   MapPinned,
   MailboxIcon,
   ScrollText,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/card";
 import { Avatar } from "@heroui/avatar";
 import { Chip } from "@heroui/chip";
-import { useSession } from "next-auth/react";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from "@heroui/dropdown";
+import { useDisclosure } from "@heroui/modal";
+import DeactivateConfirmModal from "@/components/admin/DeactivateConfirmModal";
+import { useSession, signOut } from "next-auth/react";
 import { canManageUser } from "@/lib/permissions";
 
 const DetailItem = ({ icon: Icon, label, value, color = "primary" }) => (
@@ -58,14 +67,59 @@ export default function UserDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [pendingStatus, setPendingStatus] = React.useState(null);
+
   const { data: session } = useSession();
   const currentUser = session?.user;
+
+  const isOwnProfile =
+    (currentUser?._id || currentUser?.id)?.toString() === id?.toString();
 
   const { data: user, isLoading } = useQuery({
     queryKey: ["user", id],
     queryFn: async () => {
       const response = await axios.get(`/api/users/${id}`);
       return response.data;
+    },
+  });
+
+  const handleStatusChange = (newStatus) => {
+    if (isOwnProfile && newStatus === "Inactive") {
+      setPendingStatus(newStatus);
+      onOpen();
+    } else {
+      statusMutation.mutate({ id: user._id, status: newStatus });
+    }
+  };
+
+  const confirmDeactivation = () => {
+    statusMutation.mutate({ id: user._id, status: "Inactive" });
+  };
+
+  const statusMutation = useMutation({
+    mutationFn: async ({ id, status }) => {
+      await axios.patch(`/api/users/${id}/status`, { status });
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["user", id] });
+      addToast({
+        title: "Success",
+        description: "Status updated successfully",
+        color: "success",
+      });
+
+      // If user deactivates themselves, sign out
+      if (isOwnProfile && variables.status === "Inactive") {
+        signOut({ callbackUrl: "/login" });
+      }
+    },
+    onError: (error) => {
+      addToast({
+        title: "Error",
+        description: error?.response?.data?.error || "Failed to update status",
+        color: "danger",
+      });
     },
   });
 
@@ -138,14 +192,14 @@ export default function UserDetailPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <Button
           variant="light"
-          onPress={() => router.back()}
+          onPress={() => (isOwnProfile ? router.push("/admin") : router.back())}
           startContent={<ArrowLeft size={18} />}
           className="font-bold text-slate-500 hover:text-primary pl-0"
         >
-          Back to User Management
+          {isOwnProfile ? "Back to Dashboard" : "Back to User Management"}
         </Button>
         <div className="flex items-center gap-3">
-          {canManageUser(currentUser, user) && (
+          {canManageUser(currentUser, user, "edit") && (
             <Button
               as={Link}
               href={`/admin/users/${id}/edit`}
@@ -176,9 +230,14 @@ export default function UserDetailPage() {
               />
 
               <h1 className="text-2xl font-black text-slate-900 dark:text-white capitalize tracking-tight">
-                {user.name}
+                {isOwnProfile ? "My Profile" : user.name}
               </h1>
-              <p className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
+              {isOwnProfile && (
+                <p className="text-primary font-bold text-xs uppercase tracking-widest mt-1">
+                  {user.name}
+                </p>
+              )}
+              <p className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
                 @{user.userId}
               </p>
 
@@ -201,14 +260,60 @@ export default function UserDetailPage() {
                   <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
                     Status
                   </span>
-                  <Chip
-                    variant="flat"
-                    color={statusColors[user.status]}
-                    className="capitalize font-black text-[10px] tracking-wider"
-                    size="sm"
-                  >
-                    {user.status}
-                  </Chip>
+                  {canManageUser(currentUser, user, "status") ? (
+                    <Dropdown>
+                      <DropdownTrigger>
+                        <Chip
+                          as="button"
+                          variant="flat"
+                          color={statusColors[user.status]}
+                          className="capitalize font-black text-[10px] tracking-wider cursor-pointer hover:opacity-80 transition-opacity"
+                          size="sm"
+                          endContent={
+                            <ChevronDown
+                              size={12}
+                              className="ml-1 opacity-70"
+                            />
+                          }
+                        >
+                          {user.status}
+                        </Chip>
+                      </DropdownTrigger>
+                      <DropdownMenu
+                        aria-label="Status actions"
+                        onAction={(key) => handleStatusChange(key)}
+                      >
+                        {(() => {
+                          let availableStatuses = [];
+                          if (user.status === "Pending") {
+                            availableStatuses = ["Active", "Inactive"];
+                          } else if (user.status === "Active") {
+                            availableStatuses = ["Inactive"];
+                          } else if (user.status === "Inactive") {
+                            availableStatuses = ["Active"];
+                          }
+                          return availableStatuses.map((s) => (
+                            <DropdownItem
+                              key={s}
+                              className="text-xs font-bold"
+                              color={statusColors[s]}
+                            >
+                              Set to {s}
+                            </DropdownItem>
+                          ));
+                        })()}
+                      </DropdownMenu>
+                    </Dropdown>
+                  ) : (
+                    <Chip
+                      variant="flat"
+                      color={statusColors[user.status]}
+                      className="capitalize font-black text-[10px] tracking-wider"
+                      size="sm"
+                    >
+                      {user.status}
+                    </Chip>
+                  )}
                 </div>
               </div>
             </CardBody>
@@ -385,6 +490,12 @@ export default function UserDetailPage() {
           )}
         </div>
       </div>
+
+      <DeactivateConfirmModal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        onConfirm={confirmDeactivation}
+      />
     </div>
   );
 }

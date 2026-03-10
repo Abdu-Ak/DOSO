@@ -2,11 +2,26 @@
 
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, User, Menu, Globe, ArrowLeft, LogOut } from "lucide-react";
+import {
+  Bell,
+  User,
+  Menu,
+  Globe,
+  ArrowLeft,
+  LogOut,
+  ChevronDown,
+} from "lucide-react";
 import ThemeToggle from "../ThemeToggle";
 import CustomTooltip from "./ui/CustomTooltip";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
+
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from "@heroui/dropdown";
 
 const Topbar = ({ onMenuClick }) => {
   const { data: session } = useSession();
@@ -14,6 +29,7 @@ const Topbar = ({ onMenuClick }) => {
   const router = useRouter();
 
   const user = session?.user;
+  const userId = user?._id || user?.id;
 
   const getPageTitle = () => {
     const parts = pathname.split("/").filter(Boolean);
@@ -42,7 +58,7 @@ const Topbar = ({ onMenuClick }) => {
   };
 
   return (
-    <header className="h-20 bg-surface-light dark:bg-surface-dark border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 sticky top-0 z-30 shadow-sm">
+    <header className="h-20 bg-surface-light dark:bg-surface-dark border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 sticky top-0 z-30 shadow-sm transition-colors duration-300">
       <div className="flex items-center gap-4">
         <button
           onClick={onMenuClick}
@@ -90,34 +106,68 @@ const Topbar = ({ onMenuClick }) => {
             </button>
           </CustomTooltip>
 
-          <Link
-            href={
-              user?._id || user?.id
-                ? `/admin/users/${user?._id || user?.id}`
-                : "/admin/profile"
-            }
-            className="flex items-center gap-3 px-3 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer group shrink-0"
-          >
-            <div className="w-9 h-9 bg-primary/10 rounded-lg flex items-center justify-center border border-primary/20">
-              {user?.image ? (
-                <img
-                  src={user.image}
-                  alt={user.name}
-                  className="w-full h-full object-cover rounded-lg"
+          <Dropdown placement="bottom-end">
+            <DropdownTrigger>
+              <div className="flex items-center gap-3 px-3 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-300 cursor-pointer group shrink-0 border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
+                <div className="w-9 h-9 bg-primary/10 rounded-lg flex items-center justify-center border border-primary/20 overflow-hidden shadow-sm group-hover:scale-105 transition-transform duration-300">
+                  {user?.image ? (
+                    <img
+                      src={user.image}
+                      alt={user.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <User size={20} className="text-primary" />
+                  )}
+                </div>
+                <div className="hidden sm:block">
+                  <p className="text-xs font-bold text-slate-800 dark:text-white truncate max-w-[100px]">
+                    {user?.name || "Admin User"}
+                  </p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium capitalize">
+                    {user?.role || "Administrator"}
+                  </p>
+                </div>
+                <ChevronDown
+                  size={14}
+                  className="text-slate-400 group-hover:text-primary transition-colors duration-300"
                 />
-              ) : (
-                <User size={20} className="text-primary" />
-              )}
-            </div>
-            <div className="hidden sm:block">
-              <p className="text-xs font-bold text-slate-800 dark:text-white truncate max-w-[100px]">
-                {user?.name || "Admin User"}
-              </p>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium capitalize">
-                {user?.role || "Administrator"}
-              </p>
-            </div>
-          </Link>
+              </div>
+            </DropdownTrigger>
+            <DropdownMenu
+              aria-label="Profile actions"
+              className="p-2 min-w-[200px]"
+              itemClasses={{
+                base: "rounded-lg gap-3 px-3",
+              }}
+            >
+              <DropdownItem
+                key="profile"
+                startContent={<User size={18} />}
+                onPress={() => router.push(`/admin/users/${userId}`)}
+                className="font-bold"
+              >
+                View Profile
+              </DropdownItem>
+              <DropdownItem
+                key="edit"
+                startContent={<LogOut size={18} className="rotate-180" />}
+                onPress={() => router.push(`/admin/users/${userId}/edit`)}
+                className="font-bold"
+              >
+                Edit Profile
+              </DropdownItem>
+              <DropdownItem
+                key="logout"
+                color="danger"
+                className="text-danger font-bold"
+                startContent={<LogOut size={18} />}
+                onPress={() => signOut()}
+              >
+                Logout
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
         </div>
       </div>
     </header>

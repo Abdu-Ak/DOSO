@@ -152,6 +152,7 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
                     isInvalid={!!errors.role}
                     errorMessage={errors.role?.message}
                     orientation="horizontal"
+                    isDisabled={isEdit && currentUser?._id === initialData?._id}
                   >
                     <div className="flex flex-wrap gap-4">
                       {currentUser?.role === "super_admin" && (
@@ -164,6 +165,11 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
                   </RadioGroup>
                 )}
               />
+              {isEdit && currentUser?._id === initialData?._id && (
+                <p className="text-[10px] text-slate-500 mt-1 italic">
+                  You cannot change your own role.
+                </p>
+              )}
             </div>
 
             {/* Role Specific Fields */}

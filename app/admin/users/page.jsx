@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import axios from "axios";
@@ -13,6 +13,8 @@ import {
   DropdownMenu,
   DropdownItem,
 } from "@heroui/dropdown";
+import { useDisclosure } from "@heroui/modal";
+import DeactivateConfirmModal from "@/components/admin/DeactivateConfirmModal";
 import { User as UserComponent } from "@heroui/user";
 import { Button } from "@heroui/button";
 import CustomTooltip from "@/components/admin/ui/CustomTooltip";
@@ -21,7 +23,7 @@ import DataTable from "@/components/admin/ui/DataTable";
 import UserHeader from "./_components/UserHeader";
 import UserFilters from "./_components/UserFilters";
 import { useDebounce } from "@/lib/hooks";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { canManageUser } from "@/lib/permissions";
 
 export default function UserManagement() {
@@ -38,6 +40,8 @@ export default function UserManagement() {
   const [phone, setPhone] = useState("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [pendingDeactivation, setPendingDeactivation] = useState(null);
 
   const queryClient = useQueryClient();
 
@@ -96,13 +100,22 @@ export default function UserManagement() {
     mutationFn: async ({ id, status }) => {
       await axios.patch(`/api/users/${id}/status`, { status });
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       addToast({
         title: "Success",
         description: "Status updated successfully",
         color: "success",
       });
+
+      // If user deactivates themselves from the table, sign out
+      const currentUserId = (currentUser?._id || currentUser?.id)?.toString();
+      if (
+        currentUserId === variables.id?.toString() &&
+        variables.status === "Inactive"
+      ) {
+        signOut({ callbackUrl: "/login" });
+      }
     },
     onError: (error) => {
       addToast({
@@ -112,6 +125,26 @@ export default function UserManagement() {
       });
     },
   });
+
+  const handleStatusChange = useCallback(
+    (userId, newStatus) => {
+      const currentUserId = (currentUser?._id || currentUser?.id)?.toString();
+      if (currentUserId === userId?.toString() && newStatus === "Inactive") {
+        setPendingDeactivation({ id: userId, status: newStatus });
+        onOpen();
+      } else {
+        statusMutation.mutate({ id: userId, status: newStatus });
+      }
+    },
+    [currentUser, onOpen, statusMutation],
+  );
+
+  const confirmDeactivation = useCallback(() => {
+    if (pendingDeactivation) {
+      statusMutation.mutate(pendingDeactivation);
+      setPendingDeactivation(null);
+    }
+  }, [pendingDeactivation, statusMutation]);
 
   const userColumns = useMemo(
     () => [
@@ -221,7 +254,7 @@ export default function UserManagement() {
             Inactive: "danger",
           };
 
-          const showActions = canManageUser(currentUser, user);
+          const showActions = canManageUser(currentUser, user, "status");
 
           if (!showActions) {
             return (
@@ -276,9 +309,7 @@ export default function UserManagement() {
               </DropdownTrigger>
               <DropdownMenu
                 aria-label="Status actions"
-                onAction={(key) =>
-                  statusMutation.mutate({ id: user._id, status: key })
-                }
+                onAction={(key) => handleStatusChange(user._id, key)}
               >
                 {availableStatuses.map((s) => (
                   <DropdownItem
@@ -304,20 +335,20 @@ export default function UserManagement() {
 
           return (
             <div className="relative flex items-center justify-end gap-2">
-              <CustomTooltip content="View Details">
-                <Button
-                  isIconOnly
-                  as={Link}
-                  href={`/admin/users/${user._id}`}
-                  size="sm"
-                  variant="light"
-                  className="text-slate-400 hover:text-primary"
-                >
-                  <Eye size={18} />
-                </Button>
-              </CustomTooltip>
               {showActions && (
                 <>
+                  <CustomTooltip content="View Details">
+                    <Button
+                      isIconOnly
+                      as={Link}
+                      href={`/admin/users/${user._id}`}
+                      size="sm"
+                      variant="light"
+                      className="text-slate-400 hover:text-primary"
+                    >
+                      <Eye size={18} />
+                    </Button>
+                  </CustomTooltip>
                   <CustomTooltip content="Edit User">
                     <Button
                       isIconOnly
@@ -351,7 +382,7 @@ export default function UserManagement() {
         },
       },
     ],
-    [currentUser, statusMutation],
+    [currentUser, handleStatusChange],
   );
 
   return (
@@ -408,6 +439,13 @@ export default function UserManagement() {
             <p className="mt-1">This process can&apos;t be undone.</p>
           </>
         }
+        title="Delete User"
+      />
+
+      <DeactivateConfirmModal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        onConfirm={confirmDeactivation}
       />
     </div>
   );
