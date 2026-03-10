@@ -1,42 +1,27 @@
 "use client";
 
 import React, { useState, useMemo, useCallback } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { addToast } from "@heroui/toast";
-import { Trash2, Eye, UserPen, ChevronDown, UserCheck, UserX } from "lucide-react";
-import { Chip } from "@heroui/chip";
-import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-} from "@heroui/dropdown";
 import { useDisclosure } from "@heroui/modal";
+import { useSession } from "next-auth/react";
+import { canManageUser } from "@/lib/permissions";
+import { useDebounce } from "@/lib/hooks";
+
 import DeactivateConfirmModal from "@/components/admin/DeactivateConfirmModal";
-import { User as UserComponent } from "@heroui/user";
-import { Button } from "@heroui/button";
-import CustomTooltip from "@/components/admin/ui/CustomTooltip";
 import ConfirmModal from "@/components/admin/ui/ConfirmModal";
 import DataTable from "@/components/admin/ui/DataTable";
 import UserHeader from "./_components/UserHeader";
 import UserFilters from "./_components/UserFilters";
-import { useDebounce } from "@/lib/hooks";
-import { useSession, signOut } from "next-auth/react";
-import { canManageUser } from "@/lib/permissions";
-import { Input } from "@heroui/input";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@heroui/modal";
+import MobileUserList from "./_components/MobileUserList";
+import RejectModal from "./_components/RejectModal";
+import { getUserColumns } from "./_components/UserTableColumns";
+import { useUserMutations } from "./_hooks/useUserMutations";
 
 export default function UserManagement() {
   const { data: session } = useSession();
   const currentUser = session?.user;
+
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [page, setPage] = useState(1);
@@ -45,145 +30,25 @@ export default function UserManagement() {
   const [status, setStatus] = useState("");
   const [district, setDistrict] = useState("");
   const [batch, setBatch] = useState("");
-  const [phone, setPhone] = useState("");
+
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [pendingDeactivation, setPendingDeactivation] = useState(null);
   const [rejectModalUser, setRejectModalUser] = useState(null);
-  const [rejectReason, setRejectReason] = useState("");
+  const [pendingDeactivation, setPendingDeactivation] = useState(null);
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-  const queryClient = useQueryClient();
+  const { deleteMutation, statusMutation, approveMutation, rejectMutation } =
+    useUserMutations(currentUser);
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: [
-      "users",
-      page,
-      limit,
-      debouncedSearchTerm,
-      role,
-      status,
-      district,
-      batch,
-    ],
+  const { data, isLoading } = useQuery({
+    queryKey: ["users", page, limit, debouncedSearchTerm, role, status, district, batch],
     queryFn: async () => {
       const response = await axios.get("/api/users", {
-        params: {
-          page,
-          limit,
-          search: debouncedSearchTerm,
-          role,
-          status,
-          district,
-          batch,
-        },
+        params: { page, limit, search: debouncedSearchTerm, role, status, district, batch },
       });
       return response.data;
     },
-    placeholderData: (previousData) => previousData,
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: async (id) => {
-      await axios.delete(`/api/users/${id}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      addToast({
-        title: "Success",
-        description: "User deleted successfully",
-        color: "success",
-      });
-      setIsDeleteModalOpen(false);
-      setUserToDelete(null);
-    },
-    onError: () => {
-      addToast({
-        title: "Error",
-        description: "Failed to delete user",
-        color: "danger",
-      });
-    },
-  });
-
-  const statusMutation = useMutation({
-    mutationFn: async ({ id, status }) => {
-      await axios.patch(`/api/users/${id}/status`, { status });
-    },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      addToast({
-        title: "Success",
-        description: "Status updated successfully",
-        color: "success",
-      });
-
-      // If user deactivates themselves from the table, sign out
-      const currentUserId = (currentUser?._id || currentUser?.id)?.toString();
-      if (
-        currentUserId === variables.id?.toString() &&
-        variables.status === "Inactive"
-      ) {
-        signOut({ callbackUrl: "/login" });
-      }
-    },
-    onError: (error) => {
-      addToast({
-        title: "Error",
-        description: error?.response?.data?.error || "Failed to update status",
-        color: "danger",
-      });
-    },
-  });
-
-  const approveMutation = useMutation({
-    mutationFn: async (id) => {
-      const res = await axios.post(`/api/users/${id}/approve`);
-      return res.data;
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
-      addToast({
-        title: "User Approved",
-        description: data.tempPassword
-          ? `Temporary password: ${data.tempPassword}`
-          : "User approved successfully",
-        color: "success",
-        timeout: data.tempPassword ? 10000 : 3000,
-      });
-    },
-    onError: (error) => {
-      addToast({
-        title: "Error",
-        description: error?.response?.data?.error || "Failed to approve user",
-        color: "danger",
-      });
-    },
-  });
-
-  const rejectMutation = useMutation({
-    mutationFn: async ({ id, reason }) => {
-      await axios.post(`/api/users/${id}/reject`, { reason });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
-      setRejectModalUser(null);
-      setRejectReason("");
-      addToast({
-        title: "User Rejected",
-        description: "Rejection email sent",
-        color: "warning",
-      });
-    },
-    onError: (error) => {
-      addToast({
-        title: "Error",
-        description: error?.response?.data?.error || "Failed to reject user",
-        color: "danger",
-      });
-    },
+    placeholderData: (prev) => prev,
   });
 
   const handleStatusChange = useCallback(
@@ -206,405 +71,112 @@ export default function UserManagement() {
     }
   }, [pendingDeactivation, statusMutation]);
 
+  const handleDelete = (user) => {
+    setUserToDelete(user);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleReject = ({ id, reason }) => {
+    rejectMutation.mutate({ id, reason });
+    setRejectModalUser(null);
+  };
+
+  const handleSearch = (value) => {
+    setSearchTerm(value);
+    setPage(1);
+  };
+
   const userColumns = useMemo(
-    () => [
-      {
-        header: "User",
-        accessorKey: "name",
-        cell: (info) => {
-          const user = info.row.original;
-          return (
-            <UserComponent
-              avatarProps={{
-                radius: "lg",
-                src: user.image,
-                fallback: user.name.charAt(0),
-              }}
-              description={`@${user.userId}`}
-              name={info.getValue()}
-            >
-              {user.email}
-            </UserComponent>
-          );
-        },
-      },
-      {
-        header: "Role",
-        accessorKey: "role",
-        cell: (info) => (
-          <Chip
-            className="capitalize font-black text-[10px] tracking-wider"
-            color="primary"
-            size="sm"
-            variant="flat"
-          >
-            {info.getValue()}
-          </Chip>
-        ),
-      },
-      {
-        header: "Source",
-        accessorKey: "source",
-        cell: (info) => {
-          const value = info.getValue();
-          return (
-            <Chip
-              className="capitalize font-black text-[10px] tracking-wider"
-              color={value === "public" ? "secondary" : "default"}
-              size="sm"
-              variant="flat"
-            >
-              {value || "admin"}
-            </Chip>
-          );
-        },
-      },
-      {
-        header: "Contact",
-        id: "contact",
-        cell: (info) => {
-          const user = info.row.original;
-          return (
-            <div className="flex flex-col gap-1">
-              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                {user.email || "N/A"}
-              </span>
-              <span className="text-[10px] text-slate-500">
-                {user.phone || "N/A"}
-              </span>
-            </div>
-          );
-        },
-      },
-      {
-        header: "Admission/Joined",
-        id: "dates",
-        cell: (info) => {
-          const user = info.row.original;
-          const joined = user.createdAt
-            ? new Date(user.createdAt).toLocaleDateString()
-            : "N/A";
-          const admission = user.date_of_admission
-            ? new Date(user.date_of_admission).toLocaleDateString()
-            : null;
-          return (
-            <div className="flex flex-col gap-1">
-              <span className="text-xs text-slate-600 dark:text-slate-400">
-                Created: {joined}
-              </span>
-              {admission && (
-                <span className="text-[10px] text-primary font-medium">
-                  Adm: {admission}
-                </span>
-              )}
-            </div>
-          );
-        },
-      },
-      {
-        header: "District",
-        accessorKey: "district",
-        cell: (info) => (
-          <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
-            {info.getValue() || "N/A"}
-          </span>
-        ),
-      },
-      {
-        header: "Batch",
-        accessorKey: "batch",
-        cell: (info) => (
-          <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
-            {info.getValue() || "N/A"}
-          </span>
-        ),
-      },
-      {
-        header: "Status",
-        accessorKey: "status",
-        cell: (info) => {
-          const user = info.row.original;
-          const status = info.getValue();
-          const statusColors = {
-            Active: "success",
-            Pending: "warning",
-            Inactive: "danger",
-          };
-
-          const showActions = canManageUser(currentUser, user, "status");
-
-          if (!showActions) {
-            return (
-              <Chip
-                className="capitalize font-black text-[10px] tracking-wider"
-                color={statusColors[status] || "default"}
-                size="sm"
-                variant="flat"
-              >
-                {status}
-              </Chip>
-            );
-          }
-
-          let availableStatuses = [];
-          if (status === "Pending") {
-            availableStatuses = ["Active", "Inactive"];
-          } else if (status === "Active") {
-            availableStatuses = ["Inactive"];
-          } else if (status === "Inactive") {
-            availableStatuses = ["Active"];
-          }
-
-          if (availableStatuses.length === 0) {
-            return (
-              <Chip
-                className="capitalize font-black text-[10px] tracking-wider"
-                color={statusColors[status] || "default"}
-                size="sm"
-                variant="flat"
-              >
-                {status}
-              </Chip>
-            );
-          }
-
-          return (
-            <Dropdown>
-              <DropdownTrigger>
-                <Chip
-                  as="button"
-                  className="capitalize font-black text-[10px] tracking-wider cursor-pointer hover:opacity-80 transition-opacity"
-                  color={statusColors[status] || "default"}
-                  size="sm"
-                  variant="flat"
-                  endContent={
-                    <ChevronDown size={12} className="ml-1 opacity-70" />
-                  }
-                >
-                  {status}
-                </Chip>
-              </DropdownTrigger>
-              <DropdownMenu
-                aria-label="Status actions"
-                onAction={(key) => handleStatusChange(user._id, key)}
-              >
-                {availableStatuses.map((s) => (
-                  <DropdownItem
-                    key={s}
-                    className="text-xs font-bold"
-                    color={statusColors[s]}
-                  >
-                    Set to {s}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-          );
-        },
-      },
-      {
-        header: "Actions",
-        id: "actions",
-        meta: { align: "end" },
-        cell: (info) => {
-          const user = info.row.original;
-          const showActions = canManageUser(currentUser, user);
-          const isPendingPublic = user.status === "Pending" && user.source === "public";
-
-          return (
-            <div className="relative flex items-center justify-end gap-2">
-              {isPendingPublic && showActions && (
-                <>
-                  <CustomTooltip content="Approve">
-                    <Button
-                      isIconOnly
-                      size="sm"
-                      variant="light"
-                      className="text-slate-400 hover:text-green-600"
-                      isLoading={approveMutation.isPending}
-                      onPress={() => approveMutation.mutate(user._id)}
-                    >
-                      <UserCheck size={18} />
-                    </Button>
-                  </CustomTooltip>
-                  <CustomTooltip content="Reject">
-                    <Button
-                      isIconOnly
-                      size="sm"
-                      variant="light"
-                      className="text-slate-400 hover:text-red-600"
-                      onPress={() => setRejectModalUser(user)}
-                    >
-                      <UserX size={18} />
-                    </Button>
-                  </CustomTooltip>
-                </>
-              )}
-              {showActions && (
-                <>
-                  <CustomTooltip content="View Details">
-                    <Button
-                      isIconOnly
-                      as={Link}
-                      href={`/admin/users/${user._id}`}
-                      size="sm"
-                      variant="light"
-                      className="text-slate-400 hover:text-primary"
-                    >
-                      <Eye size={18} />
-                    </Button>
-                  </CustomTooltip>
-                  <CustomTooltip content="Edit User">
-                    <Button
-                      isIconOnly
-                      as={Link}
-                      href={`/admin/users/${user._id}/edit`}
-                      size="sm"
-                      variant="light"
-                      className="text-slate-400 hover:text-primary"
-                    >
-                      <UserPen size={18} />
-                    </Button>
-                  </CustomTooltip>
-                  <CustomTooltip color="danger" content="Delete User">
-                    <Button
-                      isIconOnly
-                      onClick={() => {
-                        setUserToDelete(user);
-                        setIsDeleteModalOpen(true);
-                      }}
-                      size="sm"
-                      variant="light"
-                      className="text-slate-400 hover:text-danger"
-                    >
-                      <Trash2 size={18} />
-                    </Button>
-                  </CustomTooltip>
-                </>
-              )}
-            </div>
-          );
-        },
-      },
-    ],
+    () =>
+      getUserColumns({
+        currentUser,
+        handleStatusChange,
+        approveMutation,
+        onReject: setRejectModalUser,
+        onDelete: handleDelete,
+      }),
     [currentUser, handleStatusChange, approveMutation],
   );
+
+  const users = data?.users || [];
+  const totalPages = data?.pages || 1;
+  const totalItems = data?.total || 0;
+
+  const filterProps = {
+    role, setRole,
+    status, setStatus,
+    district, setDistrict,
+    batch, setBatch,
+    setPage,
+  };
+
+  const paginationProps = {
+    page,
+    total: totalPages,
+    onChange: setPage,
+    totalItems,
+    label: `Showing ${users.length} of ${totalItems} users`,
+  };
 
   return (
     <div className="space-y-6">
       <UserHeader />
 
-      <DataTable
-        data={data?.users || []}
-        columns={userColumns}
+      {/* Desktop */}
+      <div className="hidden lg:block">
+        <DataTable
+          data={users}
+          columns={userColumns}
+          isLoading={isLoading}
+          search={{ placeholder: "Search by name, email or user ID...", value: searchTerm, onChange: handleSearch }}
+          pagination={paginationProps}
+          topContent={<UserFilters {...filterProps} />}
+        />
+      </div>
+
+      {/* Mobile */}
+      <MobileUserList
+        users={users}
         isLoading={isLoading}
-        search={{
-          placeholder: "Search by name, email or user ID...",
-          value: searchTerm,
-          onChange: (value) => {
-            setSearchTerm(value);
-            setPage(1);
-          },
-        }}
-        pagination={{
-          page: page,
-          total: data?.pages || 1,
-          onChange: setPage,
-          totalItems: data?.total || 0,
-          label: `Showing ${data?.users?.length || 0} of ${data?.total || 0} users`,
-        }}
-        topContent={
-          <UserFilters
-            role={role}
-            setRole={setRole}
-            status={status}
-            setStatus={setStatus}
-            district={district}
-            setDistrict={setDistrict}
-            batch={batch}
-            setBatch={setBatch}
-            setPage={setPage}
-          />
-        }
+        currentUser={currentUser}
+        canManageUser={canManageUser}
+        searchTerm={searchTerm}
+        onSearchChange={handleSearch}
+        filters={filterProps}
+        pagination={paginationProps}
+        onStatusChange={handleStatusChange}
+        onDelete={handleDelete}
+        onApprove={(id) => approveMutation.mutate(id)}
+        onReject={setRejectModalUser}
+        approvePending={approveMutation.isPending}
       />
 
       <ConfirmModal
         isOpen={isDeleteModalOpen}
-        onClose={() => {
+        onClose={() => { setIsDeleteModalOpen(false); setUserToDelete(null); }}
+        onConfirm={() => {
+          deleteMutation.mutate(userToDelete?._id);
           setIsDeleteModalOpen(false);
           setUserToDelete(null);
         }}
-        onConfirm={() => deleteMutation.mutate(userToDelete?._id)}
         isLoading={deleteMutation.isPending}
+        title="Delete User"
         message={
           <>
-            <p>
-              Do you want to delete the user &quot;{userToDelete?.name}&quot;?
-            </p>
+            <p>Do you want to delete the user &quot;{userToDelete?.name}&quot;?</p>
             <p className="mt-1">This process can&apos;t be undone.</p>
           </>
         }
-        title="Delete User"
       />
 
-      <DeactivateConfirmModal
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-        onConfirm={confirmDeactivation}
-      />
+      <DeactivateConfirmModal isOpen={isOpen} onOpenChange={onOpenChange} onConfirm={confirmDeactivation} />
 
-      {/* Reject Reason Modal */}
-      <Modal
-        isOpen={!!rejectModalUser}
-        onClose={() => {
-          setRejectModalUser(null);
-          setRejectReason("");
-        }}
-        hideCloseButton
-      >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader>
-                <h3 className="text-lg font-body! font-semibold text-slate-800 dark:text-white">
-                  Reject Registration
-                </h3>
-              </ModalHeader>
-              <ModalBody>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
-                  Rejecting <strong>{rejectModalUser?.name}</strong>. Provide a
-                  reason (optional):
-                </p>
-                <Input
-                  variant="bordered"
-                  placeholder="Rejection reason"
-                  value={rejectReason}
-                  onChange={(e) => setRejectReason(e.target.value)}
-                  radius="sm"
-                />
-              </ModalBody>
-              <ModalFooter>
-                <Button variant="light" onPress={onClose} className="font-bold">
-                  Cancel
-                </Button>
-                <Button
-                  color="danger"
-                  className="font-bold"
-                  isLoading={rejectMutation.isPending}
-                  onPress={() =>
-                    rejectMutation.mutate({
-                      id: rejectModalUser._id,
-                      reason: rejectReason,
-                    })
-                  }
-                >
-                  Reject
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      <RejectModal
+        user={rejectModalUser}
+        onClose={() => setRejectModalUser(null)}
+        onReject={handleReject}
+        isLoading={rejectMutation.isPending}
+      />
     </div>
   );
 }
