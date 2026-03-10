@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import axios from "axios";
 import { addToast } from "@heroui/toast";
-import { Trash2, Eye, UserPen, ChevronDown } from "lucide-react";
+import { Trash2, Eye, UserPen, ChevronDown, UserCheck, UserX } from "lucide-react";
 import { Chip } from "@heroui/chip";
 import {
   Dropdown,
@@ -25,6 +25,14 @@ import UserFilters from "./_components/UserFilters";
 import { useDebounce } from "@/lib/hooks";
 import { useSession, signOut } from "next-auth/react";
 import { canManageUser } from "@/lib/permissions";
+import { Input } from "@heroui/input";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "@heroui/modal";
 
 export default function UserManagement() {
   const { data: session } = useSession();
@@ -42,6 +50,8 @@ export default function UserManagement() {
   const [userToDelete, setUserToDelete] = useState(null);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [pendingDeactivation, setPendingDeactivation] = useState(null);
+  const [rejectModalUser, setRejectModalUser] = useState(null);
+  const [rejectReason, setRejectReason] = useState("");
 
   const queryClient = useQueryClient();
 
@@ -126,6 +136,56 @@ export default function UserManagement() {
     },
   });
 
+  const approveMutation = useMutation({
+    mutationFn: async (id) => {
+      const res = await axios.post(`/api/users/${id}/approve`);
+      return res.data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      addToast({
+        title: "User Approved",
+        description: data.tempPassword
+          ? `Temporary password: ${data.tempPassword}`
+          : "User approved successfully",
+        color: "success",
+        timeout: data.tempPassword ? 10000 : 3000,
+      });
+    },
+    onError: (error) => {
+      addToast({
+        title: "Error",
+        description: error?.response?.data?.error || "Failed to approve user",
+        color: "danger",
+      });
+    },
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: async ({ id, reason }) => {
+      await axios.post(`/api/users/${id}/reject`, { reason });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      setRejectModalUser(null);
+      setRejectReason("");
+      addToast({
+        title: "User Rejected",
+        description: "Rejection email sent",
+        color: "warning",
+      });
+    },
+    onError: (error) => {
+      addToast({
+        title: "Error",
+        description: error?.response?.data?.error || "Failed to reject user",
+        color: "danger",
+      });
+    },
+  });
+
   const handleStatusChange = useCallback(
     (userId, newStatus) => {
       const currentUserId = (currentUser?._id || currentUser?.id)?.toString();
@@ -181,6 +241,23 @@ export default function UserManagement() {
             {info.getValue()}
           </Chip>
         ),
+      },
+      {
+        header: "Source",
+        accessorKey: "source",
+        cell: (info) => {
+          const value = info.getValue();
+          return (
+            <Chip
+              className="capitalize font-black text-[10px] tracking-wider"
+              color={value === "public" ? "secondary" : "default"}
+              size="sm"
+              variant="flat"
+            >
+              {value || "admin"}
+            </Chip>
+          );
+        },
       },
       {
         header: "Contact",
@@ -332,9 +409,37 @@ export default function UserManagement() {
         cell: (info) => {
           const user = info.row.original;
           const showActions = canManageUser(currentUser, user);
+          const isPendingPublic = user.status === "Pending" && user.source === "public";
 
           return (
             <div className="relative flex items-center justify-end gap-2">
+              {isPendingPublic && showActions && (
+                <>
+                  <CustomTooltip content="Approve">
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      variant="light"
+                      className="text-slate-400 hover:text-green-600"
+                      isLoading={approveMutation.isPending}
+                      onPress={() => approveMutation.mutate(user._id)}
+                    >
+                      <UserCheck size={18} />
+                    </Button>
+                  </CustomTooltip>
+                  <CustomTooltip content="Reject">
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      variant="light"
+                      className="text-slate-400 hover:text-red-600"
+                      onPress={() => setRejectModalUser(user)}
+                    >
+                      <UserX size={18} />
+                    </Button>
+                  </CustomTooltip>
+                </>
+              )}
               {showActions && (
                 <>
                   <CustomTooltip content="View Details">
@@ -382,7 +487,7 @@ export default function UserManagement() {
         },
       },
     ],
-    [currentUser, handleStatusChange],
+    [currentUser, handleStatusChange, approveMutation],
   );
 
   return (
@@ -447,6 +552,59 @@ export default function UserManagement() {
         onOpenChange={onOpenChange}
         onConfirm={confirmDeactivation}
       />
+
+      {/* Reject Reason Modal */}
+      <Modal
+        isOpen={!!rejectModalUser}
+        onClose={() => {
+          setRejectModalUser(null);
+          setRejectReason("");
+        }}
+        hideCloseButton
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>
+                <h3 className="text-lg font-body! font-semibold text-slate-800 dark:text-white">
+                  Reject Registration
+                </h3>
+              </ModalHeader>
+              <ModalBody>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                  Rejecting <strong>{rejectModalUser?.name}</strong>. Provide a
+                  reason (optional):
+                </p>
+                <Input
+                  variant="bordered"
+                  placeholder="Rejection reason"
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  radius="sm"
+                />
+              </ModalBody>
+              <ModalFooter>
+                <Button variant="light" onPress={onClose} className="font-bold">
+                  Cancel
+                </Button>
+                <Button
+                  color="danger"
+                  className="font-bold"
+                  isLoading={rejectMutation.isPending}
+                  onPress={() =>
+                    rejectMutation.mutate({
+                      id: rejectModalUser._id,
+                      reason: rejectReason,
+                    })
+                  }
+                >
+                  Reject
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

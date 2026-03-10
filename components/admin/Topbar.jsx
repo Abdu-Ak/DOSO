@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Bell,
@@ -10,11 +10,16 @@ import {
   ArrowLeft,
   LogOut,
   ChevronDown,
+  QrCode,
 } from "lucide-react";
 import ThemeToggle from "../ThemeToggle";
 import CustomTooltip from "./ui/CustomTooltip";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import NotificationsPanel from "./NotificationsPanel";
+import RegistrationQRModal from "./RegistrationQRModal";
 
 import {
   Dropdown,
@@ -27,21 +32,44 @@ const Topbar = ({ onMenuClick }) => {
   const { data: session } = useSession();
   const pathname = usePathname();
   const router = useRouter();
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
+  const notifRef = useRef(null);
 
   const user = session?.user;
   const userId = user?._id || user?.id;
+
+  const { data: notifData } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: async () => {
+      const res = await axios.get("/api/notifications");
+      return res.data;
+    },
+    refetchInterval: 30000,
+  });
+
+  const notifCount = notifData?.count || 0;
+
+  // Close notifications panel on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const getPageTitle = () => {
     const parts = pathname.split("/").filter(Boolean);
     if (parts.length === 1 && parts[0] === "admin") return "Dashboard";
 
-    // Handle admin/users/... paths
     if (parts[0] === "admin" && parts[1] === "users") {
       const lastPart = parts[parts.length - 1];
       if (lastPart === "create") return "User / Create";
       if (lastPart === "edit") return "User / Edit";
       if ((parts.length > 3 && !isNaN(parts[2])) || parts[2]?.length > 20) {
-        // Simple check for ID
         return "User / Details";
       }
     }
@@ -84,6 +112,15 @@ const Topbar = ({ onMenuClick }) => {
 
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2 ml-2 pl-4">
+          <CustomTooltip content="Registration QR">
+            <button
+              onClick={() => setShowQRModal(true)}
+              className="p-2 text-slate-600 dark:text-slate-400 hover:text-primary transition-colors"
+            >
+              <QrCode size={22} />
+            </button>
+          </CustomTooltip>
+
           <CustomTooltip content="Visit Site">
             <button
               onClick={() => router.push("/")}
@@ -99,12 +136,26 @@ const Topbar = ({ onMenuClick }) => {
             </div>
           </CustomTooltip>
 
-          <CustomTooltip content="Notifications">
-            <button className="p-2 text-slate-600 dark:text-slate-400 hover:text-primary transition-colors relative">
-              <Bell size={22} />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-surface-light dark:border-surface-dark"></span>
-            </button>
-          </CustomTooltip>
+          <div className="relative" ref={notifRef}>
+            <CustomTooltip content="Notifications">
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="p-2 text-slate-600 dark:text-slate-400 hover:text-primary transition-colors relative"
+              >
+                <Bell size={22} />
+                {notifCount > 0 && (
+                  <span className="absolute top-1 right-1 min-w-[18px] h-[18px] bg-red-500 rounded-full border-2 border-surface-light dark:border-surface-dark flex items-center justify-center">
+                    <span className="text-[9px] font-bold text-white leading-none">
+                      {notifCount > 9 ? "9+" : notifCount}
+                    </span>
+                  </span>
+                )}
+              </button>
+            </CustomTooltip>
+            {showNotifications && (
+              <NotificationsPanel onClose={() => setShowNotifications(false)} />
+            )}
+          </div>
 
           <Dropdown placement="bottom-end">
             <DropdownTrigger>
@@ -170,6 +221,11 @@ const Topbar = ({ onMenuClick }) => {
           </Dropdown>
         </div>
       </div>
+
+      <RegistrationQRModal
+        isOpen={showQRModal}
+        onClose={() => setShowQRModal(false)}
+      />
     </header>
   );
 };
