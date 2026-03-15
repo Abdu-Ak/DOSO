@@ -47,6 +47,7 @@ const StudentSection = ({
   watch,
   isEdit,
   isPublic,
+  isSelfEdit,
 }) => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isAdmissionCalendarOpen, setIsAdmissionCalendarOpen] = useState(false);
@@ -326,7 +327,7 @@ const StudentSection = ({
         />
       </div>
 
-      {!isPublic && (
+      {!isPublic && !isSelfEdit && (
         <div className="space-y-1">
           <Controller
             name="status"

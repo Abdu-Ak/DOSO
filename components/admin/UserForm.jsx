@@ -79,6 +79,8 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
 
   console.log(errors, "errors");
 
+  const isSelfEdit = isEdit && currentUser?._id === initialData?._id;
+
   return (
     <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-8">
       <Card className="bg-surface-light dark:bg-surface-dark border-slate-200 dark:border-slate-800 shadow-sm overflow-visible">
@@ -152,7 +154,7 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
                     isInvalid={!!errors.role}
                     errorMessage={errors.role?.message}
                     orientation="horizontal"
-                    isDisabled={isEdit && currentUser?._id === initialData?._id}
+                    isDisabled={isSelfEdit}
                   >
                     <div className="flex flex-wrap gap-x-6 gap-y-3">
                       {currentUser?.role === "super_admin" && (
@@ -165,7 +167,7 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
                   </RadioGroup>
                 )}
               />
-              {isEdit && currentUser?._id === initialData?._id && (
+              {isSelfEdit && (
                 <p className="text-[10px] text-slate-500 mt-1 italic">
                   You cannot change your own role.
                 </p>
@@ -179,6 +181,7 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
                 errors={errors}
                 control={control}
                 isEdit={isEdit}
+                isSelfEdit={isSelfEdit}
               />
             )}
 
@@ -189,6 +192,7 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
                 control={control}
                 watch={watch}
                 isEdit={isEdit}
+                isSelfEdit={isSelfEdit}
               />
             )}
 
@@ -199,6 +203,7 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
                 control={control}
                 watch={watch}
                 isEdit={isEdit}
+                isSelfEdit={isSelfEdit}
               />
             )}
           </div>
