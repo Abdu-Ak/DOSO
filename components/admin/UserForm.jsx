@@ -10,9 +10,12 @@ import AdminSection from "@/app/admin/users/create/_components/AdminSection";
 import StudentSection from "@/app/admin/users/create/_components/StudentSection";
 import AlumniSection from "@/app/admin/users/create/_components/AlumniSection";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
   const router = useRouter();
+  const { data: session } = useSession();
+  const currentUser = session?.user;
 
   const [imagePreview, setImagePreview] = useState(initialData?.image || null);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -27,11 +30,12 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
   } = useForm({
     resolver: zodResolver(userSchema),
     defaultValues: {
-      role: "student",
-      status: "Active",
-      district: "Malappuram",
-      guardian_relation: "Father",
-      batch: new Date().getFullYear().toString(),
+      ...initialData,
+      role: initialData?.role || "student",
+      status: initialData?.status || "Active",
+      district: initialData?.district || "Malappuram",
+      guardian_relation: initialData?.guardian_relation || "Father",
+      batch: initialData?.batch || new Date().getFullYear().toString(),
       dob: initialData?.dob
         ? new Date(initialData.dob).toISOString().split("T")[0]
         : "",
@@ -39,7 +43,6 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
         ? new Date(initialData.date_of_admission).toISOString().split("T")[0]
         : "",
       password: "",
-      ...initialData,
     },
   });
 
@@ -109,9 +112,10 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
                         <Camera size={32} className="mx-auto mb-2" />
                         <span className="text-xs font-bold uppercase tracking-wider">
                           Upload Photo{" "}
-                          {selectedRole !== "admin" && (
-                            <span className="text-red-500">*</span>
-                          )}
+                          {selectedRole !== "admin" &&
+                            selectedRole !== "super_admin" && (
+                              <span className="text-red-500">*</span>
+                            )}
                         </span>
                       </div>
                     )}
@@ -148,19 +152,28 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
                     isInvalid={!!errors.role}
                     errorMessage={errors.role?.message}
                     orientation="horizontal"
+                    isDisabled={isEdit && currentUser?._id === initialData?._id}
                   >
-                    <div className="flex gap-4">
-                      <Radio value="student">Student</Radio>
-                      <Radio value="alumni">Alumni</Radio>
+                    <div className="flex flex-wrap gap-4">
+                      {currentUser?.role === "super_admin" && (
+                        <Radio value="super_admin">Super Admin</Radio>
+                      )}
                       <Radio value="admin">Admin</Radio>
+                      <Radio value="alumni">Alumni</Radio>
+                      <Radio value="student">Student</Radio>
                     </div>
                   </RadioGroup>
                 )}
               />
+              {isEdit && currentUser?._id === initialData?._id && (
+                <p className="text-[10px] text-slate-500 mt-1 italic">
+                  You cannot change your own role.
+                </p>
+              )}
             </div>
 
             {/* Role Specific Fields */}
-            {selectedRole === "admin" && (
+            {(selectedRole === "admin" || selectedRole === "super_admin") && (
               <AdminSection
                 register={register}
                 errors={errors}

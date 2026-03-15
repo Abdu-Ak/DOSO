@@ -27,6 +27,12 @@ export const authOptions = {
           throw new Error("No user found with this email/userId");
         }
 
+        if (user.status !== "Active") {
+          throw new Error(
+            `Access Denied: Your account is currently ${user.status}. Please contact an administrator.`,
+          );
+        }
+
         const isPasswordCorrect = await bcrypt.compare(
           credentials.password,
           user.password,
@@ -38,25 +44,34 @@ export const authOptions = {
 
         return {
           id: user._id.toString(),
+          _id: user._id.toString(),
           name: user.name,
           email: user.email,
           role: user.role,
+          image: user.image,
         };
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.image = user.image;
+      }
+      // Handle session update
+      if (trigger === "update" && session?.image) {
+        token.image = session.image;
       }
       return token;
     },
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
+        session.user._id = token.id;
         session.user.role = token.role;
+        session.user.image = token.image;
       }
       return session;
     },

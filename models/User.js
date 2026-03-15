@@ -11,7 +11,6 @@ const UserSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, "Please provide a password"],
       select: false,
     },
     role: {
@@ -55,6 +54,18 @@ const UserSchema = new mongoose.Schema(
     pincode: String,
     batch: String,
     education: String,
+
+    // Public registration fields
+    source: {
+      type: String,
+      enum: ["admin", "public"],
+      default: "admin",
+    },
+    rejectionReason: String,
+    tempPasswordSet: {
+      type: Boolean,
+      default: false,
+    },
 
     // Backend generated ID or Admin Username
     userId: {

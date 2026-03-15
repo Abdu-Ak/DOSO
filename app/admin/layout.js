@@ -66,7 +66,7 @@ export default function AdminLayout({ children }) {
         <Topbar onMenuClick={() => setMobileMenuOpen(true)} />
 
         <main className="flex-1 overflow-y-auto p-6 bg-slate-50 dark:bg-slate-900/50">
-          <div className="max-w-7xl mx-auto">{children}</div>
+          <div className="w-full">{children}</div>
         </main>
       </div>
     </div>

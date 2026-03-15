@@ -3,73 +3,7 @@ import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import cloudinary from "@/lib/cloudinary";
 import bcrypt from "bcryptjs";
-
-export async function GET(request) {
-  try {
-    await dbConnect();
-
-    const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page")) || 1;
-    const limit = parseInt(searchParams.get("limit")) || 10;
-    const search = searchParams.get("search") || "";
-    const role = searchParams.get("role") || "";
-    const status = searchParams.get("status") || "";
-    const district = searchParams.get("district") || "";
-    const batch = searchParams.get("batch") || "";
-
-    const skip = (page - 1) * limit;
-
-    const query = {
-      role: { $ne: "super_admin" },
-    };
-
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { email: { $regex: search, $options: "i" } },
-        { userId: { $regex: search, $options: "i" } },
-        { phone: { $regex: search, $options: "i" } },
-        { father_name: { $regex: search, $options: "i" } },
-        { batch: { $regex: search, $options: "i" } },
-      ];
-    }
-
-    if (role) {
-      query.role = role.toLowerCase();
-    }
-
-    if (status) {
-      query.status = status;
-    }
-
-    if (district) {
-      query.district = district;
-    }
-
-    if (batch) {
-      query.batch = batch;
-    }
-
-    const total = await User.countDocuments(query);
-    const users = await User.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-
-    return NextResponse.json({
-      users,
-      total,
-      pages: Math.ceil(total / limit),
-      currentPage: page,
-    });
-  } catch (error) {
-    console.error("GET Users Error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch users" },
-      { status: 500 },
-    );
-  }
-}
+import crypto from "crypto";
 
 const DISTRICT_CODES = {
   Thiruvananthapuram: "TVM",
@@ -90,13 +24,10 @@ const DISTRICT_CODES = {
 };
 
 async function generateUserId(role, district, yearDate) {
-  if (role === "admin") return null;
-
   const districtCode = DISTRICT_CODES[district] || "OTH";
   const year = new Date(yearDate).getFullYear();
   const prefix = `${districtCode}-${year}`;
 
-  // Find the highest sequence number for this prefix
   const lastUser = await User.findOne({ userId: new RegExp(`^${prefix}-`) })
     .sort({ userId: -1 })
     .select("userId");
@@ -110,8 +41,7 @@ async function generateUserId(role, district, yearDate) {
     }
   }
 
-  const paddedSequence = sequence.toString().padStart(3, "0");
-  return `${prefix}-${paddedSequence}`;
+  return `${prefix}-${sequence.toString().padStart(3, "0")}`;
 }
 
 export async function POST(request) {
@@ -121,11 +51,15 @@ export async function POST(request) {
 
     const role = data.get("role");
     const email = data.get("email");
-    const password = data.get("password");
-    const status = data.get("status");
     const imageFile = data.get("image");
 
-    // Check if user already exists by email
+    if (!["student", "alumni"].includes(role)) {
+      return NextResponse.json(
+        { error: "Only student and alumni registrations are allowed" },
+        { status: 400 },
+      );
+    }
+
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       return NextResponse.json(
@@ -134,26 +68,15 @@ export async function POST(request) {
       );
     }
 
-    // Role-specific field extraction
     let userFields = {
       role,
       email: email.toLowerCase(),
-      status,
       phone: data.get("phone"),
+      status: "Pending",
+      source: "public",
     };
 
-    if (role === "admin") {
-      const userId = data.get("userId");
-      const existingUserId = await User.findOne({ userId });
-      if (existingUserId) {
-        return NextResponse.json(
-          { error: "Username already exists" },
-          { status: 400 },
-        );
-      }
-      userFields.name = data.get("name");
-      userFields.userId = userId;
-    } else if (role === "student") {
+    if (role === "student") {
       userFields.madrasa_name = data.get("madrasa_name");
       userFields.name = data.get("name");
       userFields.house_name = data.get("house_name");
@@ -219,7 +142,10 @@ export async function POST(request) {
       };
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Set a placeholder password (user can't log in until approved)
+    const placeholder = crypto.randomBytes(32).toString("hex");
+    const hashedPassword = await bcrypt.hash(placeholder, 10);
+
     const newUser = await User.create({
       ...userFields,
       password: hashedPassword,
@@ -228,13 +154,13 @@ export async function POST(request) {
     });
 
     return NextResponse.json(
-      { message: "User created successfully", user: newUser },
+      { message: "Registration submitted successfully" },
       { status: 201 },
     );
   } catch (error) {
-    console.error("POST User Error:", error);
+    console.error("Public Registration Error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to create user" },
+      { error: error.message || "Registration failed" },
       { status: 500 },
     );
   }
