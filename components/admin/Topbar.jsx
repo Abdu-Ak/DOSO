@@ -11,6 +11,7 @@ import {
   LogOut,
   ChevronDown,
   QrCode,
+  UserPen,
 } from "lucide-react";
 import ThemeToggle from "../ThemeToggle";
 import CustomTooltip from "./ui/CustomTooltip";
@@ -205,7 +206,7 @@ const Topbar = ({ onMenuClick }) => {
               </DropdownItem>
               <DropdownItem
                 key="edit"
-                startContent={<LogOut size={18} className="rotate-180" />}
+                startContent={<UserPen size={18} className="rotate-180" />}
                 onPress={() => router.push(`/admin/users/${userId}/edit`)}
                 className="font-bold"
               >
