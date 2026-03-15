@@ -4,7 +4,8 @@ import React, { useState } from "react";
 import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
 import { Button } from "@heroui/button";
 import { QRCodeSVG } from "qrcode.react";
-import { Copy, Check, CircleX } from "lucide-react";
+import { Copy, Check, CircleX, MessageCircle } from "lucide-react";
+import WhatsappIcon from "@/assets/icons/whatsapp";
 
 const RegistrationQRModal = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState("student");
@@ -17,6 +18,12 @@ const RegistrationQRModal = ({ isOpen, onClose }) => {
     navigator.clipboard.writeText(registrationUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleWhatsAppShare = () => {
+    const text = `Join us at DOSO! Register as a ${activeTab === "student" ? "Student" : "Alumni"} here: ${registrationUrl}`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(whatsappUrl, "_blank");
   };
 
   return (
@@ -70,7 +77,7 @@ const RegistrationQRModal = ({ isOpen, onClose }) => {
 
               {/* Copyable Link */}
               <div className="mt-4 flex items-center gap-2 bg-slate-50 dark:bg-slate-800 rounded-lg p-3">
-                <span className="text-xs text-slate-600 dark:text-slate-400 truncate flex-1">
+                <span className="text-sm text-slate-600 dark:text-slate-400 truncate flex-1">
                   {registrationUrl}
                 </span>
                 <Button
@@ -78,17 +85,26 @@ const RegistrationQRModal = ({ isOpen, onClose }) => {
                   size="sm"
                   variant="light"
                   onPress={handleCopy}
-                  className="shrink-0"
+                  className="shrink-0 text-slate-600"
                 >
                   {copied ? (
-                    <Check size={16} className="text-green-500" />
+                    <Check size={18} className="text-green-500" />
                   ) : (
-                    <Copy size={16} className="text-slate-400" />
+                    <Copy size={18} />
                   )}
+                </Button>
+                <Button
+                  isIconOnly
+                  size="sm"
+                  variant="light"
+                  onPress={handleWhatsAppShare}
+                  className="shrink-0 text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20"
+                >
+                  <WhatsappIcon />
                 </Button>
               </div>
 
-              <p className="text-[10px] text-center text-slate-400 mt-3">
+              <p className="text-xs text-center text-slate-500 mt-3">
                 Share this QR code or link for {activeTab} registration
               </p>
             </ModalBody>
