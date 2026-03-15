@@ -43,7 +43,20 @@ const LoginPage = () => {
       if (result.error) {
         setError(result.error || "Invalid credentials");
       } else {
-        router.push("/admin");
+        // Redirect based on role
+        const sessionRes = await fetch("/api/auth/session");
+        const sessionData = await sessionRes.json();
+        const role = sessionData?.user?.role;
+
+        if (role === "admin" || role === "super_admin") {
+          router.push("/admin");
+        } else if (role === "alumni") {
+          router.push("/alumni/profile");
+        } else if (role === "student") {
+          router.push("/student/profile");
+        } else {
+          router.push("/");
+        }
       }
     } catch (err) {
       setError("An unexpected error occurred. Please try again.");

@@ -11,6 +11,7 @@ import {
   LogOut,
   ChevronDown,
   QrCode,
+  UserPen,
 } from "lucide-react";
 import ThemeToggle from "../ThemeToggle";
 import CustomTooltip from "./ui/CustomTooltip";
@@ -102,7 +103,7 @@ const Topbar = ({ onMenuClick }) => {
           {isNestedPage() && (
             <button
               onClick={() => router.back()}
-              className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors"
+              className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors cursor-pointer"
             >
               <ArrowLeft size={20} />
             </button>
@@ -118,7 +119,7 @@ const Topbar = ({ onMenuClick }) => {
           <CustomTooltip content="Registration QR">
             <button
               onClick={() => setShowQRModal(true)}
-              className="p-2 text-slate-600 dark:text-slate-400 hover:text-primary transition-colors"
+              className="p-2 text-slate-600 dark:text-slate-400 hover:text-primary transition-colors cursor-pointer"
             >
               <QrCode size={22} />
             </button>
@@ -127,7 +128,7 @@ const Topbar = ({ onMenuClick }) => {
           <CustomTooltip content="Visit Site">
             <button
               onClick={() => router.push("/")}
-              className="p-2 text-slate-600 dark:text-slate-400 hover:text-primary transition-colors"
+              className="p-2 text-slate-600 dark:text-slate-400 hover:text-primary transition-colors cursor-pointer"
             >
               <Globe size={22} />
             </button>
@@ -143,7 +144,7 @@ const Topbar = ({ onMenuClick }) => {
             <CustomTooltip content="Notifications">
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="p-2 text-slate-600 dark:text-slate-400 hover:text-primary transition-colors relative"
+                className="p-2 text-slate-600 dark:text-slate-400 hover:text-primary transition-colors relative cursor-pointer"
               >
                 <Bell size={22} />
                 {notifCount > 0 && (
@@ -205,7 +206,7 @@ const Topbar = ({ onMenuClick }) => {
               </DropdownItem>
               <DropdownItem
                 key="edit"
-                startContent={<LogOut size={18} className="rotate-180" />}
+                startContent={<UserPen size={18} className="rotate-180" />}
                 onPress={() => router.push(`/admin/users/${userId}/edit`)}
                 className="font-bold"
               >

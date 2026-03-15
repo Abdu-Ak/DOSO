@@ -133,11 +133,11 @@ const UserFilters = ({
         as={Link}
         href="/admin/users/create"
         color="primary"
-        endContent={<UserPlus size={18} />}
+        startContent={<UserPlus size={18} />}
         className="font-bold shadow-lg shadow-primary/20 w-full sm:w-auto"
         radius="lg"
       >
-        Add New User
+        Add User
       </Button>
     </div>
   );

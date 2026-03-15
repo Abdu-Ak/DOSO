@@ -35,7 +35,15 @@ const KERALA_DISTRICTS = [
   "Other",
 ];
 
-const AlumniSection = ({ register, errors, control, watch, isEdit, isPublic }) => {
+const AlumniSection = ({
+  register,
+  errors,
+  control,
+  watch,
+  isEdit,
+  isPublic,
+  isSelfEdit,
+}) => {
   const selectedDistrict = watch("district");
   const batchYears = Array.from({ length: 25 }, (_, i) =>
     (new Date().getFullYear() - i).toString(),
@@ -210,7 +218,7 @@ const AlumniSection = ({ register, errors, control, watch, isEdit, isPublic }) =
         />
       </div>
 
-      {!isPublic && (
+      {!isPublic && !isSelfEdit && (
         <div className="space-y-1">
           <Controller
             name="status"
@@ -230,7 +238,9 @@ const AlumniSection = ({ register, errors, control, watch, isEdit, isPublic }) =
                 isInvalid={!!errors.status}
                 errorMessage={errors.status?.message}
                 selectedKeys={field.value ? [field.value] : []}
-                onSelectionChange={(keys) => field.onChange(Array.from(keys)[0])}
+                onSelectionChange={(keys) =>
+                  field.onChange(Array.from(keys)[0])
+                }
               >
                 <SelectItem key="Active" textValue="Active">
                   Active

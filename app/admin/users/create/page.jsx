@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import UserForm from "@/components/admin/UserForm";
-import { Users } from "lucide-react";
+import { UserPlus, Users } from "lucide-react";
 import { addToast } from "@heroui/toast";
 
 export default function CreateUserPage() {
@@ -43,7 +43,7 @@ export default function CreateUserPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <div className="p-2 bg-primary/10 rounded-lg text-primary">
-          <Users size={25} />
+          <UserPlus size={25} />
         </div>
         <div>
           <h2 className="text-lg font-body! font-bold text-slate-900 dark:text-white">
