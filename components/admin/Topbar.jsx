@@ -115,31 +115,38 @@ const Topbar = ({ onMenuClick }) => {
 
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2 ml-2 pl-4">
-          <CustomTooltip content="Registration QR">
-            <button
-              onClick={() => setShowQRModal(true)}
-              className="p-2 text-slate-600 dark:text-slate-400 hover:text-primary transition-colors"
-            >
-              <QrCode size={22} />
-            </button>
-          </CustomTooltip>
+          {/* These items are hidden on mobile, shown in bottom nav instead */}
+          <div className="hidden md:block">
+            <CustomTooltip content="Registration QR">
+              <button
+                onClick={() => setShowQRModal(true)}
+                className="p-2 text-slate-600 dark:text-slate-400 hover:text-primary transition-colors"
+              >
+                <QrCode size={22} />
+              </button>
+            </CustomTooltip>
+          </div>
 
-          <CustomTooltip content="Visit Site">
-            <button
-              onClick={() => router.push("/")}
-              className="p-2 text-slate-600 dark:text-slate-400 hover:text-primary transition-colors"
-            >
-              <Globe size={22} />
-            </button>
-          </CustomTooltip>
+          <div className="hidden md:block">
+            <CustomTooltip content="Visit Site">
+              <button
+                onClick={() => router.push("/")}
+                className="p-2 text-slate-600 dark:text-slate-400 hover:text-primary transition-colors"
+              >
+                <Globe size={22} />
+              </button>
+            </CustomTooltip>
+          </div>
 
-          <CustomTooltip content="Theme Switch">
-            <div>
-              <ThemeToggle />
-            </div>
-          </CustomTooltip>
+          <div className="hidden md:block">
+            <CustomTooltip content="Theme Switch">
+              <div>
+                <ThemeToggle />
+              </div>
+            </CustomTooltip>
+          </div>
 
-          <div className="relative" ref={notifRef}>
+          <div className="relative hidden md:block" ref={notifRef}>
             <CustomTooltip content="Notifications">
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
@@ -229,6 +236,56 @@ const Topbar = ({ onMenuClick }) => {
         isOpen={showQRModal}
         onClose={() => setShowQRModal(false)}
       />
+
+      {/* Mobile Bottom Navigation Bar */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface-light dark:bg-surface-dark border-t border-slate-200 dark:border-slate-800 shadow-[0_-2px_10px_rgba(0,0,0,0.08)]">
+        <div className="flex items-center justify-around h-16 px-2">
+          <button
+            onClick={() => setShowQRModal(true)}
+            className="flex flex-col items-center justify-center gap-1 p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-primary transition-colors"
+          >
+            <QrCode size={22} />
+            <span className="text-[10px] font-semibold">QR Code</span>
+          </button>
+
+          <button
+            onClick={() => router.push("/")}
+            className="flex flex-col items-center justify-center gap-1 p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-primary transition-colors"
+          >
+            <Globe size={22} />
+            <span className="text-[10px] font-semibold">Visit Site</span>
+          </button>
+
+          <div className="flex flex-col items-center justify-center gap-1 p-2 rounded-lg text-slate-500 dark:text-slate-400">
+            <ThemeToggle />
+            <span className="text-[10px] font-semibold">Theme</span>
+          </div>
+
+          <div className="relative" ref={notifRef}>
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="flex flex-col items-center justify-center gap-1 p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-primary transition-colors relative"
+            >
+              <div className="relative">
+                <Bell size={22} />
+                {notifCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 rounded-full border-2 border-surface-light dark:border-surface-dark flex items-center justify-center">
+                    <span className="text-[9px] font-bold text-white leading-none">
+                      {notifCount > 9 ? "9+" : notifCount}
+                    </span>
+                  </span>
+                )}
+              </div>
+              <span className="text-[10px] font-semibold">Alerts</span>
+            </button>
+            {showNotifications && (
+              <div className="absolute bottom-full right-0 mb-2">
+                <NotificationsPanel onClose={() => setShowNotifications(false)} />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </header>
   );
 };
