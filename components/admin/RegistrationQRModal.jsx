@@ -1,12 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-} from "@heroui/modal";
+import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
 import { Button } from "@heroui/button";
 import { QRCodeSVG } from "qrcode.react";
 import { Copy, Check, CircleX } from "lucide-react";

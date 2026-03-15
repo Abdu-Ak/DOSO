@@ -11,8 +11,8 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  School,
 } from "lucide-react";
+import Logo from "../Logo";
 import { signOut } from "next-auth/react";
 import CustomTooltip from "./ui/CustomTooltip";
 const SidebarItem = ({ icon: Icon, label, href, active, collapsed }) => {
@@ -76,9 +76,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
         <div
           className={`flex items-center gap-3 overflow-hidden whitespace-nowrap ${collapsed ? "justify-center" : ""}`}
         >
-          <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0 border border-primary/20">
-            <School className="text-primary" size={24} />
-          </div>
+          <Logo imgClassName="w-10 h-10" />
           {!collapsed && (
             <span className="text-xl font-body! font-bold text-slate-900 dark:text-white tracking-tight">
               Admin<span className="text-primary">Panel</span>
