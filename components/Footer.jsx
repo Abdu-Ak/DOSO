@@ -1,4 +1,4 @@
-import React from "react";
+import Logo from "./Logo";
 
 const Footer = () => {
   return (
@@ -10,8 +10,8 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 mb-12">
           {/* Brand Info */}
           <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-2 text-white mb-2">
-              <span className="material-symbols-outlined text-3xl">mosque</span>
+            <div className="flex items-center gap-3 text-white mb-2">
+              <Logo imgClassName="w-10 h-10" />
               <h3 className="text-xl font-bold">Darul Hidaya Dars</h3>
             </div>
             <p className="text-sm leading-relaxed font-body">

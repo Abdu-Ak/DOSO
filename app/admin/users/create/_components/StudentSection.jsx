@@ -40,7 +40,15 @@ const KERALA_DISTRICTS = [
   "Other",
 ];
 
-const StudentSection = ({ register, errors, control, watch, isEdit, isPublic }) => {
+const StudentSection = ({
+  register,
+  errors,
+  control,
+  watch,
+  isEdit,
+  isPublic,
+  isSelfEdit,
+}) => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isAdmissionCalendarOpen, setIsAdmissionCalendarOpen] = useState(false);
   const selectedDistrict = watch("district");
@@ -250,7 +258,7 @@ const StudentSection = ({ register, errors, control, watch, isEdit, isPublic }) 
               isInvalid={!!errors.guardian_relation}
               errorMessage={errors.guardian_relation?.message}
             >
-              <div className="flex gap-4">
+              <div className="flex flex-wrap gap-x-6 gap-y-3">
                 <Radio value="Father">Father</Radio>
                 <Radio value="Mother">Mother</Radio>
                 <Radio value="Other">Other</Radio>
@@ -319,7 +327,7 @@ const StudentSection = ({ register, errors, control, watch, isEdit, isPublic }) 
         />
       </div>
 
-      {!isPublic && (
+      {!isPublic && !isSelfEdit && (
         <div className="space-y-1">
           <Controller
             name="status"
@@ -339,7 +347,9 @@ const StudentSection = ({ register, errors, control, watch, isEdit, isPublic }) 
                 isInvalid={!!errors.status}
                 errorMessage={errors.status?.message}
                 selectedKeys={field.value ? [field.value] : []}
-                onSelectionChange={(keys) => field.onChange(Array.from(keys)[0])}
+                onSelectionChange={(keys) =>
+                  field.onChange(Array.from(keys)[0])
+                }
               >
                 <SelectItem key="Active" textValue="Active">
                   Active

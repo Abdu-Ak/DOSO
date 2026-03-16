@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useParams } from "next/navigation";
 import axios from "axios";
 import UserForm from "@/components/admin/UserForm";
-import { Users, Loader2, AlertCircle } from "lucide-react";
+import { Users, Loader2, AlertCircle, UserPen } from "lucide-react";
 import { addToast } from "@heroui/toast";
 import { Button } from "@heroui/button";
 import { canManageUser } from "@/lib/permissions";
@@ -88,7 +88,7 @@ export default function EditUserPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <div className="p-2 bg-primary/10 rounded-lg text-primary">
-          <Users size={25} />
+          <UserPen size={25} />
         </div>
         <div>
           <h2 className="text-lg font-body! font-bold text-slate-900 dark:text-white">

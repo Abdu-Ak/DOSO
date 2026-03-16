@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { School, Menu, X } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
+import Logo from "./Logo";
 
 const NAV_ITEMS = [
   { label: "Home", href: "/" },
@@ -29,9 +30,7 @@ const Header = () => {
         <div className="flex justify-between h-20 items-center">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 shrink-0">
-            <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-              <School className="text-primary" size={24} />
-            </div>
+            <Logo imgClassName="w-10 h-10" />
             <span className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
               Darul Hidaya<span className="text-primary">Dars</span>
             </span>

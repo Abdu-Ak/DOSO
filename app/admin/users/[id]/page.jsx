@@ -26,6 +26,7 @@ import {
   MailboxIcon,
   ScrollText,
   ChevronDown,
+  UserPen,
 } from "lucide-react";
 import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/card";
@@ -204,7 +205,7 @@ export default function UserDetailPage() {
               as={Link}
               href={`/admin/users/${id}/edit`}
               color="primary"
-              startContent={<Edit2 size={18} />}
+              startContent={<UserPen size={18} />}
               className="font-bold shadow-lg shadow-primary/20"
               radius="xl"
             >

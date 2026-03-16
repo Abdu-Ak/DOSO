@@ -6,7 +6,7 @@ import { Controller } from "react-hook-form";
 import { User as UserIcon, Mail, Lock, Phone, ShieldCheck } from "lucide-react";
 import InputField from "@/components/admin/ui/InputField";
 
-const AdminSection = ({ register, errors, control, isEdit }) => {
+const AdminSection = ({ register, errors, control, isEdit, isSelfEdit }) => {
   return (
     <>
       <InputField
@@ -52,40 +52,44 @@ const AdminSection = ({ register, errors, control, isEdit }) => {
         error={errors.phone}
       />
 
-      <div className="space-y-1">
-        <Controller
-          name="status"
-          control={control}
-          render={({ field }) => (
-            <Select
-              {...field}
-              label={
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Status <span className="text-red-500">*</span>
-                </span>
-              }
-              labelPlacement="outside"
-              variant="bordered"
-              placeholder="Select status"
-              radius="sm"
-              isInvalid={!!errors.status}
-              errorMessage={errors.status?.message}
-              selectedKeys={field.value ? [field.value] : []}
-              onSelectionChange={(keys) => field.onChange(Array.from(keys)[0])}
-            >
-              <SelectItem key="Active" textValue="Active">
-                Active
-              </SelectItem>
-              <SelectItem key="Pending" textValue="Pending">
-                Pending
-              </SelectItem>
-              <SelectItem key="Inactive" textValue="Inactive">
-                Inactive
-              </SelectItem>
-            </Select>
-          )}
-        />
-      </div>
+      {!isSelfEdit && (
+        <div className="space-y-1">
+          <Controller
+            name="status"
+            control={control}
+            render={({ field }) => (
+              <Select
+                {...field}
+                label={
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    Status <span className="text-red-500">*</span>
+                  </span>
+                }
+                labelPlacement="outside"
+                variant="bordered"
+                placeholder="Select status"
+                radius="sm"
+                isInvalid={!!errors.status}
+                errorMessage={errors.status?.message}
+                selectedKeys={field.value ? [field.value] : []}
+                onSelectionChange={(keys) =>
+                  field.onChange(Array.from(keys)[0])
+                }
+              >
+                <SelectItem key="Active" textValue="Active">
+                  Active
+                </SelectItem>
+                <SelectItem key="Pending" textValue="Pending">
+                  Pending
+                </SelectItem>
+                <SelectItem key="Inactive" textValue="Inactive">
+                  Inactive
+                </SelectItem>
+              </Select>
+            )}
+          />
+        </div>
+      )}
     </>
   );
 };
