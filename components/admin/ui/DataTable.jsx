@@ -116,7 +116,7 @@ const DataTable = ({
         bottomContentPlacement="inside"
         classNames={{
           wrapper:
-            "bg-surface-light dark:bg-surface-dark border-slate-200 dark:border-slate-800 shadow-sm rounded-2xl p-0",
+            "bg-surface-light dark:bg-surface-dark border-slate-200 dark:border-slate-800 shadow-sm p-0",
           th: "bg-slate-50 dark:bg-slate-900/50 text-slate-500 font-bold text-xs uppercase tracking-wider h-14 px-6",
           td: "py-4 px-6",
           ...classNames,

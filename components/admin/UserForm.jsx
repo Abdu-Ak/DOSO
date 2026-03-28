@@ -82,10 +82,13 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
   const isSelfEdit = isEdit && currentUser?._id === initialData?._id;
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-8">
+    <form
+      onSubmit={handleSubmit(onFormSubmit)}
+      className=" space-y-4 md:space-y-8"
+    >
       <Card className="bg-surface-light dark:bg-surface-dark border-slate-200 dark:border-slate-800 shadow-sm overflow-visible">
-        <CardBody className="p-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        <CardBody className="p-4 md:p-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Header / Image */}
             {selectedRole !== "admin" && (
               <div className="flex flex-col items-center justify-center col-span-1 md:col-span-2 space-y-4 pb-6 border-b border-slate-100 dark:border-slate-800">
@@ -156,7 +159,7 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
                     orientation="horizontal"
                     isDisabled={isSelfEdit}
                   >
-                    <div className="flex flex-wrap gap-x-6 gap-y-3">
+                    <div className="flex flex-wrap gap-x-3 md:gap-x-6 gap-y-3">
                       {currentUser?.role === "super_admin" && (
                         <Radio value="super_admin">Super Admin</Radio>
                       )}
@@ -208,12 +211,12 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
             )}
           </div>
 
-          <div className="mt-10 flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
+          <div className="mt-10 flex justify-between md:justify-end gap-2 md:gap-6">
             <Button
               type="button"
               variant="light"
               onPress={() => router.push("/admin/users")}
-              className="w-full sm:w-auto font-bold text-slate-600 dark:text-slate-400 h-11"
+              className="w-fit sm:w-auto font-bold text-slate-600 dark:text-slate-400 h-11"
             >
               Cancel
             </Button>
@@ -222,10 +225,10 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
               color="primary"
               isLoading={loading}
               startContent={!loading && <Save size={18} />}
-              className="w-full sm:w-auto px-8 font-bold shadow-lg h-11"
+              className="w-fit sm:w-auto font-bold shadow-lg h-11"
               radius="lg"
             >
-              {isEdit ? "Update User" : "Create User"}
+              {isEdit ? "Update user" : "Create user"}
             </Button>
           </div>
         </CardBody>

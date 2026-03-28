@@ -188,16 +188,16 @@ export default function UserDetailPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 md:px-0 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="max-w-6xl mx-auto space-y-4 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Top Navigation */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-4">
         <Button
           variant="light"
           onPress={() => (isOwnProfile ? router.push("/admin") : router.back())}
           startContent={<ArrowLeft size={18} />}
-          className="font-bold text-slate-500 hover:text-primary pl-0"
+          className="flex font-bold text-slate-500 hover:text-primary pl-0"
         >
-          {isOwnProfile ? "Back to Dashboard" : "Back to User Management"}
+          {isOwnProfile ? "Back to dashboard" : "Back to users"}
         </Button>
         <div className="flex items-center gap-3">
           {canManageUser(currentUser, user, "edit") && (
@@ -209,7 +209,7 @@ export default function UserDetailPage() {
               className="font-bold shadow-lg shadow-primary/20"
               radius="xl"
             >
-              Edit Profile
+              Edit
             </Button>
           )}
         </div>

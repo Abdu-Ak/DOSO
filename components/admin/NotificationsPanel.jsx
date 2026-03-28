@@ -87,19 +87,26 @@ const NotificationsPanel = ({ onClose }) => {
   const notifications = data?.notifications || [];
 
   return (
-    <div className="absolute right-0 top-full mt-2 w-96 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden">
+    <div className="absolute right-[-60px] xs:right-0 top-full mt-2 w-[calc(100vw-32px)] sm:w-80 md:w-96 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden">
       <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
         <h3 className="font-bold text-sm text-slate-800 dark:text-white">
           Pending Registrations
         </h3>
-        <Chip size="sm" color="warning" variant="flat" className="font-bold text-[10px]">
+        <Chip
+          size="sm"
+          color="warning"
+          variant="flat"
+          className="font-bold text-[10px]"
+        >
           {notifications.length}
         </Chip>
       </div>
 
       <div className="max-h-96 overflow-y-auto">
         {isLoading ? (
-          <div className="p-8 text-center text-sm text-slate-400">Loading...</div>
+          <div className="p-8 text-center text-sm text-slate-400">
+            Loading...
+          </div>
         ) : notifications.length === 0 ? (
           <div className="p-8 text-center text-sm text-slate-400">
             No pending registrations
@@ -113,7 +120,11 @@ const NotificationsPanel = ({ onClose }) => {
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden shrink-0">
                   {user.image ? (
-                    <img src={user.image} alt={user.name} className="w-full h-full object-cover" />
+                    <img
+                      src={user.image}
+                      alt={user.name}
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
                     <span className="text-primary font-bold text-sm">
                       {user.name?.charAt(0)}
@@ -125,7 +136,12 @@ const NotificationsPanel = ({ onClose }) => {
                     {user.name}
                   </p>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <Chip size="sm" color="primary" variant="flat" className="capitalize text-[10px] font-bold">
+                    <Chip
+                      size="sm"
+                      color="primary"
+                      variant="flat"
+                      className="capitalize text-[10px] font-bold"
+                    >
                       {user.role}
                     </Chip>
                     <span className="text-[10px] text-slate-400 flex items-center gap-1">
@@ -153,7 +169,10 @@ const NotificationsPanel = ({ onClose }) => {
                       className="font-bold flex-1"
                       isLoading={rejectMutation.isPending}
                       onPress={() =>
-                        rejectMutation.mutate({ id: user._id, reason: rejectReason })
+                        rejectMutation.mutate({
+                          id: user._id,
+                          reason: rejectReason,
+                        })
                       }
                     >
                       Confirm Reject
