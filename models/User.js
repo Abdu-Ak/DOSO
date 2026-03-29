@@ -38,10 +38,17 @@ const UserSchema = new mongoose.Schema(
     },
 
     // Alumni specific fields
+    house_name: String,
+    father_name: String,
+    address: String,
+    district: String,
+    custom_district: String,
     post_office: String,
     pincode: String,
     batch: String,
     education: String,
+    current_job: String,
+    custom_job: String,
 
     // Public registration fields
     source: {

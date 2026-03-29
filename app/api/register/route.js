@@ -178,6 +178,9 @@ export async function POST(request) {
       userFields.pincode = data.get("pincode");
       userFields.batch = data.get("batch");
       userFields.education = data.get("education");
+      userFields.dob = data.get("dob") ? new Date(data.get("dob")) : undefined;
+      userFields.current_job = data.get("current_job");
+      userFields.custom_job = data.get("custom_job");
 
       const districtForId =
         data.get("district") === "Other"

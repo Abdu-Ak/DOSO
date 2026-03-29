@@ -47,10 +47,17 @@ export async function PUT(request, { params }) {
     const imageFile = data.get("image");
 
     // Alumni fields
+    const house_name = data.get("house_name");
+    const father_name = data.get("father_name");
+    const address = data.get("address");
+    const district = data.get("district");
+    const custom_district = data.get("custom_district");
     const post_office = data.get("post_office");
     const pincode = data.get("pincode");
     const batch = data.get("batch");
     const education = data.get("education");
+    const current_job = data.get("current_job");
+    const custom_job = data.get("custom_job");
 
     // Check if new email/userId is taken by another user
     const existingUser = await User.findOne({
@@ -74,10 +81,17 @@ export async function PUT(request, { params }) {
       dob: dob ? new Date(dob) : null,
       status,
       // alumni fields
+      house_name,
+      father_name,
+      address,
+      district,
+      custom_district,
       post_office,
       pincode,
       batch,
       education,
+      current_job,
+      custom_job,
     };
 
     if (password) {

@@ -160,7 +160,7 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
                     isDisabled={isSelfEdit}
                   >
                     <div className="flex flex-wrap gap-x-3 md:gap-x-6 gap-y-3">
-                      {currentUser?.role === "super_admin" && (
+                      {initialData?.role === "super_admin" && (
                         <Radio value="super_admin">Super Admin</Radio>
                       )}
                       <Radio value="admin">Admin</Radio>

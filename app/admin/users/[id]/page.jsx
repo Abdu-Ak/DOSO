@@ -404,6 +404,15 @@ export default function UserDetailPage() {
                         label="Batch"
                         value={user.batch}
                       />
+                      <DetailItem
+                        icon={Briefcase}
+                        label="Current Job"
+                        value={
+                          user.current_job === "Other"
+                            ? user.custom_job
+                            : user.current_job
+                        }
+                      />
                     </>
                   )}
                 </div>
