@@ -1,26 +1,33 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
+import Student from "@/models/Student";
 
 export async function GET() {
   try {
     await dbConnect();
 
     // Get counts
-    const totalUsers = await User.countDocuments({
+    const totalSystemUsers = await User.countDocuments({
       role: { $ne: "super_admin" },
     });
-    const students = await User.countDocuments({ role: "student" });
+    const students = await Student.countDocuments();
+    const totalUsers = totalSystemUsers + students;
+
     const alumni = await User.countDocuments({ role: "alumni" });
     const admins = await User.countDocuments({ role: "admin" });
 
     // New users in last 30 days
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const newUsersLast30Days = await User.countDocuments({
+    const newSystemUsersLast30Days = await User.countDocuments({
       createdAt: { $gte: thirtyDaysAgo },
       role: { $ne: "super_admin" },
     });
+    const newStudentsLast30Days = await Student.countDocuments({
+      createdAt: { $gte: thirtyDaysAgo },
+    });
+    const newUsersLast30Days = newSystemUsersLast30Days + newStudentsLast30Days;
 
     // Calculate growth percentages
     const previousTotal = totalUsers - newUsersLast30Days;

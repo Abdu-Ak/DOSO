@@ -71,7 +71,7 @@ const StudentCard = ({
           <p className="text-sm font-bold text-slate-800 dark:text-white truncate">
             {student.name}
           </p>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             {student.studentId
               ? `@${student.studentId}`
               : student.phone
@@ -80,7 +80,7 @@ const StudentCard = ({
           </p>
           <div className="flex flex-wrap gap-1.5 mt-1.5">
             <Chip
-              className="capitalize font-black text-[9px] tracking-wider"
+              className="capitalize font-black text-xs tracking-wider"
               color={student.source === "public" ? "secondary" : "default"}
               size="sm"
               variant="flat"
@@ -92,7 +92,7 @@ const StudentCard = ({
                 <DropdownTrigger>
                   <Chip
                     as="button"
-                    className="capitalize font-black text-[9px] tracking-wider cursor-pointer"
+                    className="capitalize font-black text-xs tracking-wider cursor-pointer"
                     color={statusColors[student.status] || "default"}
                     size="sm"
                     variant="flat"
@@ -118,7 +118,7 @@ const StudentCard = ({
               </Dropdown>
             ) : (
               <Chip
-                className="capitalize font-black text-[9px] tracking-wider"
+                className="capitalize font-black text-xs tracking-wider"
                 color={statusColors[student.status] || "default"}
                 size="sm"
                 variant="flat"
@@ -131,7 +131,7 @@ const StudentCard = ({
       </div>
 
       {/* Info rows */}
-      <div className="grid grid-cols-1 gap-1.5 text-[11px] text-slate-600 dark:text-slate-400">
+      <div className="grid grid-cols-1 gap-1.5 text-xs text-slate-600 dark:text-slate-400">
         <div className="flex items-center gap-2">
           <Phone size={12} className="shrink-0 text-slate-400" />
           <span>{student.phone || "N/A"}</span>
@@ -183,7 +183,7 @@ const StudentCard = ({
                 size="sm"
                 color="success"
                 variant="flat"
-                className="font-bold flex-1 text-[11px]"
+                className="font-bold flex-1 text-xs"
                 startContent={<UserCheck size={14} />}
                 isLoading={approvePending}
                 onPress={() => onApprove(student._id)}
@@ -194,7 +194,7 @@ const StudentCard = ({
                 size="sm"
                 color="danger"
                 variant="flat"
-                className="font-bold flex-1 text-[11px]"
+                className="font-bold flex-1 text-xs"
                 startContent={<UserX size={14} />}
                 onPress={() => onReject(student)}
               >

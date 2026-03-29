@@ -31,7 +31,7 @@ import UserForm from "@/components/admin/UserForm";
 
 const DetailItem = ({ icon: Icon, label, value, color = "primary" }) => (
   <div className="space-y-1.5 group text-left">
-    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 flex items-center gap-2 mb-1">
+    <p className="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 flex items-center gap-2 mb-1">
       {Icon && <Icon size={12} className={`text-${color}`} />}
       {label}
     </p>
@@ -123,26 +123,26 @@ export default function StudentProfilePage() {
               <h2 className="text-xl font-black text-slate-900 dark:text-white capitalize">
                 {user.name}
               </h2>
-              <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px] mt-2 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
+              <p className="text-slate-500 font-bold uppercase tracking-widest text-xs mt-2 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
                 @{user.userId}
               </p>
 
               <div className="w-full mt-8 space-y-3">
                 <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                  <span className="text-xs font-black uppercase tracking-wider text-slate-400">
                     Status
                   </span>
                   <Chip
                     variant="flat"
                     color={statusColors[user.status]}
                     size="sm"
-                    className="font-black text-[10px] tracking-wider uppercase"
+                    className="font-black text-xs tracking-wider uppercase"
                   >
                     {user.status}
                   </Chip>
                 </div>
                 <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                  <span className="text-xs font-black uppercase tracking-wider text-slate-400">
                     Joined
                   </span>
                   <span className="text-xs font-bold">

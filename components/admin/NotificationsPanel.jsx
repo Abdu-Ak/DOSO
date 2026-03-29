@@ -96,7 +96,7 @@ const NotificationsPanel = ({ onClose }) => {
           size="sm"
           color="warning"
           variant="flat"
-          className="font-bold text-[10px]"
+          className="font-bold text-xs"
         >
           {notifications.length}
         </Chip>
@@ -140,11 +140,11 @@ const NotificationsPanel = ({ onClose }) => {
                       size="sm"
                       color="primary"
                       variant="flat"
-                      className="capitalize text-[10px] font-bold"
+                      className="capitalize text-xs font-bold"
                     >
                       {user.role}
                     </Chip>
-                    <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                    <span className="text-xs text-slate-400 flex items-center gap-1">
                       <Clock size={10} /> {timeAgo(user.createdAt)}
                     </span>
                   </div>

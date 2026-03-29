@@ -160,7 +160,7 @@ const Topbar = ({ onMenuClick }) => {
                 <Bell size={22} />
                 {notifCount > 0 && (
                   <span className="absolute top-1 right-1 min-w-[18px] h-[18px] bg-red-500 rounded-full border-2 border-surface-light dark:border-surface-dark flex items-center justify-center">
-                    <span className="text-[9px] font-bold text-white leading-none">
+                    <span className="text-xs font-bold text-white leading-none">
                       {notifCount > 9 ? "9+" : notifCount}
                     </span>
                   </span>
@@ -190,7 +190,7 @@ const Topbar = ({ onMenuClick }) => {
                   <p className="text-xs font-bold text-slate-800 dark:text-white truncate max-w-[100px]">
                     {user?.name || "Admin User"}
                   </p>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium capitalize">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium capitalize">
                     {user?.role || "Administrator"}
                   </p>
                 </div>

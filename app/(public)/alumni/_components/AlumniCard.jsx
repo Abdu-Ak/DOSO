@@ -64,7 +64,7 @@ export default function AlumniCard({
           <div
             className={`mt-3 flex items-center justify-center gap-1 text-xs font-medium ${occupationColorClasses[occupationColor]} py-1 px-2 rounded-full mx-auto w-fit`}
           >
-            <span className="material-symbols-outlined text-[14px]">work</span>
+            <span className="material-symbols-outlined text-sm">work</span>
             <span>{occupation}</span>
           </div>
 

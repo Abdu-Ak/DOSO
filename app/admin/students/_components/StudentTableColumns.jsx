@@ -129,7 +129,7 @@ export function getStudentColumns({
         const value = info.getValue();
         return (
           <Chip
-            className="capitalize font-black text-[10px] tracking-wider"
+            className="capitalize font-black text-xs tracking-wider"
             color={value === "public" ? "secondary" : "default"}
             size="sm"
             variant="flat"
@@ -143,7 +143,7 @@ export function getStudentColumns({
       header: "Phone",
       accessorKey: "phone",
       cell: (info) => (
-        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+        <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
           {info.getValue() || "N/A"}
         </span>
       ),
@@ -165,7 +165,7 @@ export function getStudentColumns({
               Joined: {created}
             </span>
             {admission && (
-              <span className="text-[10px] text-primary font-medium">
+              <span className="text-xs text-primary font-medium">
                 Adm: {admission}
               </span>
             )}
@@ -195,7 +195,7 @@ export function getStudentColumns({
         if (!showActions) {
           return (
             <Chip
-              className="capitalize font-black text-[10px] tracking-wider"
+              className="capitalize font-black text-xs tracking-wider"
               color={STATUS_COLORS[status] || "default"}
               size="sm"
               variant="flat"
@@ -213,7 +213,7 @@ export function getStudentColumns({
         if (availableStatuses.length === 0) {
           return (
             <Chip
-              className="capitalize font-black text-[10px] tracking-wider"
+              className="capitalize font-black text-xs tracking-wider"
               color={STATUS_COLORS[status] || "default"}
               size="sm"
               variant="flat"
@@ -228,7 +228,7 @@ export function getStudentColumns({
             <DropdownTrigger>
               <Chip
                 as="button"
-                className="capitalize font-black text-[10px] tracking-wider cursor-pointer hover:opacity-80 transition-opacity"
+                className="capitalize font-black text-xs tracking-wider cursor-pointer hover:opacity-80 transition-opacity"
                 color={STATUS_COLORS[status] || "default"}
                 size="sm"
                 variant="flat"

@@ -71,12 +71,12 @@ const UserCard = ({
           <p className="text-sm font-bold text-slate-800 dark:text-white truncate">
             {user.name}
           </p>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             @{user.userId}
           </p>
           <div className="flex flex-wrap gap-1.5 mt-1.5">
             <Chip
-              className="capitalize font-black text-[9px] tracking-wider"
+              className="capitalize font-black text-xs tracking-wider"
               color="primary"
               size="sm"
               variant="flat"
@@ -84,7 +84,7 @@ const UserCard = ({
               {user.role}
             </Chip>
             <Chip
-              className="capitalize font-black text-[9px] tracking-wider"
+              className="capitalize font-black text-xs tracking-wider"
               color={user.source === "public" ? "secondary" : "default"}
               size="sm"
               variant="flat"
@@ -96,7 +96,7 @@ const UserCard = ({
                 <DropdownTrigger>
                   <Chip
                     as="button"
-                    className="capitalize font-black text-[9px] tracking-wider cursor-pointer"
+                    className="capitalize font-black text-xs tracking-wider cursor-pointer"
                     color={statusColors[user.status] || "default"}
                     size="sm"
                     variant="flat"
@@ -122,7 +122,7 @@ const UserCard = ({
               </Dropdown>
             ) : (
               <Chip
-                className="capitalize font-black text-[9px] tracking-wider"
+                className="capitalize font-black text-xs tracking-wider"
                 color={statusColors[user.status] || "default"}
                 size="sm"
                 variant="flat"
@@ -135,7 +135,7 @@ const UserCard = ({
       </div>
 
       {/* Info rows */}
-      <div className="grid grid-cols-1 gap-1.5 text-[11px] text-slate-600 dark:text-slate-400">
+      <div className="grid grid-cols-1 gap-1.5 text-xs text-slate-600 dark:text-slate-400">
         <div className="flex items-center gap-2">
           <Mail size={12} className="shrink-0 text-slate-400" />
           <span className="truncate">{user.email || "N/A"}</span>
@@ -182,7 +182,7 @@ const UserCard = ({
                 size="sm"
                 color="success"
                 variant="flat"
-                className="font-bold flex-1 text-[11px]"
+                className="font-bold flex-1 text-xs"
                 startContent={<UserCheck size={14} />}
                 isLoading={approvePending}
                 onPress={() => onApprove(user._id)}
@@ -193,7 +193,7 @@ const UserCard = ({
                 size="sm"
                 color="danger"
                 variant="flat"
-                className="font-bold flex-1 text-[11px]"
+                className="font-bold flex-1 text-xs"
                 startContent={<UserX size={14} />}
                 onPress={() => onReject(user)}
               >

@@ -170,7 +170,7 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
                 )}
               />
               {isSelfEdit && (
-                <p className="text-[10px] text-slate-500 mt-1 italic">
+                <p className="text-xs text-slate-500 mt-1 italic">
                   You cannot change your own role.
                 </p>
               )}

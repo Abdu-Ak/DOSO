@@ -10,11 +10,11 @@ import { User as UserUI } from "@heroui/user";
 import { Button } from "@heroui/button";
 import DataTable from "@/components/admin/ui/DataTable";
 
-const RecentUsers = () => {
+const RecentStudents = () => {
   const { data, isLoading } = useQuery({
-    queryKey: ["recent-users"],
+    queryKey: ["recent-students"],
     queryFn: async () => {
-      const resp = await axios.get("/api/users?limit=5");
+      const resp = await axios.get("/api/students?limit=5");
       return resp.data;
     },
   });
@@ -22,7 +22,7 @@ const RecentUsers = () => {
   const columns = React.useMemo(
     () => [
       {
-        header: "User",
+        header: "Student",
         accessorKey: "name",
         cell: (info) => (
           <UserUI
@@ -31,30 +31,31 @@ const RecentUsers = () => {
               src: info.row.original.image,
               fallback: info.getValue()?.charAt(0),
             }}
-            description={info.row.original.email}
+            description={
+              info.row.original.studentId ||
+              info.row.original.phone ||
+              "No details"
+            }
             name={info.getValue()}
           />
         ),
       },
       {
-        header: "Role",
-        accessorKey: "role",
+        header: "District",
+        accessorKey: "district",
         cell: (info) => (
-          <Chip
-            className="capitalize font-black text-xs tracking-wider"
-            color="primary"
-            size="sm"
-            variant="flat"
-          >
-            {info.getValue()}
-          </Chip>
+          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+            {info.getValue() === "Other"
+              ? info.row.original.custom_district
+              : info.getValue()}
+          </span>
         ),
       },
       {
         header: "Status",
         accessorKey: "status",
         cell: (info) => {
-          const status = info.getValue();
+          const status = info.getValue() || "Pending";
           const colors = {
             Active: "success",
             Pending: "warning",
@@ -81,7 +82,7 @@ const RecentUsers = () => {
             <Button
               isIconOnly
               as={Link}
-              href={`/admin/users/${info.row.original._id}`}
+              href={`/admin/students/${info.row.original._id}`}
               size="sm"
               variant="light"
               className="text-slate-400 hover:text-primary transition-colors"
@@ -100,23 +101,22 @@ const RecentUsers = () => {
       <div className="p-6 pb-2 flex justify-between items-center border-b border-slate-200 dark:border-slate-800 mb-3">
         <div>
           <h3 className="text-lg font-bold text-slate-800 dark:text-white">
-            Recent Registered Users
+            Recent Registered Students
           </h3>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Overview of the latest users who joined the platform.
+            Overview of the latest students who joined the platform.
           </p>
         </div>
-
         <Link
-          href="/admin/users"
+          href="/admin/students"
           className="text-primary text-sm font-bold hover:underline flex items-center gap-1"
         >
-          View All Users <ArrowUpRight size={16} />
+          View All Students <ArrowUpRight size={16} />
         </Link>
       </div>
 
       <DataTable
-        data={data?.users || []}
+        data={data?.students || []}
         columns={columns}
         isLoading={isLoading}
       />
@@ -124,4 +124,4 @@ const RecentUsers = () => {
   );
 };
 
-export default RecentUsers;
+export default RecentStudents;

@@ -49,7 +49,7 @@ const PlatformActivity = () => {
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 {activity.description}
               </p>
-              <span className="text-[10px] text-slate-400 font-medium mt-2 block tracking-wider uppercase">
+              <span className="text-xs text-slate-400 font-medium mt-2 block tracking-wider uppercase">
                 {activity.time}
               </span>
             </div>

@@ -24,8 +24,8 @@ const StatCard = ({
   }
 
   return (
-    <div className="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all group">
-      <div className="flex justify-between items-start mb-4">
+    <div className="bg-surface-light dark:bg-surface-dark p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all group">
+      <div className="flex justify-between items-start mb-3">
         <div
           className={`p-3 rounded-xl ${bgColor} transition-all duration-300 group-hover:scale-110`}
         >
