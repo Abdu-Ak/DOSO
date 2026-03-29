@@ -153,32 +153,6 @@ export async function POST(request) {
       }
       userFields.name = data.get("name");
       userFields.userId = userId;
-    } else if (role === "student") {
-      userFields.madrasa_name = data.get("madrasa_name");
-      userFields.name = data.get("name");
-      userFields.house_name = data.get("house_name");
-      userFields.address = data.get("address");
-      userFields.district = data.get("district");
-      userFields.custom_district = data.get("custom_district");
-      userFields.dob = data.get("dob") ? new Date(data.get("dob")) : null;
-      userFields.father_name = data.get("father_name");
-      userFields.guardian_name = data.get("guardian_name");
-      userFields.guardian_phone = data.get("guardian_phone");
-      userFields.guardian_relation = data.get("guardian_relation");
-      userFields.guardian_occupation = data.get("guardian_occupation");
-      userFields.date_of_admission = data.get("date_of_admission")
-        ? new Date(data.get("date_of_admission"))
-        : null;
-
-      const districtForId =
-        data.get("district") === "Other"
-          ? data.get("custom_district")
-          : data.get("district");
-      userFields.userId = await generateUserId(
-        role,
-        districtForId,
-        userFields.date_of_admission || new Date(),
-      );
     } else if (role === "alumni") {
       userFields.name = data.get("name");
       userFields.house_name = data.get("house_name");

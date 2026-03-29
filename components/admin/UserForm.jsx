@@ -7,7 +7,6 @@ import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/card";
 import { RadioGroup, Radio } from "@heroui/radio";
 import AdminSection from "@/app/admin/users/create/_components/AdminSection";
-import StudentSection from "@/app/admin/users/create/_components/StudentSection";
 import AlumniSection from "@/app/admin/users/create/_components/AlumniSection";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -31,7 +30,7 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
     resolver: zodResolver(userSchema),
     defaultValues: {
       ...initialData,
-      role: initialData?.role || "student",
+      role: initialData?.role || "alumni",
       status: initialData?.status || "Active",
       district: initialData?.district || "Malappuram",
       guardian_relation: initialData?.guardian_relation || "Father",
@@ -90,7 +89,7 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
         <CardBody className="p-4 md:p-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Header / Image */}
-            {selectedRole !== "admin" && (
+            {selectedRole !== "admin" && selectedRole !== "super_admin" && (
               <div className="flex flex-col items-center justify-center col-span-1 md:col-span-2 space-y-4 pb-6 border-b border-slate-100 dark:border-slate-800">
                 {/* Image Upload at Top */}
                 <div className="relative group">
@@ -141,6 +140,7 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
             )}
 
             {/* Role Selection as Radio below image */}
+
             <div className="col-span-1 md:col-span-2 w-full">
               <Controller
                 name="role"
@@ -165,7 +165,6 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
                       )}
                       <Radio value="admin">Admin</Radio>
                       <Radio value="alumni">Alumni</Radio>
-                      <Radio value="student">Student</Radio>
                     </div>
                   </RadioGroup>
                 )}
@@ -183,17 +182,6 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
                 register={register}
                 errors={errors}
                 control={control}
-                isEdit={isEdit}
-                isSelfEdit={isSelfEdit}
-              />
-            )}
-
-            {selectedRole === "student" && (
-              <StudentSection
-                register={register}
-                errors={errors}
-                control={control}
-                watch={watch}
                 isEdit={isEdit}
                 isSelfEdit={isSelfEdit}
               />

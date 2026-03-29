@@ -15,8 +15,8 @@ const UserSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["super_admin", "admin", "alumni", "student"],
-      default: "student",
+      enum: ["super_admin", "admin", "alumni"],
+      default: "alumni",
     },
     name: {
       type: String,
@@ -36,18 +36,6 @@ const UserSchema = new mongoose.Schema(
       enum: ["Active", "Pending", "Inactive"],
       default: "Active",
     },
-    // Student specific fields
-    madrasa_name: String,
-    house_name: String,
-    address: String,
-    district: String,
-    custom_district: String,
-    father_name: String,
-    guardian_name: String,
-    guardian_phone: String,
-    guardian_relation: String,
-    guardian_occupation: String,
-    date_of_admission: Date,
 
     // Alumni specific fields
     post_office: String,

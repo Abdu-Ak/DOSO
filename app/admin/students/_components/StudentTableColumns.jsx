@@ -29,43 +29,35 @@ const STATUS_COLORS = {
   Inactive: "danger",
 };
 
-export function getUserColumns({
+export function getStudentColumns({
   currentUser,
   handleStatusChange,
   approveMutation,
   onReject,
   onDelete,
-  basePath = "/admin/users",
-  role,
-  entityLabel = "User",
+  basePath = "/admin/students",
 }) {
-  const columns = [
+  return [
     {
-      header: entityLabel,
+      header: "Student",
       accessorKey: "name",
       cell: (info) => {
-        const user = info.row.original;
-        const showActions = canManageUser(currentUser, user);
+        const student = info.row.original;
+        const showActions = canManageUser(currentUser, student);
         const isPendingPublic =
-          user.status === "Pending" && user.source === "public";
+          student.status === "Pending" && student.source === "public";
 
         return (
           <div className="flex items-center justify-between gap-2 group">
             <UserComponent
               avatarProps={{
                 radius: "lg",
-                src: user.image,
-                fallback: user.name.charAt(0),
+                src: student.image,
+                fallback: student.name?.charAt(0),
               }}
-              description={
-                user.studentId || user.userId
-                  ? `@${user.studentId || user.userId}`
-                  : user.phone || ""
-              }
+              description={student.studentId ? `@${student.studentId}` : ""}
               name={info.getValue()}
-            >
-              {user.email}
-            </UserComponent>
+            />
             {showActions && (
               <Dropdown placement="bottom-end">
                 <DropdownTrigger>
@@ -73,11 +65,11 @@ export function getUserColumns({
                     <MoreVertical size={18} className="text-slate-400" />
                   </Button>
                 </DropdownTrigger>
-                <DropdownMenu aria-label="User actions" variant="flat">
+                <DropdownMenu aria-label="Student actions" variant="flat">
                   <DropdownItem
                     key="view"
                     as={Link}
-                    href={`${basePath}/${user._id}`}
+                    href={`${basePath}/${student._id}`}
                     startContent={<Eye size={16} />}
                     className="text-slate-700 dark:text-slate-300"
                   >
@@ -86,21 +78,21 @@ export function getUserColumns({
                   <DropdownItem
                     key="edit"
                     as={Link}
-                    href={`${basePath}/${user._id}/edit`}
+                    href={`${basePath}/${student._id}/edit`}
                     startContent={<UserPen size={16} />}
                     className="text-slate-700 dark:text-slate-300"
                   >
-                    Edit {entityLabel}
+                    Edit Student
                   </DropdownItem>
                   {isPendingPublic && (
                     <DropdownItem
                       key="approve"
                       color="success"
                       startContent={<UserCheck size={16} />}
-                      onPress={() => approveMutation.mutate(user._id)}
+                      onPress={() => approveMutation.mutate(student._id)}
                       className="text-success"
                     >
-                      Approve {entityLabel}
+                      Approve Student
                     </DropdownItem>
                   )}
                   {isPendingPublic && (
@@ -108,20 +100,20 @@ export function getUserColumns({
                       key="reject"
                       color="danger"
                       startContent={<UserX size={16} />}
-                      onPress={() => onReject(user)}
+                      onPress={() => onReject(student)}
                       className="text-danger"
                     >
-                      Reject {entityLabel}
+                      Reject Student
                     </DropdownItem>
                   )}
                   <DropdownItem
                     key="delete"
                     color="danger"
                     startContent={<Trash2 size={16} />}
-                    onPress={() => onDelete(user)}
+                    onPress={() => onDelete(student)}
                     className="text-danger"
                   >
-                    Delete {entityLabel}
+                    Delete Student
                   </DropdownItem>
                 </DropdownMenu>
               </Dropdown>
@@ -130,24 +122,6 @@ export function getUserColumns({
         );
       },
     },
-    ...(role !== "student"
-      ? [
-          {
-            header: "Role",
-            accessorKey: "role",
-            cell: (info) => (
-              <Chip
-                className="capitalize font-black text-[10px] tracking-wider"
-                color="primary"
-                size="sm"
-                variant="flat"
-              >
-                {info.getValue()}
-              </Chip>
-            ),
-          },
-        ]
-      : []),
     {
       header: "Source",
       accessorKey: "source",
@@ -166,38 +140,29 @@ export function getUserColumns({
       },
     },
     {
-      header: "Contact",
-      id: "contact",
-      cell: (info) => {
-        const user = info.row.original;
-        return (
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-              {user.email || "N/A"}
-            </span>
-
-            <span className="text-xs text-slate-500">
-              {user.phone || "N/A"}
-            </span>
-          </div>
-        );
-      },
+      header: "Phone",
+      accessorKey: "phone",
+      cell: (info) => (
+        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+          {info.getValue() || "N/A"}
+        </span>
+      ),
     },
     {
-      header: "Admission/Joined",
-      id: "dates",
+      header: "Admission",
+      id: "admission",
       cell: (info) => {
-        const user = info.row.original;
-        const joined = user.createdAt
-          ? new Date(user.createdAt).toLocaleDateString()
-          : "N/A";
-        const admission = user.date_of_admission
-          ? new Date(user.date_of_admission).toLocaleDateString()
+        const student = info.row.original;
+        const admission = student.date_of_admission
+          ? new Date(student.date_of_admission).toLocaleDateString()
           : null;
+        const created = student.createdAt
+          ? new Date(student.createdAt).toLocaleDateString()
+          : "N/A";
         return (
           <div className="flex flex-col gap-1">
             <span className="text-xs text-slate-600 dark:text-slate-400">
-              Created: {joined}
+              Joined: {created}
             </span>
             {admission && (
               <span className="text-[10px] text-primary font-medium">
@@ -213,30 +178,19 @@ export function getUserColumns({
       accessorKey: "district",
       cell: (info) => (
         <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
-          {info.getValue() || "N/A"}
+          {info.getValue() === "Other"
+            ? info.row.original.custom_district
+            : info.getValue() || "N/A"}
         </span>
       ),
     },
-    ...(role !== "student"
-      ? [
-          {
-            header: "Batch",
-            accessorKey: "batch",
-            cell: (info) => (
-              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
-                {info.getValue() || "N/A"}
-              </span>
-            ),
-          },
-        ]
-      : []),
     {
       header: "Status",
       accessorKey: "status",
       cell: (info) => {
-        const user = info.row.original;
+        const student = info.row.original;
         const status = info.getValue();
-        const showActions = canManageUser(currentUser, user, "status");
+        const showActions = canManageUser(currentUser, student, "status");
 
         if (!showActions) {
           return (
@@ -287,7 +241,7 @@ export function getUserColumns({
             </DropdownTrigger>
             <DropdownMenu
               aria-label="Status actions"
-              onAction={(key) => handleStatusChange(user._id, key)}
+              onAction={(key) => handleStatusChange(student._id, key)}
             >
               {availableStatuses.map((s) => (
                 <DropdownItem
@@ -304,6 +258,4 @@ export function getUserColumns({
       },
     },
   ];
-
-  return columns;
 }

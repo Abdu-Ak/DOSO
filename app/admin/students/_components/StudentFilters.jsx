@@ -2,20 +2,20 @@
 
 import React from "react";
 import Link from "next/link";
-import { UserPlus, Search, Filter } from "lucide-react";
+import { UserPlus, Search, Filter, School, BookOpen } from "lucide-react";
 import { Button } from "@heroui/button";
 import { Select, SelectItem } from "@heroui/select";
 import { Input } from "@heroui/input";
 
-const UserFilters = ({
-  role,
-  setRole,
+const StudentFilters = ({
   status,
   setStatus,
   district,
   setDistrict,
-  batch,
-  setBatch,
+  madrasaClass,
+  setMadrasaClass,
+  schoolClass,
+  setSchoolClass,
   setPage,
   showFilters = true,
   setShowFilters,
@@ -47,7 +47,7 @@ const UserFilters = ({
         <Input
           isClearable
           className="flex-1 lg:max-w-md"
-          placeholder="Search by name, email or user ID..."
+          placeholder="Search students..."
           startContent={<Search size={18} className="text-slate-400" />}
           value={searchTerm}
           onClear={() => onSearchChange("")}
@@ -66,7 +66,7 @@ const UserFilters = ({
         </Button>
         <Button
           as={Link}
-          href="/admin/users/create"
+          href="/admin/students/create"
           isIconOnly
           color="primary"
           className="lg:hidden shadow-lg shadow-primary/20"
@@ -80,28 +80,6 @@ const UserFilters = ({
       <div
         className={`flex flex-wrap items-center gap-3 w-full lg:w-auto ${!showFilters ? "hidden lg:flex" : "flex"}`}
       >
-        <Select
-          className="w-full sm:w-32"
-          placeholder="Role"
-          variant="bordered"
-          radius="lg"
-          selectedKeys={role ? [role] : []}
-          onSelectionChange={(keys) => {
-            setRole(Array.from(keys)[0] || "");
-            setPage(1);
-          }}
-        >
-          <SelectItem key="" value="">
-            All Roles
-          </SelectItem>
-          <SelectItem key="admin" value="admin">
-            Admin
-          </SelectItem>
-          <SelectItem key="alumni" value="alumni">
-            Alumni
-          </SelectItem>
-        </Select>
-
         <Select
           className="w-full sm:w-32"
           placeholder="Status"
@@ -148,40 +126,19 @@ const UserFilters = ({
           ))}
         </Select>
 
-        <Select
-          className="w-full sm:w-32"
-          placeholder="Batch"
-          variant="bordered"
-          radius="lg"
-          selectedKeys={batch ? [batch] : []}
-          onSelectionChange={(keys) => {
-            setBatch(Array.from(keys)[0] || "");
-            setPage(1);
-          }}
-        >
-          <SelectItem key="" value="">
-            All Batches
-          </SelectItem>
-          {Array.from({ length: 11 }, (_, i) => 2020 + i).map((year) => (
-            <SelectItem key={year.toString()} value={year.toString()}>
-              {year}
-            </SelectItem>
-          ))}
-        </Select>
-
         <Button
           as={Link}
-          href="/admin/users/create"
+          href="/admin/students/create"
           color="primary"
           startContent={<UserPlus size={18} />}
           className="hidden lg:flex font-bold shadow-lg shadow-primary/20 w-auto"
           radius="lg"
         >
-          Add User
+          Add Student
         </Button>
       </div>
     </div>
   );
 };
 
-export default UserFilters;
+export default StudentFilters;
