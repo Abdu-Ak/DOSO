@@ -7,6 +7,7 @@ import DataTable from "@/components/admin/ui/DataTable";
 import EventHeader from "./_components/EventHeader";
 import EventFilters from "./_components/EventFilters";
 import MobileEventList from "./_components/MobileEventList";
+import ConfirmModal from "@/components/admin/ui/ConfirmModal";
 import { getEventColumns } from "./_components/EventTableColumns";
 import { useEventMutations } from "./_hooks/useEventMutations";
 
@@ -18,6 +19,10 @@ export default function EventsManagementPage() {
   const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
+
+  // Modal states
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState(null);
 
   // Queries & Mutations
   const { toggleVisibilityMutation, deleteMutation } = useEventMutations();
@@ -55,9 +60,16 @@ export default function EventsManagementPage() {
     await toggleVisibilityMutation.mutateAsync({ id, isVisible });
   };
 
-  const handleDeleteClick = async (event) => {
-    if (window.confirm(`Are you sure you want to delete "${event.title}"?`)) {
-      await deleteMutation.mutateAsync(event._id);
+  const handleDeleteClick = (event) => {
+    setEventToDelete(event);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (eventToDelete) {
+      await deleteMutation.mutateAsync(eventToDelete._id);
+      setIsDeleteModalOpen(false);
+      setEventToDelete(null);
     }
   };
 
@@ -116,6 +128,26 @@ export default function EventsManagementPage() {
         paginationProps={paginationProps}
         onToggleVisibility={handleToggleVisibility}
         onDelete={handleDeleteClick}
+      />
+
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setEventToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+        isLoading={deleteMutation.isPending}
+        title="Delete Event"
+        message={
+          <>
+            <p>
+              Are you sure you want to delete the event &quot;
+              {eventToDelete?.title}&quot;?
+            </p>
+            <p className="mt-1">This action cannot be undone.</p>
+          </>
+        }
       />
     </div>
   );

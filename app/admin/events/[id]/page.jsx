@@ -87,7 +87,7 @@ export default function EventDetailsPage() {
             className="font-bold shadow-lg shadow-primary/20"
             radius="xl"
           >
-            Edit Event
+            Edit
           </Button>
         </div>
       </div>
@@ -166,7 +166,7 @@ export default function EventDetailsPage() {
         <div className="lg:col-span-2 space-y-8">
           {/* Visibility Section */}
           <Card className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm rounded-3xl overflow-visible">
-            <CardBody className="p-6 flex flex-row items-center justify-between">
+            <CardBody className="p-6 flex flex-row gap-3 items-center justify-between">
               <div>
                 <h3 className="text-lg font-black text-slate-900 dark:text-white leading-tight">
                   Public Visibility
@@ -187,7 +187,7 @@ export default function EventDetailsPage() {
           </Card>
 
           {/* Images Gallery */}
-          <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-primary/10 rounded-xl text-primary">
@@ -239,7 +239,7 @@ export default function EventDetailsPage() {
           </div>
 
           {/* Videos Gallery */}
-          <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-secondary/10 rounded-xl text-secondary">

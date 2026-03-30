@@ -98,12 +98,12 @@ const RecentStudents = () => {
 
   return (
     <div className="bg-surface-light dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-      <div className="p-6 pb-2 flex justify-between items-center border-b border-slate-200 dark:border-slate-800 mb-3">
+      <div className="p-6 pb-2 flex flex-col md:flex-row justify-between gap-3 items-end md:items-center border-b border-slate-200 dark:border-slate-800 mb-3">
         <div>
-          <h3 className="text-lg font-bold text-slate-800 dark:text-white">
+          <h3 className="text-lg font-bold text-slate-800 dark:text-white leading-tight">
             Recent Registered Students
           </h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             Overview of the latest students who joined the platform.
           </p>
         </div>
@@ -111,7 +111,7 @@ const RecentStudents = () => {
           href="/admin/students"
           className="text-primary text-sm font-bold hover:underline flex items-center gap-1"
         >
-          View All<ArrowUpRight size={16} />
+          View All <ArrowUpRight size={16} />
         </Link>
       </div>
 

@@ -97,12 +97,12 @@ const RecentUsers = () => {
 
   return (
     <div className="bg-surface-light dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-      <div className="p-6 pb-2 flex justify-between items-center border-b border-slate-200 dark:border-slate-800 mb-3">
+      <div className="p-6 pb-2 flex flex-col md:flex-row justify-between items-end md:items-center gap-3 border-b border-slate-200 dark:border-slate-800 mb-3">
         <div>
-          <h3 className="text-lg font-bold text-slate-800 dark:text-white">
+          <h3 className="text-lg font-bold text-slate-800 dark:text-white leading-tight">
             Recent Registered Users
           </h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             Overview of the latest users who joined the platform.
           </p>
         </div>
