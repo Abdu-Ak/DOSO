@@ -1,6 +1,5 @@
 import React from "react";
 import EventsHero from "./_components/EventsHero";
-import EventsFilter from "./_components/EventsFilter";
 import EventsGrid from "./_components/EventsGrid";
 
 export default function EventsPage() {
@@ -12,7 +11,6 @@ export default function EventsPage() {
       <main className="flex-grow z-10 py-12 px-4 sm:px-6 lg:px-8 relative">
         <div className="max-w-7xl mx-auto">
           <EventsHero />
-          <EventsFilter />
           <EventsGrid />
         </div>
       </main>

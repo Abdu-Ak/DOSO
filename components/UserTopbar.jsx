@@ -69,7 +69,7 @@ const UserTopbar = ({ menus = [] }) => {
                 <p className="text-xs font-bold text-slate-800 dark:text-white truncate max-w-[100px]">
                   {user?.name || "User"}
                 </p>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium capitalize">
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium capitalize">
                   {role}
                 </p>
               </div>

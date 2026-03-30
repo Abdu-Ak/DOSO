@@ -41,7 +41,7 @@ const RecentUsers = () => {
         accessorKey: "role",
         cell: (info) => (
           <Chip
-            className="capitalize font-black text-[10px] tracking-wider"
+            className="capitalize font-black text-xs tracking-wider"
             color="primary"
             size="sm"
             variant="flat"
@@ -62,7 +62,7 @@ const RecentUsers = () => {
           };
           return (
             <Chip
-              className="capitalize font-black text-[10px] tracking-wider"
+              className="capitalize font-black text-xs tracking-wider"
               color={colors[status]}
               size="sm"
               variant="flat"
@@ -96,28 +96,29 @@ const RecentUsers = () => {
   );
 
   return (
-    <div className="bg-surface-light dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden min-h-[400px]">
-      <div className="p-6 pb-2">
-        <h3 className="text-lg font-bold text-slate-800 dark:text-white">
-          Recent Registered Users
-        </h3>
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          Overview of the latest users who joined the platform.
-        </p>
+    <div className="bg-surface-light dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+      <div className="p-6 pb-2 flex flex-col md:flex-row justify-between items-end md:items-center gap-3 border-b border-slate-200 dark:border-slate-800 mb-3">
+        <div>
+          <h3 className="text-lg font-bold text-slate-800 dark:text-white leading-tight">
+            Recent Registered Users
+          </h3>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Overview of the latest users who joined the platform.
+          </p>
+        </div>
+
+        <Link
+          href="/admin/users"
+          className="text-primary text-sm font-bold hover:underline flex items-center gap-1"
+        >
+          View All <ArrowUpRight size={16} />
+        </Link>
       </div>
 
       <DataTable
         data={data?.users || []}
         columns={columns}
         isLoading={isLoading}
-        topContent={
-          <Link
-            href="/admin/users"
-            className="text-primary text-sm font-bold hover:underline flex items-center gap-1"
-          >
-            View All Users <ArrowUpRight size={16} />
-          </Link>
-        }
       />
     </div>
   );

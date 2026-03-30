@@ -116,7 +116,7 @@ const DataTable = ({
         bottomContentPlacement="inside"
         classNames={{
           wrapper:
-            "bg-surface-light dark:bg-surface-dark border-slate-200 dark:border-slate-800 shadow-sm rounded-2xl p-0",
+            "bg-surface-light dark:bg-surface-dark border-slate-200 dark:border-slate-800 shadow-sm p-0 overflow-x-auto",
           th: "bg-slate-50 dark:bg-slate-900/50 text-slate-500 font-bold text-xs uppercase tracking-wider h-14 px-6",
           td: "py-4 px-6",
           ...classNames,
@@ -125,9 +125,10 @@ const DataTable = ({
         topContentPlacement="inside"
       >
         <TableHeader>
-          {table.getHeaderGroups()[0].headers.map((header) => (
+          {table?.getHeaderGroups()?.[0]?.headers?.map((header) => (
             <TableColumn
               key={header.id}
+              id={header.id}
               align={header.column.columnDef.meta?.align || "start"}
             >
               {header.isPlaceholder

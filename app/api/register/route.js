@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
+import Student from "@/models/Student";
 import cloudinary from "@/lib/cloudinary";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
@@ -23,7 +24,31 @@ const DISTRICT_CODES = {
   Other: "OTH",
 };
 
-async function generateUserId(role, district, yearDate) {
+async function generateStudentId(district, yearDate) {
+  const districtCode = DISTRICT_CODES[district] || "OTH";
+  const year = new Date(yearDate).getFullYear();
+  const prefix = `S-${districtCode}-${year}`;
+
+  const lastStudent = await Student.findOne({
+    studentId: new RegExp(`^${prefix}-`),
+  })
+    .sort({ studentId: -1 })
+    .select("studentId");
+
+  let sequence = 1;
+  if (lastStudent && lastStudent.studentId) {
+    const parts = lastStudent.studentId.split("-");
+    const lastSeq = parseInt(parts[3]);
+    if (!isNaN(lastSeq)) {
+      sequence = lastSeq + 1;
+    }
+  }
+
+  const paddedSequence = sequence.toString().padStart(3, "0");
+  return `${prefix}-${paddedSequence}`;
+}
+
+async function generateAlumniId(district, yearDate) {
   const districtCode = DISTRICT_CODES[district] || "OTH";
   const year = new Date(yearDate).getFullYear();
   const prefix = `${districtCode}-${year}`;
@@ -60,47 +85,87 @@ export async function POST(request) {
       );
     }
 
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
-    if (existingUser) {
-      return NextResponse.json(
-        { error: "User with this email already exists" },
-        { status: 400 },
-      );
+    const existingModel = role === "student" ? Student : User;
+    if (email) {
+      const existingEntry = await existingModel.findOne({
+        email: email.toLowerCase(),
+      });
+      if (existingEntry) {
+        return NextResponse.json(
+          {
+            error: `${role.charAt(0).toUpperCase() + role.slice(1)} with this email already exists`,
+          },
+          { status: 400 },
+        );
+      }
     }
 
     let userFields = {
       role,
-      email: email.toLowerCase(),
+      email: email ? email.toLowerCase() : undefined,
       phone: data.get("phone"),
       status: "Pending",
       source: "public",
     };
 
     if (role === "student") {
-      userFields.madrasa_name = data.get("madrasa_name");
-      userFields.name = data.get("name");
-      userFields.house_name = data.get("house_name");
-      userFields.address = data.get("address");
-      userFields.district = data.get("district");
-      userFields.custom_district = data.get("custom_district");
-      userFields.dob = data.get("dob") ? new Date(data.get("dob")) : null;
-      userFields.father_name = data.get("father_name");
-      userFields.guardian_name = data.get("guardian_name");
-      userFields.guardian_phone = data.get("guardian_phone");
-      userFields.guardian_relation = data.get("guardian_relation");
-      userFields.guardian_occupation = data.get("guardian_occupation");
-      userFields.date_of_admission = data.get("date_of_admission")
-        ? new Date(data.get("date_of_admission"))
-        : null;
+      const studentData = {
+        name: data.get("name"),
+        phone: data.get("phone"),
+        dob: new Date(data.get("dob")),
+        status: "Pending",
+        current_madrasa_class: data.get("current_madrasa_class"),
+        current_school_class: data.get("current_school_class"),
+        house_name: data.get("house_name"),
+        address: data.get("address"),
+        district: data.get("district"),
+        custom_district: data.get("custom_district"),
+        father_name: data.get("father_name"),
+        guardian_name: data.get("guardian_name"),
+        guardian_phone: data.get("guardian_phone"),
+        guardian_relation: data.get("guardian_relation"),
+        guardian_occupation: data.get("guardian_occupation"),
+        date_of_admission: new Date(data.get("date_of_admission")),
+        source: "public",
+      };
 
       const districtForId =
         data.get("district") === "Other"
           ? data.get("custom_district")
           : data.get("district");
-      userFields.userId = await generateUserId(
-        role,
+      studentData.studentId = await generateStudentId(
         districtForId,
-        userFields.date_of_admission || new Date(),
+        studentData.date_of_admission || new Date(),
+      );
+
+      // Handle image upload for student
+      let imageData = { url: "", publicId: "" };
+      if (imageFile && imageFile.size > 0) {
+        const arrayBuffer = await imageFile.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const uploadResult = await new Promise((resolve, reject) => {
+          cloudinary.uploader
+            .upload_stream({ folder: "students" }, (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            })
+            .end(buffer);
+        });
+        imageData = {
+          url: uploadResult.secure_url,
+          publicId: uploadResult.public_id,
+        };
+      }
+
+      await Student.create({
+        ...studentData,
+        image: imageData.url,
+        imagePublicId: imageData.publicId,
+      });
+
+      return NextResponse.json(
+        { message: "Registration submitted successfully" },
+        { status: 201 },
       );
     } else if (role === "alumni") {
       userFields.name = data.get("name");
@@ -113,6 +178,9 @@ export async function POST(request) {
       userFields.pincode = data.get("pincode");
       userFields.batch = data.get("batch");
       userFields.education = data.get("education");
+      userFields.dob = data.get("dob") ? new Date(data.get("dob")) : undefined;
+      userFields.current_job = data.get("current_job");
+      userFields.custom_job = data.get("custom_job");
 
       const districtForId =
         data.get("district") === "Other"
@@ -121,7 +189,7 @@ export async function POST(request) {
       const batchYear = data.get("batch")
         ? `${data.get("batch")}-01-01`
         : new Date();
-      userFields.userId = await generateUserId(role, districtForId, batchYear);
+      userFields.userId = await generateAlumniId(districtForId, batchYear);
     }
 
     let imageData = { url: "", publicId: "" };

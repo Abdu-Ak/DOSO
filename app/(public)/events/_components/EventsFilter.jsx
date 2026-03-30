@@ -1,75 +1,111 @@
 "use client";
 
-import { AlignHorizontalDistributeCenter, Calendar, RotateCcw, Search } from "lucide-react";
-import React, { useState } from "react";
+import { Calendar, RotateCcw, Search, X, Filter } from "lucide-react";
+import React from "react";
+import { Input } from "@heroui/input";
+import { Select, SelectItem } from "@heroui/select";
+import { Button } from "@heroui/button";
+import { DateRangePicker } from "@heroui/date-picker";
+import { EVENT_TYPES } from "@/app/admin/events/_components/EventFilters";
 
-
-export default function EventsFilter() {
-  const [year, setYear] = useState("All Years");
-  const [category, setCategory] = useState("All Categories");
-
-  const handleReset = () => {
-    setYear("All Years");
-    setCategory("All Categories");
-  };
-
+export default function EventsFilter({
+  searchTerm,
+  setSearchTerm,
+  category,
+  setCategory,
+  dateRange,
+  setDateRange,
+  showFilters,
+  setShowFilters,
+  onReset,
+  onSearch,
+}) {
   return (
-    <div className="bg-white dark:bg-neutral-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 mb-12 flex flex-col md:flex-row justify-between items-center gap-4 sticky top-24 z-30 transition-shadow hover:shadow-md">
-      <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-        {/* Year Filter */}
-        <div className="relative group w-full sm:w-48">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-focus-within:text-primary transition-colors">
-            <Calendar size={16} />
-          </span>
-          <select
-            className="form-select pl-10 pr-10 py-2.5 w-full rounded-lg border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:border-primary focus:ring-primary text-sm font-medium shadow-sm transition-all cursor-pointer"
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-          >
-            <option>All Years</option>
-            <option>2024</option>
-            <option>2023</option>
-            <option>2022</option>
-          </select>
-          <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">
-            expand_more
-          </span>
+    <div className="bg-white dark:bg-neutral-dark rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 md:p-6 mb-12 flex flex-col gap-6 sticky top-24 z-30 transition-shadow hover:shadow-md">
+      {/* Mobile Header with Toggle */}
+      <div className="flex items-center gap-3 md:hidden">
+        <div className="flex-1 relative">
+          <Input
+            placeholder="Search events..."
+            value={searchTerm}
+            onValueChange={setSearchTerm}
+            startContent={<Search className="text-slate-400" size={16} />}
+            variant="bordered"
+            isClearable
+            className="w-full"
+          />
+        </div>
+        <Button
+          isIconOnly
+          variant={showFilters ? "solid" : "flat"}
+          color={showFilters ? "primary" : "default"}
+          onPress={() => setShowFilters(!showFilters)}
+          radius="lg"
+          size="sm"
+        >
+          {showFilters ? <X size={18} /> : <Filter size={18} />}
+        </Button>
+      </div>
+
+      {/* Filter Grid (Collapsible on mobile) */}
+      <div
+        className={`${!showFilters ? "hidden md:grid" : "grid"} grid-cols-1 md:grid-cols-12 gap-4 items-end`}
+      >
+        {/* Desktop Search Bar (Hidden on mobile as it's in the header) */}
+        <div className="hidden md:block md:col-span-4">
+          <Input
+            label="Find Event"
+            placeholder="Search by title or location..."
+            value={searchTerm}
+            onValueChange={setSearchTerm}
+            startContent={<Search className="text-slate-400" size={18} />}
+            variant="bordered"
+            isClearable
+            className="w-full"
+          />
         </div>
 
         {/* Category Filter */}
-        <div className="relative group w-full sm:w-48">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-focus-within:text-primary transition-colors">
-            <AlignHorizontalDistributeCenter size={16} />
-          </span>
-          <select
-            className="form-select pl-10 pr-10 py-2.5 w-full rounded-lg border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:border-primary focus:ring-primary text-sm font-medium shadow-sm transition-all cursor-pointer"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
+        <div className="md:col-span-3">
+          <Select
+            label="Category"
+            placeholder="All"
+            variant="bordered"
+            selectedKeys={category ? [category] : []}
+            onSelectionChange={(keys) => setCategory([...keys][0] || "")}
           >
-            <option>All Categories</option>
-            <option>Academic</option>
-            <option>Cultural</option>
-            <option>Religious</option>
-            <option>Sports</option>
-          </select>
-          <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">
-            expand_more
-          </span>
+            {EVENT_TYPES.map((t) => (
+              <SelectItem key={t} value={t}>
+                {t}
+              </SelectItem>
+            ))}
+          </Select>
         </div>
-      </div>
 
-      <div className="flex gap-3 w-full md:w-auto justify-end">
-        <button
-          onClick={handleReset}
-          className="px-5 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-2"
-        >
-          <RotateCcw size={16} />
-          Reset
-        </button>
-        <button className="px-6 py-2.5 bg-primary hover:bg-primary-dark text-white text-sm font-semibold rounded-lg shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all flex items-center gap-2">
-          <Search size={16} />
-          Find Events
-        </button>
+        {/* Date Range Picker */}
+        <div className="md:col-span-3">
+          <DateRangePicker
+            label="Event Dates"
+            variant="bordered"
+            value={dateRange}
+            onChange={setDateRange}
+            className="w-full"
+          />
+        </div>
+
+        {/* Reset Button */}
+        <div className="md:col-span-2 flex items-center justify-start md:justify-end">
+          <Button
+            variant="light"
+            color="default"
+            startContent={<RotateCcw size={16} />}
+            onPress={onReset}
+            size="sm"
+            className="font-medium bg-slate-100 dark:bg-slate-300 w-fit"
+          >
+            Reset Filters
+          </Button>
+        </div>
       </div>
     </div>
   );

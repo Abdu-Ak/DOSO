@@ -24,19 +24,12 @@ const MobileUserList = ({
 }) => {
   return (
     <div className="lg:hidden space-y-4">
-      <div className="bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-800 rounded-2xl p-4 space-y-4 shadow-sm">
-        <Input
-          isClearable
-          className="w-full"
-          placeholder="Search by name, email or user ID..."
-          startContent={<Search size={18} className="text-slate-400" />}
-          value={searchTerm}
-          onClear={() => onSearchChange("")}
-          onValueChange={onSearchChange}
-          variant="bordered"
-          radius="lg"
+      <div className="bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+        <UserFilters
+          {...filters}
+          searchTerm={searchTerm}
+          onSearchChange={onSearchChange}
         />
-        <UserFilters {...filters} />
       </div>
 
       {isLoading ? (

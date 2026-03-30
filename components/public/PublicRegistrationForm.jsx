@@ -10,7 +10,7 @@ import {
 import { Camera, X, Send, CheckCircle } from "lucide-react";
 import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/card";
-import StudentSection from "@/app/admin/users/create/_components/StudentSection";
+import StudentSection from "@/app/admin/students/_components/StudentSection";
 import AlumniSection from "@/app/admin/users/create/_components/AlumniSection";
 import axios from "axios";
 import { addToast } from "@heroui/toast";

@@ -16,6 +16,7 @@ export async function GET(request) {
     const status = searchParams.get("status") || "";
     const district = searchParams.get("district") || "";
     const batch = searchParams.get("batch") || "";
+    const industry = searchParams.get("industry") || "";
 
     const skip = (page - 1) * limit;
 
@@ -48,6 +49,14 @@ export async function GET(request) {
 
     if (batch) {
       query.batch = batch;
+    }
+
+    if (industry && industry !== "All Industries") {
+      query.$or = [
+        ...(query.$or || []),
+        { current_job: { $regex: industry, $options: "i" } },
+        { custom_job: { $regex: industry, $options: "i" } },
+      ];
     }
 
     const total = await User.countDocuments(query);
@@ -153,32 +162,6 @@ export async function POST(request) {
       }
       userFields.name = data.get("name");
       userFields.userId = userId;
-    } else if (role === "student") {
-      userFields.madrasa_name = data.get("madrasa_name");
-      userFields.name = data.get("name");
-      userFields.house_name = data.get("house_name");
-      userFields.address = data.get("address");
-      userFields.district = data.get("district");
-      userFields.custom_district = data.get("custom_district");
-      userFields.dob = data.get("dob") ? new Date(data.get("dob")) : null;
-      userFields.father_name = data.get("father_name");
-      userFields.guardian_name = data.get("guardian_name");
-      userFields.guardian_phone = data.get("guardian_phone");
-      userFields.guardian_relation = data.get("guardian_relation");
-      userFields.guardian_occupation = data.get("guardian_occupation");
-      userFields.date_of_admission = data.get("date_of_admission")
-        ? new Date(data.get("date_of_admission"))
-        : null;
-
-      const districtForId =
-        data.get("district") === "Other"
-          ? data.get("custom_district")
-          : data.get("district");
-      userFields.userId = await generateUserId(
-        role,
-        districtForId,
-        userFields.date_of_admission || new Date(),
-      );
     } else if (role === "alumni") {
       userFields.name = data.get("name");
       userFields.house_name = data.get("house_name");
@@ -190,6 +173,9 @@ export async function POST(request) {
       userFields.pincode = data.get("pincode");
       userFields.batch = data.get("batch");
       userFields.education = data.get("education");
+      userFields.dob = data.get("dob") ? new Date(data.get("dob")) : undefined;
+      userFields.current_job = data.get("current_job");
+      userFields.custom_job = data.get("custom_job");
 
       const districtForId =
         data.get("district") === "Other"

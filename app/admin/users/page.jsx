@@ -35,16 +35,34 @@ export default function UserManagement() {
   const [userToDelete, setUserToDelete] = useState(null);
   const [rejectModalUser, setRejectModalUser] = useState(null);
   const [pendingDeactivation, setPendingDeactivation] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const { deleteMutation, statusMutation, approveMutation, rejectMutation } =
     useUserMutations(currentUser);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["users", page, limit, debouncedSearchTerm, role, status, district, batch],
+    queryKey: [
+      "users",
+      page,
+      limit,
+      debouncedSearchTerm,
+      role,
+      status,
+      district,
+      batch,
+    ],
     queryFn: async () => {
       const response = await axios.get("/api/users", {
-        params: { page, limit, search: debouncedSearchTerm, role, status, district, batch },
+        params: {
+          page,
+          limit,
+          search: debouncedSearchTerm,
+          role,
+          status,
+          district,
+          batch,
+        },
       });
       return response.data;
     },
@@ -103,11 +121,19 @@ export default function UserManagement() {
   const totalItems = data?.total || 0;
 
   const filterProps = {
-    role, setRole,
-    status, setStatus,
-    district, setDistrict,
-    batch, setBatch,
+    role,
+    setRole,
+    status,
+    setStatus,
+    district,
+    setDistrict,
+    batch,
+    setBatch,
     setPage,
+    showFilters,
+    setShowFilters,
+    searchTerm,
+    onSearchChange: handleSearch,
   };
 
   const paginationProps = {
@@ -128,7 +154,6 @@ export default function UserManagement() {
           data={users}
           columns={userColumns}
           isLoading={isLoading}
-          search={{ placeholder: "Search by name, email or user ID...", value: searchTerm, onChange: handleSearch }}
           pagination={paginationProps}
           topContent={<UserFilters {...filterProps} />}
         />
@@ -153,7 +178,10 @@ export default function UserManagement() {
 
       <ConfirmModal
         isOpen={isDeleteModalOpen}
-        onClose={() => { setIsDeleteModalOpen(false); setUserToDelete(null); }}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setUserToDelete(null);
+        }}
         onConfirm={() => {
           deleteMutation.mutate(userToDelete?._id);
           setIsDeleteModalOpen(false);
@@ -163,13 +191,19 @@ export default function UserManagement() {
         title="Delete User"
         message={
           <>
-            <p>Do you want to delete the user &quot;{userToDelete?.name}&quot;?</p>
+            <p>
+              Do you want to delete the user &quot;{userToDelete?.name}&quot;?
+            </p>
             <p className="mt-1">This process can&apos;t be undone.</p>
           </>
         }
       />
 
-      <DeactivateConfirmModal isOpen={isOpen} onOpenChange={onOpenChange} onConfirm={confirmDeactivation} />
+      <DeactivateConfirmModal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        onConfirm={confirmDeactivation}
+      />
 
       <RejectModal
         user={rejectModalUser}

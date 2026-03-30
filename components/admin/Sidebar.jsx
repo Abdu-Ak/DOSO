@@ -53,7 +53,16 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
 
   const NAV_ITEMS = [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { label: "User Management", href: "/admin/users", icon: Users },
+    {
+      label: "User Management",
+      href: "/admin/users",
+      icon: Users,
+    },
+    {
+      label: "Students List",
+      href: "/admin/students",
+      icon: Users,
+    },
     { label: "Events", href: "/admin/events", icon: Calendar },
     { label: "Settings", href: "/admin/settings", icon: Settings },
   ];
@@ -87,7 +96,9 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
 
       {/* Navigation Links */}
       <nav className="flex-1 px-4 py-6 space-y-3 overflow-y-auto">
-        {NAV_ITEMS.map((item) => (
+        {NAV_ITEMS.filter(
+          (item) => !item.roles || item.roles.includes(userRole),
+        ).map((item) => (
           <SidebarItem
             key={item.href}
             {...item}

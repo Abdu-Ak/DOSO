@@ -1,9 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Textarea } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
 import { Controller } from "react-hook-form";
+import { Popover, PopoverTrigger, PopoverContent } from "@heroui/popover";
+import { Button } from "@heroui/button";
+import { Calendar } from "@heroui/calendar";
+import { parseDate } from "@internationalized/date";
 import {
   User as UserIcon,
   Mail,
@@ -14,6 +18,8 @@ import {
   MailboxIcon,
   MapPinned,
   School,
+  CalendarDays,
+  BriefcaseIcon,
 } from "lucide-react";
 import InputField from "@/components/admin/ui/InputField";
 
@@ -44,7 +50,9 @@ const AlumniSection = ({
   isPublic,
   isSelfEdit,
 }) => {
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const selectedDistrict = watch("district");
+  const selectedJob = watch("current_job");
   const batchYears = Array.from({ length: 25 }, (_, i) =>
     (new Date().getFullYear() - i).toString(),
   );
@@ -89,12 +97,71 @@ const AlumniSection = ({
       )}
 
       <InputField
+        {...register("education")}
+        label="Education"
+        placeholder="Enter education"
+        startContent={<School size={18} className="text-slate-400" />}
+        error={errors.education}
+      />
+
+      <InputField
         {...register("father_name")}
         label="Father Name"
         placeholder="Enter father name"
         startContent={<UserIcon size={18} className="text-slate-400" />}
         error={errors.father_name}
       />
+
+      <div className="space-y-1">
+        <Controller
+          name="dob"
+          control={control}
+          render={({ field }) => (
+            <div className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                Date of Birth <span className="text-red-500">*</span>
+              </span>
+              <Popover
+                isOpen={isCalendarOpen}
+                onOpenChange={setIsCalendarOpen}
+                placement="bottom"
+              >
+                <PopoverTrigger>
+                  <Button
+                    variant="bordered"
+                    radius="sm"
+                    className="h-10 justify-start border-slate-200 dark:border-slate-700"
+                    startContent={
+                      <CalendarDays size={18} className="text-slate-400" />
+                    }
+                  >
+                    {field.value
+                      ? new Date(field.value).toLocaleDateString()
+                      : "Select date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="p-0">
+                  <Calendar
+                    aria-label="Date of Birth"
+                    value={
+                      field.value ? parseDate(field.value.split("T")[0]) : null
+                    }
+                    onChange={(date) => {
+                      field.onChange(date.toString());
+                      setIsCalendarOpen(false);
+                    }}
+                  />
+                </PopoverContent>
+              </Popover>
+              {errors.dob && (
+                <span className="text-tiny text-danger">
+                  {errors.dob.message}
+                </span>
+              )}
+            </div>
+          )}
+        />
+      </div>
 
       <InputField
         {...register("house_name")}
@@ -179,14 +246,6 @@ const AlumniSection = ({
         error={errors.pincode}
       />
 
-      <InputField
-        {...register("education")}
-        label="Education"
-        placeholder="Enter education"
-        startContent={<School size={18} className="text-slate-400" />}
-        error={errors.education}
-      />
-
       <div className="space-y-1">
         <Controller
           name="batch"
@@ -217,6 +276,54 @@ const AlumniSection = ({
           )}
         />
       </div>
+
+      <div className="space-y-1">
+        <Controller
+          name="current_job"
+          control={control}
+          render={({ field }) => (
+            <Select
+              {...field}
+              label={
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Current Job <span className="text-red-500">*</span>
+                </span>
+              }
+              labelPlacement="outside"
+              variant="bordered"
+              radius="sm"
+              placeholder="Select current job"
+              isInvalid={!!errors.current_job}
+              errorMessage={errors.current_job?.message}
+              selectedKeys={field.value ? [field.value] : []}
+              onSelectionChange={(keys) => field.onChange(Array.from(keys)[0])}
+            >
+              <SelectItem key="Mudaris" textValue="Mudaris">
+                Mudaris
+              </SelectItem>
+              <SelectItem key="Khatheeb" textValue="Khatheeb">
+                Khatheeb
+              </SelectItem>
+              <SelectItem key="Sadr Mualim" textValue="Sadr Mualim">
+                Sadr Mualim
+              </SelectItem>
+              <SelectItem key="Other" textValue="Other">
+                Other
+              </SelectItem>
+            </Select>
+          )}
+        />
+      </div>
+
+      {selectedJob === "Other" && (
+        <InputField
+          {...register("custom_job")}
+          label="Custom Job Title"
+          placeholder="Enter job title"
+          startContent={<BriefcaseIcon size={18} className="text-slate-400" />}
+          error={errors.custom_job}
+        />
+      )}
 
       {!isPublic && !isSelfEdit && (
         <div className="space-y-1">

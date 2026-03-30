@@ -6,13 +6,13 @@ import { TrendingUp } from "lucide-react";
 import DashboardStats from "./_components/DashboardStats";
 import RecentUsers from "./_components/RecentUsers";
 import PlatformActivity from "./_components/PlatformActivity";
-import QuickActions from "./_components/QuickActions";
+import RecentStudents from "./_components/RecentStudents";
 
 export default function AdminDashboard() {
   const { data: session } = useSession();
 
   return (
-    <div className="space-y-8 max-w-[1600px] mx-auto pb-10">
+    <div className="space-y-6 max-w-[1600px] mx-auto pb-10">
       {/* Welcome Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
         <div>
@@ -23,10 +23,6 @@ export default function AdminDashboard() {
             Here&apos;s a pulse check of Darul Hidaya Dars today.
           </p>
         </div>
-        <button className="bg-primary text-white px-6 py-3 rounded-2xl font-black text-sm shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 w-fit">
-          <TrendingUp size={18} />
-          Generate Insight
-        </button>
       </div>
 
       {/* Stats Section */}
@@ -35,15 +31,15 @@ export default function AdminDashboard() {
       </div>
 
       {/* Main Grid Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-200">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-200">
         {/* Left Column (Main Content) */}
-        <div className="lg:col-span-8 space-y-8">
+        <div className="lg:col-span-8 space-y-6">
           <RecentUsers />
+          <RecentStudents />
         </div>
 
         {/* Right Column (Side Content) */}
-        <div className="lg:col-span-4 space-y-8">
-          <QuickActions />
+        <div className="lg:col-span-4 space-y-6">
           <PlatformActivity />
         </div>
       </div>

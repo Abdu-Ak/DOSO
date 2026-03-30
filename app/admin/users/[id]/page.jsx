@@ -45,7 +45,7 @@ import { canManageUser } from "@/lib/permissions";
 
 const DetailItem = ({ icon: Icon, label, value, color = "primary" }) => (
   <div className="space-y-1.5 group">
-    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 flex items-center gap-2 mb-1">
+    <p className="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 flex items-center gap-2 mb-1">
       {Icon && <Icon size={12} className={`text-${color}`} />}
       {label}
     </p>
@@ -188,16 +188,16 @@ export default function UserDetailPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 md:px-0 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="max-w-6xl mx-auto space-y-4 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Top Navigation */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-4">
         <Button
           variant="light"
           onPress={() => (isOwnProfile ? router.push("/admin") : router.back())}
           startContent={<ArrowLeft size={18} />}
-          className="font-bold text-slate-500 hover:text-primary pl-0"
+          className="flex font-bold text-slate-500 hover:text-primary pl-0"
         >
-          {isOwnProfile ? "Back to Dashboard" : "Back to User Management"}
+          {isOwnProfile ? "Back to dashboard" : "Back to users"}
         </Button>
         <div className="flex items-center gap-3">
           {canManageUser(currentUser, user, "edit") && (
@@ -209,7 +209,7 @@ export default function UserDetailPage() {
               className="font-bold shadow-lg shadow-primary/20"
               radius="xl"
             >
-              Edit Profile
+              Edit
             </Button>
           )}
         </div>
@@ -238,27 +238,27 @@ export default function UserDetailPage() {
                   {user.name}
                 </p>
               )}
-              <p className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
+              <p className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-xs mt-2 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
                 @{user.userId}
               </p>
 
               <div className="flex flex-col gap-3 mt-8 w-full">
                 <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                  <span className="text-xs font-black uppercase tracking-wider text-slate-400">
                     Role
                   </span>
                   <Chip
                     startContent={<ShieldCheck size={14} />}
                     variant="flat"
                     color="primary"
-                    className="capitalize font-black text-[10px] tracking-wider"
+                    className="capitalize font-black text-xs tracking-wider"
                     size="sm"
                   >
                     {user.role}
                   </Chip>
                 </div>
                 <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                  <span className="text-xs font-black uppercase tracking-wider text-slate-400">
                     Status
                   </span>
                   {canManageUser(currentUser, user, "status") ? (
@@ -268,7 +268,7 @@ export default function UserDetailPage() {
                           as="button"
                           variant="flat"
                           color={statusColors[user.status]}
-                          className="capitalize font-black text-[10px] tracking-wider cursor-pointer hover:opacity-80 transition-opacity"
+                          className="capitalize font-black text-xs tracking-wider cursor-pointer hover:opacity-80 transition-opacity"
                           size="sm"
                           endContent={
                             <ChevronDown
@@ -309,7 +309,7 @@ export default function UserDetailPage() {
                     <Chip
                       variant="flat"
                       color={statusColors[user.status]}
-                      className="capitalize font-black text-[10px] tracking-wider"
+                      className="capitalize font-black text-xs tracking-wider"
                       size="sm"
                     >
                       {user.status}
@@ -403,6 +403,15 @@ export default function UserDetailPage() {
                         icon={GraduationCap}
                         label="Batch"
                         value={user.batch}
+                      />
+                      <DetailItem
+                        icon={Briefcase}
+                        label="Current Job"
+                        value={
+                          user.current_job === "Other"
+                            ? user.custom_job
+                            : user.current_job
+                        }
                       />
                     </>
                   )}

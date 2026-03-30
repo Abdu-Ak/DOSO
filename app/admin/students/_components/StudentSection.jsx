@@ -11,7 +11,6 @@ import { Calendar } from "@heroui/calendar";
 import { parseDate } from "@internationalized/date";
 import {
   User as UserIcon,
-  Mail,
   Lock,
   Phone,
   School,
@@ -19,6 +18,7 @@ import {
   MapPin,
   CalendarDays,
   BriefcaseIcon,
+  BookOpen,
 } from "lucide-react";
 import InputField from "@/components/admin/ui/InputField";
 
@@ -47,7 +47,6 @@ const StudentSection = ({
   watch,
   isEdit,
   isPublic,
-  isSelfEdit,
 }) => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isAdmissionCalendarOpen, setIsAdmissionCalendarOpen] = useState(false);
@@ -55,14 +54,6 @@ const StudentSection = ({
 
   return (
     <>
-      <InputField
-        {...register("madrasa_name")}
-        label="Madrasa Name"
-        placeholder="Enter madrasa name"
-        startContent={<School size={18} className="text-slate-400" />}
-        error={errors.madrasa_name}
-      />
-
       <InputField
         {...register("name")}
         label="Student Name"
@@ -72,33 +63,13 @@ const StudentSection = ({
       />
 
       <InputField
-        {...register("email")}
-        type="email"
-        label="Email Address"
-        placeholder="Enter email address"
-        startContent={<Mail size={18} className="text-slate-400" />}
-        error={errors.email}
-      />
-
-      <InputField
         {...register("phone")}
         label="Phone Number"
         placeholder="Enter phone number"
         startContent={<Phone size={18} className="text-slate-400" />}
         error={errors.phone}
+        required={false}
       />
-
-      {!isPublic && (
-        <InputField
-          {...register("password")}
-          type="password"
-          label="Password"
-          placeholder="Enter password"
-          startContent={<Lock size={18} className="text-slate-400" />}
-          error={errors.password}
-          isEdit={isEdit}
-        />
-      )}
 
       <div className="space-y-1">
         <Controller
@@ -144,6 +115,73 @@ const StudentSection = ({
               {errors.dob && (
                 <span className="text-xs text-danger">
                   {errors.dob.message}
+                </span>
+              )}
+            </div>
+          )}
+        />
+      </div>
+
+      <InputField
+        {...register("current_madrasa_class")}
+        label="Current Madrasa Class"
+        placeholder="Enter madrasa class (e.g., Class 7)"
+        startContent={<School size={18} className="text-slate-400" />}
+        error={errors.current_madrasa_class}
+      />
+
+      <InputField
+        {...register("current_school_class")}
+        label="Current School Class"
+        placeholder="Enter school class (e.g., 9th Standard)"
+        startContent={<BookOpen size={18} className="text-slate-400" />}
+        error={errors.current_school_class}
+      />
+
+      <div className="space-y-1">
+        <Controller
+          name="date_of_admission"
+          control={control}
+          render={({ field }) => (
+            <div className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                Date of Admission <span className="text-red-500">*</span>
+              </span>
+              <Popover
+                isOpen={isAdmissionCalendarOpen}
+                onOpenChange={setIsAdmissionCalendarOpen}
+                placement="bottom"
+              >
+                <PopoverTrigger>
+                  <Button
+                    variant="bordered"
+                    radius="sm"
+                    className="h-10 justify-start border-slate-200 dark:border-slate-700"
+                    startContent={
+                      <CalendarDays size={18} className="text-slate-400" />
+                    }
+                  >
+                    {field.value
+                      ? new Date(field.value).toLocaleDateString()
+                      : "Select date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="p-0">
+                  <Calendar
+                    aria-label="Admission"
+                    value={
+                      field.value ? parseDate(field.value.split("T")[0]) : null
+                    }
+                    onChange={(date) => {
+                      field.onChange(date.toString());
+                      setIsAdmissionCalendarOpen(false);
+                    }}
+                  />
+                </PopoverContent>
+              </Popover>
+              {errors.date_of_admission && (
+                <span className="text-xs text-danger">
+                  {errors.date_of_admission.message}
                 </span>
               )}
             </div>
@@ -276,58 +314,7 @@ const StudentSection = ({
         error={errors.guardian_occupation}
       />
 
-      <div className="space-y-1">
-        <Controller
-          name="date_of_admission"
-          control={control}
-          render={({ field }) => (
-            <div className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                Date of Admission <span className="text-red-500">*</span>
-              </span>
-              <Popover
-                isOpen={isAdmissionCalendarOpen}
-                onOpenChange={setIsAdmissionCalendarOpen}
-                placement="bottom"
-              >
-                <PopoverTrigger>
-                  <Button
-                    variant="bordered"
-                    radius="sm"
-                    className="h-10 justify-start border-slate-200 dark:border-slate-700"
-                    startContent={
-                      <CalendarDays size={18} className="text-slate-400" />
-                    }
-                  >
-                    {field.value
-                      ? new Date(field.value).toLocaleDateString()
-                      : "Select date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="p-0">
-                  <Calendar
-                    aria-label="Admission"
-                    value={
-                      field.value ? parseDate(field.value.split("T")[0]) : null
-                    }
-                    onChange={(date) => {
-                      field.onChange(date.toString());
-                      setIsAdmissionCalendarOpen(false);
-                    }}
-                  />
-                </PopoverContent>
-              </Popover>
-              {errors.date_of_admission && (
-                <span className="text-xs text-danger">
-                  {errors.date_of_admission.message}
-                </span>
-              )}
-            </div>
-          )}
-        />
-      </div>
-
-      {!isPublic && !isSelfEdit && (
+      {!isPublic && (
         <div className="space-y-1">
           <Controller
             name="status"

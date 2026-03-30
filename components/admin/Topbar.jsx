@@ -78,6 +78,24 @@ const Topbar = ({ onMenuClick }) => {
       }
     }
 
+    if (parts[0] === "admin" && parts[1] === "students") {
+      const lastPart = parts[parts.length - 1];
+      if (lastPart === "create") return "Students / Create";
+      if (lastPart === "edit") return "Students / Edit";
+      if (parts.length > 3 || (parts[2] && parts[2].length > 15)) {
+        return "Students / Details";
+      }
+    }
+
+    if (parts[0] === "admin" && parts[1] === "events") {
+      const lastPart = parts[parts.length - 1];
+      if (lastPart === "create") return "Event / Create";
+      if (lastPart === "edit") return "Event / Edit";
+      if (parts.length > 3 || (parts[2] && parts[2].length > 15)) {
+        return "Event / Details";
+      }
+    }
+
     const lastPart = parts[parts.length - 1];
     return (
       lastPart.charAt(0).toUpperCase() + lastPart.slice(1).replace(/-/g, " ")
@@ -90,8 +108,8 @@ const Topbar = ({ onMenuClick }) => {
   };
 
   return (
-    <header className="h-20 bg-surface-light dark:bg-surface-dark border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 sticky top-0 z-30 shadow-sm transition-colors duration-300">
-      <div className="flex items-center gap-4">
+    <header className="h-20 bg-surface-light dark:bg-surface-dark border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-3 md:px-6 sticky top-0 z-30 shadow-sm transition-colors duration-300">
+      <div className="flex items-center gap-2 md:gap-4">
         <button
           onClick={onMenuClick}
           className="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors"
@@ -103,7 +121,7 @@ const Topbar = ({ onMenuClick }) => {
           {isNestedPage() && (
             <button
               onClick={() => router.back()}
-              className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors cursor-pointer"
+              className="hidden lg:flex p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors cursor-pointer"
             >
               <ArrowLeft size={20} />
             </button>
@@ -114,25 +132,27 @@ const Topbar = ({ onMenuClick }) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2 ml-2 pl-4">
-          <CustomTooltip content="Registration QR">
-            <button
-              onClick={() => setShowQRModal(true)}
-              className="p-2 text-slate-600 dark:text-slate-400 hover:text-primary transition-colors cursor-pointer"
-            >
-              <QrCode size={22} />
-            </button>
-          </CustomTooltip>
+      <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-2 ml-2 pl-2 md:pl-4">
+          <div className="hidden md:flex items-center">
+            <CustomTooltip content="Registration QR">
+              <button
+                onClick={() => setShowQRModal(true)}
+                className="p-2 text-slate-600 dark:text-slate-400 hover:text-primary transition-colors cursor-pointer"
+              >
+                <QrCode size={22} />
+              </button>
+            </CustomTooltip>
 
-          <CustomTooltip content="Visit Site">
-            <button
-              onClick={() => router.push("/")}
-              className="p-2 text-slate-600 dark:text-slate-400 hover:text-primary transition-colors cursor-pointer"
-            >
-              <Globe size={22} />
-            </button>
-          </CustomTooltip>
+            <CustomTooltip content="Visit Site">
+              <button
+                onClick={() => router.push("/")}
+                className="p-2 text-slate-600 dark:text-slate-400 hover:text-primary transition-colors cursor-pointer"
+              >
+                <Globe size={22} />
+              </button>
+            </CustomTooltip>
+          </div>
 
           <CustomTooltip content="Theme Switch">
             <div>
@@ -149,7 +169,7 @@ const Topbar = ({ onMenuClick }) => {
                 <Bell size={22} />
                 {notifCount > 0 && (
                   <span className="absolute top-1 right-1 min-w-[18px] h-[18px] bg-red-500 rounded-full border-2 border-surface-light dark:border-surface-dark flex items-center justify-center">
-                    <span className="text-[9px] font-bold text-white leading-none">
+                    <span className="text-xs font-bold text-white leading-none">
                       {notifCount > 9 ? "9+" : notifCount}
                     </span>
                   </span>
@@ -179,13 +199,13 @@ const Topbar = ({ onMenuClick }) => {
                   <p className="text-xs font-bold text-slate-800 dark:text-white truncate max-w-[100px]">
                     {user?.name || "Admin User"}
                   </p>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium capitalize">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium capitalize">
                     {user?.role || "Administrator"}
                   </p>
                 </div>
                 <ChevronDown
                   size={14}
-                  className="text-slate-400 group-hover:text-primary transition-colors duration-300"
+                  className="hidden md:block text-slate-400 group-hover:text-primary transition-colors duration-300"
                 />
               </div>
             </DropdownTrigger>
@@ -206,11 +226,27 @@ const Topbar = ({ onMenuClick }) => {
               </DropdownItem>
               <DropdownItem
                 key="edit"
-                startContent={<UserPen size={18} className="rotate-180" />}
+                startContent={<UserPen size={18} />}
                 onPress={() => router.push(`/admin/users/${userId}/edit`)}
                 className="font-bold"
               >
                 Edit Profile
+              </DropdownItem>
+              <DropdownItem
+                key="qr"
+                startContent={<QrCode size={18} />}
+                onPress={() => setShowQRModal(true)}
+                className="font-bold md:hidden"
+              >
+                Registration QR
+              </DropdownItem>
+              <DropdownItem
+                key="site"
+                startContent={<Globe size={18} />}
+                onPress={() => router.push("/")}
+                className="font-bold md:hidden"
+              >
+                Visit Site
               </DropdownItem>
               <DropdownItem
                 key="logout"

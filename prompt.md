@@ -1,259 +1,52 @@
-@UserForm.jsx @route.js# User Management System Refactor
+# Task: Separate Student Management and Update Education Fields
 
-This document defines the requirements for refactoring the **User Management System** in a **Next.js (App Router)** application.
+## Context
 
-The system must support a **multi-role based user structure** with dynamic forms and backend-generated user IDs.
+I am refactoring a Next.js application using **Mongoose**, **React Hook Form**, and **HeroUI**.
+I am decoupling "Students" from the general User list into a dedicated "Student Management" section.
 
----
+## 1. Schema Updates (models/User.js)
 
-# Roles
+- **Remove field:** `madrasa_name`.
+- **Add field:** `current_madrasa_class` (String) - e.g., "Class 7".
+- **Add field:** `current_school_class` (String) - e.g., "9th Standard".
+- **Hardcoded Role:** Since the Student Management modal is specific to students, the `role` should be automatically set to `student` on the backend/form submission. No role selection UI is needed for this section.
+- **Status:** For public registrations, default `status` remains `Pending`.
 
-The system must support three roles:
+## 2. UI Component Update (StudentSection.jsx)
 
-- `admin`
-- `student`
-- `alumni`
+Update the `StudentSection` component:
 
-Each role has **different required fields and validation rules**.
+- **Remove** the "Madrasa Name" field.
+- **Add** two new InputFields:
+  1. **Current Madrasa Class**: Use `School` icon.
+  2. **Current School Class**: Use `School` or `BookOpen` icon.
+- **Remove Role/Password logic:** Ensure no role selection is present. If it's a new student creation, the password can be generated or handled as per existing logic, but the UI should stay focused on student data.
+- **Public Form:** These changes must reflect in the public-facing registration form.
 
----
+## 3. Admin Sidebar & Management Logic
 
-# General Requirements
+- **Sidebar:** Add a "Student Management" menu visible only to `super_admin` and `admin`.
+- **User List Filtering:** - Modify the general **User Management** table to **exclude** all users with `role: "student"`.
+  - Remove student-related filters (districts, etc.) from the general User list.
+- **Student Management Page:**
+  - Create a dedicated view that **only** fetches/displays users with `role: "student"`.
+  - Implement full CRUD (Add, Edit, Delete, View).
 
-1. The form must be **role-based**.
-2. When a role is selected, display the corresponding fields dynamically.
-3. All fields mentioned for each role must be **required** unless otherwise specified.
-4. Every user must contain a `role` field.
-5. Admin login uses:
-   - `username`
-   - `email`
-6. Student and Alumni login uses:
-   - `userId`
-   - `email`
-7. `userId` **must NOT appear in the form**. It must be **generated automatically in the backend**.
-8. Every user must contain an `image` field that is **required** ecxept admin.
-9. Every user must contain a `password` field that is **required** and need validation rule as minimum 6 characters.
+## 4. Authentication Restriction (Temporary)
 
----
+- **Disable Student Login:** - In the login logic (API route or Auth provider), check the user's role.
+  - If `role === 'student'`, **comment out** the session/JWT generation code.
+  - Return a response: `{ message: "Student login is currently disabled." }`.
 
-# Admin Fields
+## 5. Filtering & UI
 
-Required fields:
+- In the new **Student Management** list, add specific filters for:
+  - `district`
+  - `status` (Active/Pending/Inactive)
+  - `current_madrasa_class`
+  - `current_school_class`
 
-- Full Name
-- Username
-- Email
-- Phone Number
-- Role (`admin`)
+## Instructions for AI:
 
-Validation rules:
-
-- All fields are required
-- Email must be valid
-- Phone number must be numeric
-
----
-
-# Student Fields
-
-Required fields:
-
-- Madrasa Name
-- Student Name
-- House Name
-- Address
-- District
-- Date of Birth
-- Father Name
-- Guardian Name
-- Guardian Phone Number
-- Guardian Relation
-- Guardian Occupation
-- Date of Admission
-
----
-
-## District Field
-
-District must be a **dropdown select** containing the **14 districts of Kerala**:
-
-- Thiruvananthapuram
-- Kollam
-- Pathanamthitta
-- Alappuzha
-- Kottayam
-- Idukki
-- Ernakulam
-- Thrissur
-- Palakkad
-- Malappuram
-- Kozhikode
-- Wayanad
-- Kannur
-- Kasaragod
-- Other
-
-If **"Other"** is selected:
-
-- Show a **text input field**
-- Allow the user to enter a **custom district name**
-
----
-
-## Guardian Relation
-
-This must be a **radio input** with the following options:
-
-- Father
-- Mother
-- Other
-
----
-
-# Alumni Fields
-
-Required fields:
-
-- Full Name
-- House Name
-- Phone Number
-- Father Name
-- Address
-- Post Office
-- District
-- Pincode
-- Batch
-- Education
-
----
-
-## District
-
-Use the same **district dropdown logic** as the Student form, including:
-
-- 14 districts
-- "Other" option
-- Custom district text input when "Other" is selected
-
----
-
-## Batch Field
-
-Batch must be a **dropdown showing the last 25 years**.
-
-
-Example: 
-2025
-2024
-2023
-...
-(last 25 years)
-
-
----
-
-# User ID Generation (Backend Logic)
-
-For **students and alumni**, the system must generate a unique `userId`.
-
-The format must be:
-
-[DISTRICT_SHORT]-[YEAR]-[AUTO_INCREMENT]
-
-Example:
-
-MLP-2022-001
-KNR-2021-045
-TVM-2023-012
-
-Where:
-
-### District Short Codes
-
-| District | Code |
-|--------|------|
-| Thiruvananthapuram | TVM |
-| Kollam | KLM |
-| Pathanamthitta | PTA |
-| Alappuzha | ALP |
-| Kottayam | KTM |
-| Idukki | IDK |
-| Ernakulam | EKM |
-| Thrissur | TSR |
-| Palakkad | PKD |
-| Malappuram | MLP |
-| Kozhikode | KKD |
-| Wayanad | WYD |
-| Kannur | KNR |
-| Kasaragod | KSD |
-
----
-
-### Year Value
-
-- **Student** → Admission Year
-- **Alumni** → Batch Year
-
----
-
-### Auto Increment
-
-The number must:
-
-- Increase sequentially for each student/alumni not admin
-- Be **padded to 3 digits**
-
-Examples:
-
-001
-002
-003
-
----
-
-# Login Rules
-
-## Admin Login
-
-Admins login using:
-
-
-username + email
-
-
----
-
-## Student / Alumni Login
-
-Students and Alumni login using:
-
-
-userId + email
-
-
----
-
-# Form Behaviour
-
-The system must support the following behaviors:
-
-- Dynamic fields based on selected role
-- Required field validation
-- District dropdown with "Other" custom option
-- Guardian relation radio buttons
-- Batch dropdown showing last 25 years
-- Backend generated userId for students and alumni
-
----
-
-# Expected Implementation
-
-The completed implementation must include:
-
-1. Dynamic role-based form
-2. Frontend validation
-3. Backend userId generation logic
-4. District dropdown with custom option
-5. Batch year generator
-6. Proper schema supporting admin, student, and alumni
-7. Authentication logic supporting different login types
+Please provide the updated `StudentSection.jsx`, the modified Mongoose Schema, and the logic for the filtered Student Management table.

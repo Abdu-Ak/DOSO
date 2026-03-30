@@ -12,7 +12,15 @@ import {
   DropdownMenu,
   DropdownItem,
 } from "@heroui/dropdown";
-import { Trash2, Eye, UserPen, ChevronDown, UserCheck, UserX } from "lucide-react";
+import {
+  Trash2,
+  Eye,
+  UserPen,
+  ChevronDown,
+  UserCheck,
+  UserX,
+  MoreVertical,
+} from "lucide-react";
 import { canManageUser } from "@/lib/permissions";
 
 const STATUS_COLORS = {
@@ -27,42 +35,119 @@ export function getUserColumns({
   approveMutation,
   onReject,
   onDelete,
+  basePath = "/admin/users",
+  role,
+  entityLabel = "User",
 }) {
-  return [
+  const columns = [
     {
-      header: "User",
+      header: entityLabel,
       accessorKey: "name",
       cell: (info) => {
         const user = info.row.original;
+        const showActions = canManageUser(currentUser, user);
+        const isPendingPublic =
+          user.status === "Pending" && user.source === "public";
+
         return (
-          <UserComponent
-            avatarProps={{
-              radius: "lg",
-              src: user.image,
-              fallback: user.name.charAt(0),
-            }}
-            description={`@${user.userId}`}
-            name={info.getValue()}
-          >
-            {user.email}
-          </UserComponent>
+          <div className="flex items-center justify-between gap-2 group">
+            <UserComponent
+              avatarProps={{
+                radius: "lg",
+                src: user.image,
+                fallback: user.name.charAt(0),
+              }}
+              description={
+                user.studentId || user.userId
+                  ? `@${user.studentId || user.userId}`
+                  : user.phone || ""
+              }
+              name={info.getValue()}
+            >
+              {user.email}
+            </UserComponent>
+            {showActions && (
+              <Dropdown placement="bottom-end">
+                <DropdownTrigger>
+                  <Button isIconOnly size="sm" variant="light">
+                    <MoreVertical size={18} className="text-slate-400" />
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu aria-label="User actions" variant="flat">
+                  <DropdownItem
+                    key="view"
+                    as={Link}
+                    href={`${basePath}/${user._id}`}
+                    startContent={<Eye size={16} />}
+                    className="text-slate-700 dark:text-slate-300"
+                  >
+                    View Details
+                  </DropdownItem>
+                  <DropdownItem
+                    key="edit"
+                    as={Link}
+                    href={`${basePath}/${user._id}/edit`}
+                    startContent={<UserPen size={16} />}
+                    className="text-slate-700 dark:text-slate-300"
+                  >
+                    Edit {entityLabel}
+                  </DropdownItem>
+                  {isPendingPublic && (
+                    <DropdownItem
+                      key="approve"
+                      color="success"
+                      startContent={<UserCheck size={16} />}
+                      onPress={() => approveMutation.mutate(user._id)}
+                      className="text-success"
+                    >
+                      Approve {entityLabel}
+                    </DropdownItem>
+                  )}
+                  {isPendingPublic && (
+                    <DropdownItem
+                      key="reject"
+                      color="danger"
+                      startContent={<UserX size={16} />}
+                      onPress={() => onReject(user)}
+                      className="text-danger"
+                    >
+                      Reject {entityLabel}
+                    </DropdownItem>
+                  )}
+                  <DropdownItem
+                    key="delete"
+                    color="danger"
+                    startContent={<Trash2 size={16} />}
+                    onPress={() => onDelete(user)}
+                    className="text-danger"
+                  >
+                    Delete {entityLabel}
+                  </DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
+            )}
+          </div>
         );
       },
     },
-    {
-      header: "Role",
-      accessorKey: "role",
-      cell: (info) => (
-        <Chip
-          className="capitalize font-black text-[10px] tracking-wider"
-          color="primary"
-          size="sm"
-          variant="flat"
-        >
-          {info.getValue()}
-        </Chip>
-      ),
-    },
+    ...(role !== "student"
+      ? [
+          {
+            header: "Role",
+            accessorKey: "role",
+            cell: (info) => (
+              <Chip
+                className="capitalize font-black text-xs tracking-wider"
+                color="primary"
+                size="sm"
+                variant="flat"
+              >
+                {info.getValue()}
+              </Chip>
+            ),
+          },
+        ]
+      : []),
     {
       header: "Source",
       accessorKey: "source",
@@ -70,7 +155,7 @@ export function getUserColumns({
         const value = info.getValue();
         return (
           <Chip
-            className="capitalize font-black text-[10px] tracking-wider"
+            className="capitalize font-black text-xs tracking-wider"
             color={value === "public" ? "secondary" : "default"}
             size="sm"
             variant="flat"
@@ -90,7 +175,8 @@ export function getUserColumns({
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
               {user.email || "N/A"}
             </span>
-            <span className="text-[10px] text-slate-500">
+
+            <span className="text-xs text-slate-500">
               {user.phone || "N/A"}
             </span>
           </div>
@@ -114,7 +200,7 @@ export function getUserColumns({
               Created: {joined}
             </span>
             {admission && (
-              <span className="text-[10px] text-primary font-medium">
+              <span className="text-xs text-primary font-medium">
                 Adm: {admission}
               </span>
             )}
@@ -131,15 +217,19 @@ export function getUserColumns({
         </span>
       ),
     },
-    {
-      header: "Batch",
-      accessorKey: "batch",
-      cell: (info) => (
-        <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
-          {info.getValue() || "N/A"}
-        </span>
-      ),
-    },
+    ...(role !== "student"
+      ? [
+          {
+            header: "Batch",
+            accessorKey: "batch",
+            cell: (info) => (
+              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                {info.getValue() || "N/A"}
+              </span>
+            ),
+          },
+        ]
+      : []),
     {
       header: "Status",
       accessorKey: "status",
@@ -151,7 +241,7 @@ export function getUserColumns({
         if (!showActions) {
           return (
             <Chip
-              className="capitalize font-black text-[10px] tracking-wider"
+              className="capitalize font-black text-xs tracking-wider"
               color={STATUS_COLORS[status] || "default"}
               size="sm"
               variant="flat"
@@ -169,7 +259,7 @@ export function getUserColumns({
         if (availableStatuses.length === 0) {
           return (
             <Chip
-              className="capitalize font-black text-[10px] tracking-wider"
+              className="capitalize font-black text-xs tracking-wider"
               color={STATUS_COLORS[status] || "default"}
               size="sm"
               variant="flat"
@@ -184,11 +274,13 @@ export function getUserColumns({
             <DropdownTrigger>
               <Chip
                 as="button"
-                className="capitalize font-black text-[10px] tracking-wider cursor-pointer hover:opacity-80 transition-opacity"
+                className="capitalize font-black text-xs tracking-wider cursor-pointer hover:opacity-80 transition-opacity"
                 color={STATUS_COLORS[status] || "default"}
                 size="sm"
                 variant="flat"
-                endContent={<ChevronDown size={12} className="ml-1 opacity-70" />}
+                endContent={
+                  <ChevronDown size={12} className="ml-1 opacity-70" />
+                }
               >
                 {status}
               </Chip>
@@ -198,7 +290,11 @@ export function getUserColumns({
               onAction={(key) => handleStatusChange(user._id, key)}
             >
               {availableStatuses.map((s) => (
-                <DropdownItem key={s} className="text-xs font-bold" color={STATUS_COLORS[s]}>
+                <DropdownItem
+                  key={s}
+                  className="text-xs font-bold"
+                  color={STATUS_COLORS[s]}
+                >
                   Set to {s}
                 </DropdownItem>
               ))}
@@ -207,86 +303,7 @@ export function getUserColumns({
         );
       },
     },
-    {
-      header: "Actions",
-      id: "actions",
-      meta: { align: "end" },
-      cell: (info) => {
-        const user = info.row.original;
-        const showActions = canManageUser(currentUser, user);
-        const isPendingPublic = user.status === "Pending" && user.source === "public";
-
-        return (
-          <div className="relative flex items-center justify-end gap-2">
-            {isPendingPublic && showActions && (
-              <>
-                <CustomTooltip content="Approve">
-                  <Button
-                    isIconOnly
-                    size="sm"
-                    variant="light"
-                    className="text-slate-400 hover:text-green-600"
-                    isLoading={approveMutation.isPending}
-                    onPress={() => approveMutation.mutate(user._id)}
-                  >
-                    <UserCheck size={18} />
-                  </Button>
-                </CustomTooltip>
-                <CustomTooltip content="Reject">
-                  <Button
-                    isIconOnly
-                    size="sm"
-                    variant="light"
-                    className="text-slate-400 hover:text-red-600"
-                    onPress={() => onReject(user)}
-                  >
-                    <UserX size={18} />
-                  </Button>
-                </CustomTooltip>
-              </>
-            )}
-            {showActions && (
-              <>
-                <CustomTooltip content="View Details">
-                  <Button
-                    isIconOnly
-                    as={Link}
-                    href={`/admin/users/${user._id}`}
-                    size="sm"
-                    variant="light"
-                    className="text-slate-400 hover:text-primary"
-                  >
-                    <Eye size={18} />
-                  </Button>
-                </CustomTooltip>
-                <CustomTooltip content="Edit User">
-                  <Button
-                    isIconOnly
-                    as={Link}
-                    href={`/admin/users/${user._id}/edit`}
-                    size="sm"
-                    variant="light"
-                    className="text-slate-400 hover:text-primary"
-                  >
-                    <UserPen size={18} />
-                  </Button>
-                </CustomTooltip>
-                <CustomTooltip color="danger" content="Delete User">
-                  <Button
-                    isIconOnly
-                    onPress={() => onDelete(user)}
-                    size="sm"
-                    variant="light"
-                    className="text-slate-400 hover:text-danger"
-                  >
-                    <Trash2 size={18} />
-                  </Button>
-                </CustomTooltip>
-              </>
-            )}
-          </div>
-        );
-      },
-    },
   ];
+
+  return columns;
 }

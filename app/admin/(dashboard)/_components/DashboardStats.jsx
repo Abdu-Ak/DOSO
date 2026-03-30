@@ -17,7 +17,7 @@ const DashboardStats = () => {
 
   const stats = [
     {
-      title: "Total Users",
+      title: "Total Users & Students",
       value: data?.totalUsers?.toLocaleString() || "0",
       icon: Users,
       trend: data?.trends?.total || "+0%",
