@@ -1,15 +1,35 @@
 import React from "react";
-import { Mail, Linkedin } from "lucide-react";
+import {
+  Mail,
+  Linkedin,
+  MapPin,
+  Briefcase,
+  GraduationCap,
+  Phone,
+} from "lucide-react";
 
 export default function AlumniCard({
-  name,
-  batch,
-  occupation,
-  description,
-  image,
+  alumni,
+  onViewDetails,
   gradientFrom = "primary",
   occupationColor = "primary",
 }) {
+  const {
+    name,
+    batch,
+    current_job,
+    custom_job,
+    education,
+    address,
+    email,
+    phone,
+    linkedin,
+    image,
+  } = alumni;
+  const occupation = current_job || custom_job || "Alumni";
+  const displayImage =
+    image ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`;
   const gradientClasses = {
     primary: "from-primary/20 to-primary/5",
     teal: "from-teal-600/20 to-teal-600/5",
@@ -47,7 +67,7 @@ export default function AlumniCard({
           <img
             alt={`Portrait of ${name}`}
             className="w-full h-full object-cover"
-            src={image}
+            src={displayImage}
           />
         </div>
 
@@ -57,40 +77,60 @@ export default function AlumniCard({
             {name}
           </h3>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            {batch}
+            Batch of {batch}
           </p>
 
           {/* Occupation Badge */}
           <div
-            className={`mt-3 flex items-center justify-center gap-1 text-xs font-medium ${occupationColorClasses[occupationColor]} py-1 px-2 rounded-full mx-auto w-fit`}
+            className={`mt-3 flex items-center justify-center gap-1 text-sm font-medium ${occupationColorClasses[occupationColor]} py-1 px-2 rounded-full mx-auto w-fit`}
           >
-            <span className="material-symbols-outlined text-sm">work</span>
+            <Briefcase size={18} className="shrink-0" />
             <span>{occupation}</span>
           </div>
 
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 line-clamp-2 min-h-[2.5em]">
-            {description}
-          </p>
+          <div className="text-xs text-slate-500 dark:text-slate-400 mt-3 space-y-1">
+            {education && (
+              <p className="flex items-center justify-center gap-1.5 truncate">
+                <GraduationCap size={12} className="shrink-0" />
+                <span className="truncate">{education}</span>
+              </p>
+            )}
+            {address && (
+              <p className="flex items-center justify-center gap-1.5 truncate">
+                <MapPin size={12} className="shrink-0" />
+                <span className="truncate">{address}</span>
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Footer */}
         <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
           <div className="flex gap-2">
-            <a
-              className="text-slate-400 hover:text-primary transition-colors"
-              href="#"
-            >
-              <Mail size={18} />
-            </a>
-            <a
-              className="text-slate-400 hover:text-[#0077b5] transition-colors"
-              href="#"
-            >
-              <Linkedin size={18} />
-            </a>
+            {email && (
+              <a
+                className="text-slate-400 hover:text-primary transition-colors cursor-pointer"
+                href={`mailto:${email}`}
+                title="Email"
+              >
+                <Mail size={18} />
+              </a>
+            )}
+            {phone && (
+              <a
+                className="text-slate-400 hover:text-primary transition-colors cursor-pointer"
+                href={`tel:${phone}`}
+                title="Phone"
+              >
+                <Phone size={18} />
+              </a>
+            )}
           </div>
-          <button className="text-xs font-bold text-primary hover:underline">
-            View Profile
+          <button
+            onClick={onViewDetails}
+            className="text-xs font-bold text-primary hover:underline"
+          >
+            View Details
           </button>
         </div>
       </div>

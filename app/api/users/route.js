@@ -16,6 +16,7 @@ export async function GET(request) {
     const status = searchParams.get("status") || "";
     const district = searchParams.get("district") || "";
     const batch = searchParams.get("batch") || "";
+    const industry = searchParams.get("industry") || "";
 
     const skip = (page - 1) * limit;
 
@@ -48,6 +49,14 @@ export async function GET(request) {
 
     if (batch) {
       query.batch = batch;
+    }
+
+    if (industry && industry !== "All Industries") {
+      query.$or = [
+        ...(query.$or || []),
+        { current_job: { $regex: industry, $options: "i" } },
+        { custom_job: { $regex: industry, $options: "i" } },
+      ];
     }
 
     const total = await User.countDocuments(query);

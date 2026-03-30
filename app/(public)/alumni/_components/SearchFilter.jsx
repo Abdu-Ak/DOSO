@@ -1,88 +1,135 @@
 "use client";
 
-import React, { useState } from "react";
-import { Search, RefreshCw } from "lucide-react";
+import React from "react";
+import { Search, RotateCcw, Filter, X } from "lucide-react";
+import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
+import { Select, SelectItem } from "@heroui/select";
 
-export default function SearchFilter() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [batchYear, setBatchYear] = useState("All Batches");
-  const [industry, setIndustry] = useState("All Industries");
+const BATCHES = [
+  "All Batches",
+  "Batch of 2023",
+  "Batch of 2022",
+  "Batch of 2021",
+  "Batch of 2020",
+  "Batch of 2019",
+];
 
-  const handleReset = () => {
-    setSearchTerm("");
-    setBatchYear("All Batches");
-    setIndustry("All Industries");
-  };
+const INDUSTRIES = [
+  "All Industries",
+  "Islamic Studies",
+  "Education",
+  "Technology",
+  "Healthcare",
+  "Business",
+];
 
+export default function SearchFilter({
+  searchTerm,
+  setSearchTerm,
+  batchYear,
+  setBatchYear,
+  industry,
+  setIndustry,
+  showFilters,
+  setShowFilters,
+  onReset,
+}) {
   return (
-    <div className="bg-surface-light dark:bg-surface-dark p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 mb-10">
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
-        {/* Search Input */}
-        <div className="md:col-span-5 relative">
-          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-            Search Alumni
-          </label>
-          <div className="relative">
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-              <Search size={20} />
-            </span>
-            <input
-              className="block w-full pl-10 pr-3 py-3 border border-slate-300 dark:border-slate-700 rounded-lg leading-5 bg-white dark:bg-background-dark text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm transition-shadow shadow-sm"
-              placeholder="Search by name, company, or location..."
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+    <div className="bg-white dark:bg-neutral-dark rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 md:p-6 mb-12 flex flex-col gap-6 sticky top-24 z-30 transition-shadow hover:shadow-md">
+      {/* Mobile Header with Toggle */}
+      <div className="flex items-center gap-3 md:hidden">
+        <div className="flex-1 relative">
+          <Input
+            placeholder="Search alumni..."
+            value={searchTerm}
+            onValueChange={setSearchTerm}
+            startContent={<Search className="text-slate-400" size={16} />}
+            variant="bordered"
+            isClearable
+            className="w-full"
+          />
+        </div>
+        <Button
+          isIconOnly
+          variant={showFilters ? "solid" : "flat"}
+          color={showFilters ? "primary" : "default"}
+          onPress={() => setShowFilters(!showFilters)}
+          radius="lg"
+          size="sm"
+        >
+          {showFilters ? <X size={18} /> : <Filter size={18} />}
+        </Button>
+      </div>
+
+      {/* Filter Grid (Collapsible on mobile) */}
+      <div
+        className={`${!showFilters ? "hidden md:grid" : "grid"} grid-cols-1 md:grid-cols-12 gap-4 items-end`}
+      >
+        {/* Desktop Search Bar (Hidden on mobile as it's in the header) */}
+        <div className="hidden md:block md:col-span-4">
+          <Input
+            label="Find Alumni"
+            placeholder="Search by name, company, or location..."
+            value={searchTerm}
+            onValueChange={setSearchTerm}
+            startContent={<Search className="text-slate-400" size={18} />}
+            variant="bordered"
+            isClearable
+            className="w-full"
+          />
         </div>
 
         {/* Batch Filter */}
         <div className="md:col-span-3">
-          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-            Batch Year
-          </label>
-          <select
-            className="block w-full py-3 pl-3 pr-10 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-background-dark text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm shadow-sm cursor-pointer"
-            value={batchYear}
-            onChange={(e) => setBatchYear(e.target.value)}
+          <Select
+            label="Batch Year"
+            placeholder="All Batches"
+            variant="bordered"
+            selectedKeys={batchYear ? [batchYear] : []}
+            onSelectionChange={(keys) =>
+              setBatchYear([...keys][0] || "All Batches")
+            }
           >
-            <option>All Batches</option>
-            <option>Class of 2023</option>
-            <option>Class of 2022</option>
-            <option>Class of 2021</option>
-            <option>Class of 2020</option>
-            <option>Class of 2019</option>
-          </select>
+            {BATCHES.map((b) => (
+              <SelectItem key={b} value={b}>
+                {b}
+              </SelectItem>
+            ))}
+          </Select>
         </div>
 
         {/* Occupation Filter */}
         <div className="md:col-span-3">
-          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-            Field / Industry
-          </label>
-          <select
-            className="block w-full py-3 pl-3 pr-10 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-background-dark text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm shadow-sm cursor-pointer"
-            value={industry}
-            onChange={(e) => setIndustry(e.target.value)}
+          <Select
+            label="Field / Industry"
+            placeholder="All Industries"
+            variant="bordered"
+            selectedKeys={industry ? [industry] : []}
+            onSelectionChange={(keys) =>
+              setIndustry([...keys][0] || "All Industries")
+            }
           >
-            <option>All Industries</option>
-            <option>Islamic Studies</option>
-            <option>Education</option>
-            <option>Technology</option>
-            <option>Healthcare</option>
-            <option>Business</option>
-          </select>
+            {INDUSTRIES.map((i) => (
+              <SelectItem key={i} value={i}>
+                {i}
+              </SelectItem>
+            ))}
+          </Select>
         </div>
 
         {/* Reset Button */}
-        <div className="md:col-span-1 flex justify-center md:justify-start pb-1">
-          <button
-            onClick={handleReset}
-            className="text-primary hover:text-primary/80 font-semibold text-sm flex items-center gap-1 transition-colors"
+        <div className="md:col-span-2 flex items-center justify-start md:justify-end">
+          <Button
+            variant="light"
+            color="default"
+            startContent={<RotateCcw size={16} />}
+            onPress={onReset}
+            size="sm"
+            className="font-medium bg-slate-100 dark:bg-slate-300 w-fit"
           >
-            <RefreshCw size={16} />
-            Reset
-          </button>
+            Reset Filters
+          </Button>
         </div>
       </div>
     </div>

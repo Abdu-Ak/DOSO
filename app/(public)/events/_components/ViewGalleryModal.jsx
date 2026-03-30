@@ -55,6 +55,9 @@ export default function ViewGalleryModal({ isOpen, onClose, event }) {
         scrollBehavior="inside"
         backdrop="blur"
         hideCloseButton
+        classNames={{
+          backdrop: "bg-slate-900/10 backdrop-blur-sm shadow-none",
+        }}
       >
         <ModalContent className="rounded-3xl">
           <ModalHeader className="flex flex-col gap-1 border-b border-gray-100 overflow-hidden">
