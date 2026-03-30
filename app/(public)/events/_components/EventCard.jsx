@@ -82,7 +82,7 @@ export default function EventCard({ event, onViewGallery }) {
           variant="light"
           color="primary"
           onPress={() => onViewGallery(event)}
-          className="font-bold px-0 h-auto min-w-0 bg-transparent hover:translate-x-1 transition-transform"
+          className="font-bold p-2 h-auto min-w-0 bg-transparent hover:translate-x-1 transition-transform"
           endContent={<ChevronRight size={18} />}
         >
           View Gallery

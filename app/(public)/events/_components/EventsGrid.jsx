@@ -14,10 +14,28 @@ export default function EventsGrid() {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [category, setCategory] = useState("");
+  const [dateRange, setDateRange] = useState(null);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(1);
   const [limit] = useState(6);
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Reset page when filters change to ensure user starts from page 1 of new results
+  React.useEffect(() => {
+    setPage(1);
+  }, [debouncedSearchTerm, category, startDate, endDate]);
+
+  // Sync date range with API filter strings
+  React.useEffect(() => {
+    if (dateRange?.start && dateRange?.end) {
+      setStartDate(dateRange.start.toString());
+      setEndDate(dateRange.end.toString());
+    } else {
+      setStartDate("");
+      setEndDate("");
+    }
+  }, [dateRange]);
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -62,6 +80,7 @@ export default function EventsGrid() {
     setCategory("");
     setStartDate("");
     setEndDate("");
+    setDateRange(null);
     setPage(1);
   };
 
@@ -76,10 +95,10 @@ export default function EventsGrid() {
         setSearchTerm={setSearchTerm}
         category={category}
         setCategory={setCategory}
-        startDate={startDate}
-        setStartDate={setStartDate}
-        endDate={endDate}
-        setEndDate={setEndDate}
+        dateRange={dateRange}
+        setDateRange={setDateRange}
+        showFilters={showFilters}
+        setShowFilters={setShowFilters}
         onReset={handleReset}
         onSearch={handleSearch}
       />

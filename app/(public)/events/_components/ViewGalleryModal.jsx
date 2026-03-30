@@ -54,6 +54,7 @@ export default function ViewGalleryModal({ isOpen, onClose, event }) {
         size="5xl"
         scrollBehavior="inside"
         backdrop="blur"
+        hideCloseButton
       >
         <ModalContent className="rounded-3xl">
           <ModalHeader className="flex flex-col gap-1 border-b border-gray-100 overflow-hidden">
@@ -100,6 +101,7 @@ export default function ViewGalleryModal({ isOpen, onClose, event }) {
                           size="sm"
                           variant="flat"
                           className="bg-white/20 text-white backdrop-blur-md border border-white/30 rounded-xl"
+                          onPress={() => openPreview(item)}
                         >
                           {item.type === "image" ? (
                             <ImageIcon size={18} />
@@ -111,8 +113,8 @@ export default function ViewGalleryModal({ isOpen, onClose, event }) {
                           isIconOnly
                           size="sm"
                           variant="flat"
-                          className="bg-primary/80 text-white border border-white/20 rounded-xl"
-                          onPress={(e) => {
+                          className="bg-primary/80 text-white border border-white/20 rounded-xl font-bold"
+                          onClick={(e) => {
                             e.stopPropagation();
                             handleDownload(item.url, `event-media-${index}`);
                           }}
@@ -157,7 +159,7 @@ export default function ViewGalleryModal({ isOpen, onClose, event }) {
         className="bg-black/95 z-999"
       >
         <ModalContent>
-          <div className="relative w-full h-full flex items-center justify-center p-4 md:p-12 group">
+          <div className="relative w-full h-full flex flex-col items-center justify-center p-4 md:p-12 gap-6 group">
             <button
               onClick={() => setSelectedMedia(null)}
               className="absolute top-6 right-6 z-50 p-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl backdrop-blur-xl transition-all"
@@ -168,19 +170,19 @@ export default function ViewGalleryModal({ isOpen, onClose, event }) {
             {selectedMedia?.type === "image" ? (
               <img
                 src={selectedMedia.url}
-                className="max-w-full max-h-full object-contain rounded-xl shadow-2xl"
+                className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl"
                 alt="Preview"
               />
             ) : (
               <video
                 src={selectedMedia?.url}
                 controls
-                className="max-w-full max-h-full rounded-xl shadow-2xl"
+                className="max-w-full max-h-[85vh] rounded-xl shadow-2xl"
                 autoPlay
               />
             )}
 
-            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-4">
+            <div className="flex items-center gap-4">
               <Button
                 color="primary"
                 startContent={<Download size={18} />}
