@@ -111,7 +111,7 @@ const RecentUsers = () => {
           href="/admin/users"
           className="text-primary text-sm font-bold hover:underline flex items-center gap-1"
         >
-          View All Users <ArrowUpRight size={16} />
+          View All <ArrowUpRight size={16} />
         </Link>
       </div>
 

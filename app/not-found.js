@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { Home, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function NotFound() {
@@ -29,17 +29,10 @@ export default function NotFound() {
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-          <Link
-            href="/"
-            className="group flex items-center gap-2 bg-primary text-white px-8 py-3.5 rounded-xl font-bold hover:bg-primary-dark transition-all shadow-lg shadow-primary/25 hover:scale-105 active:scale-95"
-          >
-            <Home size={20} />
-            Back to Home
-          </Link>
+        <div className="flex items-center justify-center pt-4">
           <button
-            onClick={() => router.push("/")}
-            className="flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-semibold px-6 py-3 transition-colors"
+            onClick={() => router.back()}
+            className="group flex items-center gap-2 bg-primary text-white px-8 py-3.5 rounded-xl font-bold hover:bg-primary-dark transition-all shadow-lg shadow-primary/25 hover:scale-105 active:scale-95"
           >
             <ArrowLeft size={20} />
             Go Back

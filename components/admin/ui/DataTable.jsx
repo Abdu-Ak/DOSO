@@ -125,9 +125,10 @@ const DataTable = ({
         topContentPlacement="inside"
       >
         <TableHeader>
-          {table.getHeaderGroups()[0].headers.map((header) => (
+          {table?.getHeaderGroups()?.[0]?.headers?.map((header) => (
             <TableColumn
               key={header.id}
+              id={header.id}
               align={header.column.columnDef.meta?.align || "start"}
             >
               {header.isPlaceholder

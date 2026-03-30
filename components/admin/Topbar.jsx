@@ -87,6 +87,15 @@ const Topbar = ({ onMenuClick }) => {
       }
     }
 
+    if (parts[0] === "admin" && parts[1] === "events") {
+      const lastPart = parts[parts.length - 1];
+      if (lastPart === "create") return "Event / Create";
+      if (lastPart === "edit") return "Event / Edit";
+      if (parts.length > 3 || (parts[2] && parts[2].length > 15)) {
+        return "Event / Details";
+      }
+    }
+
     const lastPart = parts[parts.length - 1];
     return (
       lastPart.charAt(0).toUpperCase() + lastPart.slice(1).replace(/-/g, " ")
