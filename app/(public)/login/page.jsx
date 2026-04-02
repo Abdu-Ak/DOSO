@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const LoginPage = () => {
   const router = useRouter();
@@ -148,12 +149,12 @@ const LoginPage = () => {
 
             <div className="flex items-center justify-end">
               <div className="text-sm">
-                <a
-                  href="#"
+                <Link
+                  href="/forgot-password"
                   className="font-medium text-primary hover:text-primary-dark transition-colors"
                 >
                   Forgot your password?
-                </a>
+                </Link>
               </div>
             </div>
 
