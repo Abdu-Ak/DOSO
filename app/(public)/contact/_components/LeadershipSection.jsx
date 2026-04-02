@@ -1,5 +1,5 @@
 import React from "react";
-import { AtSign, Phone, Smartphone } from "lucide-react";
+import { AtSign, Mail, Phone, Smartphone } from "lucide-react";
 import { getSettings } from "@/lib/settings";
 
 export default async function LeadershipSection() {
@@ -86,7 +86,7 @@ export default async function LeadershipSection() {
                     className={`flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg ${leader.hoverColor} transition-colors group`}
                     href={`mailto:${leader.email}`}
                   >
-                    <AtSign size={18} className={leader.titleColor} />
+                    <Mail size={18} className={leader.titleColor} />
                     <span className="truncate font-medium">{leader.email}</span>
                   </a>
                   <a

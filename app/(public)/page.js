@@ -12,7 +12,7 @@ export default function Home() {
       <HistoryMission />
       <Leadership />
       <Events />
-      <Newsletter />
+      {/* <Newsletter /> */}
     </>
   );
 }
