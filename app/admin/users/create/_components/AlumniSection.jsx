@@ -298,14 +298,14 @@ const AlumniSection = ({
               selectedKeys={field.value ? [field.value] : []}
               onSelectionChange={(keys) => field.onChange(Array.from(keys)[0])}
             >
-              <SelectItem key="Mudaris" textValue="Mudaris">
-                Mudaris
+              <SelectItem key="Mudarris" textValue="Mudarris">
+                Mudarris
               </SelectItem>
-              <SelectItem key="Khatheeb" textValue="Khatheeb">
-                Khatheeb
+              <SelectItem key="Khateeb" textValue="Khateeb">
+                Khateeb
               </SelectItem>
-              <SelectItem key="Sadr Mualim" textValue="Sadr Mualim">
-                Sadr Mualim
+              <SelectItem key="Sadar Muallim" textValue="Sadar Muallim">
+                Sadar Muallim
               </SelectItem>
               <SelectItem key="Other" textValue="Other">
                 Other
