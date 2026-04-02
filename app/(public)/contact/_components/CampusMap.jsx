@@ -1,7 +1,11 @@
 import React from "react";
 import { Bus, Navigation } from "lucide-react";
+import { getSettings } from "@/lib/settings";
 
-export default function CampusMap() {
+export default async function CampusMap() {
+  const settings = await getSettings();
+  const { contact } = settings;
+
   return (
     <section className="relative pt-24 pb-0 bg-white dark:bg-background-dark overflow-hidden">
       <div className="absolute inset-0 islamic-pattern opacity-10"></div>
@@ -38,10 +42,15 @@ export default function CampusMap() {
                 Located 15 mins from Central Station. Free visitor parking
                 available on site for all guests.
               </p>
-              <button className="bg-primary text-white text-sm font-bold px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-primary/95 transition-all w-full justify-center">
+              <a
+                href={contact?.mapLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-primary text-white text-sm font-bold px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-primary/95 transition-all w-full justify-center"
+              >
                 <Navigation size={14} />
                 Get Directions
-              </button>
+              </a>
             </div>
           </div>
         </div>

@@ -1,7 +1,11 @@
 import React from "react";
 import { MapPin, Phone, Mail, Clock, Calendar } from "lucide-react";
+import { getSettings } from "@/lib/settings";
 
-export default function ContactInfo() {
+export default async function ContactInfo() {
+  const settings = await getSettings();
+  const { contact } = settings;
+
   return (
     <div className="lg:sticky lg:top-32">
       <div className="bg-primary text-white p-12 mosque-arch-card shadow-2xl relative overflow-hidden">
@@ -21,10 +25,8 @@ export default function ContactInfo() {
               </div>
               <div>
                 <p className="font-bold text-lg">Main Campus</p>
-                <p className="text-white/80 leading-relaxed">
-                  123 Education Square, Knowledge City,
-                  <br />
-                  State 54321, Country
+                <p className="text-white/80 leading-relaxed whitespace-pre-line">
+                  {contact?.address}
                 </p>
               </div>
             </div>
@@ -35,7 +37,7 @@ export default function ContactInfo() {
               </div>
               <div>
                 <p className="font-bold text-lg">Switchboard</p>
-                <p className="text-white/80">+1 (234) 567-8900</p>
+                <p className="text-white/80">{contact?.phone}</p>
               </div>
             </div>
 
@@ -45,7 +47,7 @@ export default function ContactInfo() {
               </div>
               <div>
                 <p className="font-bold text-lg">General Enquiries</p>
-                <p className="text-white/80">info@darulhidaya.edu</p>
+                <p className="text-white/80">{contact?.email}</p>
               </div>
             </div>
           </div>

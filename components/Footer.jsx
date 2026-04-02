@@ -1,6 +1,10 @@
 import Logo from "./Logo";
+import { getSettings } from "@/lib/settings";
 
-const Footer = () => {
+const Footer = async () => {
+  const settings = await getSettings();
+  const { contact } = settings;
+
   return (
     <footer
       className="bg-background-dark text-slate-400 py-16 border-t border-slate-800"
@@ -59,29 +63,27 @@ const Footer = () => {
                 <span className="material-symbols-outlined text-primary mt-0.5">
                   location_on
                 </span>
-                <span>
-                  123 Islamic Center Road,
-                  <br />
-                  Cityville, State 12345
-                </span>
+                <span>{contact?.address}</span>
               </li>
               <li className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-primary">
                   call
                 </span>
-                <span>+1 (234) 567-8900</span>
+                <span>{contact?.phone}</span>
               </li>
               <li className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-primary">
                   mail
                 </span>
-                <span>info@darulhidayadars.org</span>
+                <span>{contact?.email}</span>
               </li>
             </ul>
           </div>
         </div>
         <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-body">
-          <p>© 2023 Darul Hidaya Dars. All rights reserved.</p>
+          <p>
+            © {new Date().getFullYear()} Darul Hidaya Dars. All rights reserved.
+          </p>
           <p>
             Designed with <span className="text-red-500">♥</span> for the Ummah.
           </p>
