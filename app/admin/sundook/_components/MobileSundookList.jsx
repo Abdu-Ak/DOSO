@@ -13,12 +13,19 @@ import {
   Package,
   FileText,
   Loader2,
+  Trash2,
 } from "lucide-react";
 
 /**
  * Mobile view for Sundook list in Admin panel
  */
-const MobileSundookList = ({ records, isLoading, onApprove, onReject }) => {
+const MobileSundookList = ({
+  records,
+  isLoading,
+  onApprove,
+  onReject,
+  onDelete,
+}) => {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-slate-400">
@@ -117,30 +124,40 @@ const MobileSundookList = ({ records, isLoading, onApprove, onReject }) => {
               )}
             </div>
 
-            {record.status === "pending" && (
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  color="success"
-                  variant="flat"
-                  className="font-bold flex-1 h-10"
-                  onPress={() => onApprove(record)}
-                  startContent={<CheckCircle2 size={16} />}
-                >
-                  Approve
-                </Button>
-                <Button
-                  size="sm"
-                  color="danger"
-                  variant="flat"
-                  className="font-bold flex-1 h-10"
-                  onPress={() => onReject(record)}
-                  startContent={<XCircle size={16} />}
-                >
-                  Reject
-                </Button>
-              </div>
-            )}
+            <div className="flex items-center justify-between gap-2">
+              {record.status === "pending" && (
+                <div className="flex gap-2 w-full">
+                  <Button
+                    size="sm"
+                    color="success"
+                    variant="flat"
+                    className="font-bold w-full"
+                    onPress={() => onApprove(record)}
+                    startContent={<CheckCircle2 size={16} />}
+                  >
+                    Approve
+                  </Button>
+                  <Button
+                    size="sm"
+                    color="danger"
+                    variant="flat"
+                    className="font-bold w-full"
+                    onPress={() => onReject(record)}
+                    startContent={<XCircle size={16} />}
+                  >
+                    Reject
+                  </Button>
+                </div>
+              )}
+              <Button
+                size="sm"
+                color="danger"
+                variant="light"
+                className="font-bold w-fit "
+                onPress={() => onDelete(record)}
+                startContent={<Trash2 size={14} />}
+              />
+            </div>
           </CardBody>
         </Card>
       ))}

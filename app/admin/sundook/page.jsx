@@ -17,6 +17,7 @@ import MobileSundookList from "./_components/MobileSundookList";
 import ApproveModal from "./_components/ApproveModal";
 import RejectModal from "./_components/RejectModal";
 import CreateRecordModal from "./_components/CreateRecordModal";
+import ConfirmModal from "@/components/admin/ui/ConfirmModal";
 
 export default function AdminSundookPage() {
   const queryClient = useQueryClient();
@@ -30,6 +31,8 @@ export default function AdminSundookPage() {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [receiptNumber, setReceiptNumber] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
+  const [recordToDelete, setRecordToDelete] = useState(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const {
     isOpen: isApproveOpen,
@@ -148,6 +151,29 @@ export default function AdminSundookPage() {
       });
     },
   });
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      const response = await axios.delete(`/api/sundook/${id}`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sundook"] });
+      addToast({
+        title: "Deleted",
+        description: "Record deleted successfully",
+        color: "success",
+      });
+      setIsDeleteOpen(false);
+      setRecordToDelete(null);
+    },
+    onError: (error) => {
+      addToast({
+        title: "Error",
+        description: error.response?.data?.error || "Failed to delete record",
+        color: "danger",
+      });
+    },
+  });
 
   const handleApprove = () => {
     statusMutation.mutate({
@@ -192,6 +218,10 @@ export default function AdminSundookPage() {
         onReject: (r) => {
           setSelectedRecord(r);
           onRejectOpen();
+        },
+        onDelete: (r) => {
+          setRecordToDelete(r);
+          setIsDeleteOpen(true);
         },
       }),
     [onApproveOpen, onRejectOpen],
@@ -263,6 +293,10 @@ export default function AdminSundookPage() {
             setSelectedRecord(r);
             onRejectOpen();
           }}
+          onDelete={(r) => {
+            setRecordToDelete(r);
+            setIsDeleteOpen(true);
+          }}
         />
         {totalPages > 1 && (
           <div className="flex justify-center mt-6">
@@ -304,6 +338,27 @@ export default function AdminSundookPage() {
         setFormData={setNewRecordData}
         onSubmit={onSubmitCreate}
         isLoading={createMutation.isPending}
+      />
+
+      <ConfirmModal
+        isOpen={isDeleteOpen}
+        onClose={() => {
+          setIsDeleteOpen(false);
+          setRecordToDelete(null);
+        }}
+        onConfirm={() => deleteMutation.mutate(recordToDelete?._id)}
+        isLoading={deleteMutation.isPending}
+        title="Delete Record"
+        confirmText="Delete"
+        message={
+          <>
+            <p>
+              Are you sure you want to delete the Sundook record for{" "}
+              <strong>{recordToDelete?.alumni?.name}</strong>?
+            </p>
+            <p className="mt-1">This action cannot be undone.</p>
+          </>
+        }
       />
     </div>
   );

@@ -10,9 +10,15 @@ import {
   DropdownMenu,
   DropdownItem,
 } from "@heroui/dropdown";
-import { MoreVertical, CheckCircle2, XCircle, FileText } from "lucide-react";
+import {
+  MoreVertical,
+  CheckCircle2,
+  XCircle,
+  FileText,
+  Trash2,
+} from "lucide-react";
 
-export const getSundookColumns = ({ onApprove, onReject }) => [
+export const getSundookColumns = ({ onApprove, onReject, onDelete }) => [
   {
     header: "Alumni",
     accessorKey: "alumni.name",
@@ -29,14 +35,14 @@ export const getSundookColumns = ({ onApprove, onReject }) => [
             description={`@${record.alumni?.userId}`}
             name={record.alumni?.name || "Unknown Alumni"}
           />
-          {record.status === "pending" && (
-            <Dropdown placement="bottom-end">
-              <DropdownTrigger>
-                <Button isIconOnly size="sm" variant="light">
-                  <MoreVertical size={18} className="text-slate-400" />
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu aria-label="Sundook actions" variant="flat">
+          <Dropdown placement="bottom-end">
+            <DropdownTrigger>
+              <Button isIconOnly size="sm" variant="light">
+                <MoreVertical size={18} className="text-slate-400" />
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu aria-label="Sundook actions" variant="flat">
+              {record.status === "pending" && (
                 <DropdownItem
                   key="approve"
                   color="success"
@@ -46,6 +52,8 @@ export const getSundookColumns = ({ onApprove, onReject }) => [
                 >
                   Approve Record
                 </DropdownItem>
+              )}
+              {record.status === "pending" && (
                 <DropdownItem
                   key="reject"
                   color="danger"
@@ -55,9 +63,18 @@ export const getSundookColumns = ({ onApprove, onReject }) => [
                 >
                   Reject Record
                 </DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
-          )}
+              )}
+              <DropdownItem
+                key="delete"
+                color="danger"
+                startContent={<Trash2 size={16} />}
+                onPress={() => onDelete(record)}
+                className="text-danger font-bold"
+              >
+                Delete Record
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
         </div>
       );
     },
