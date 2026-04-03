@@ -52,7 +52,8 @@ const Topbar = ({ onMenuClick }) => {
     staleTime: 30000, // Consider data fresh for 30s to avoid redundant fetches
   });
 
-  const notifCount = notifData?.count || 0;
+  const notifCount =
+    (notifData?.count || 0) + (notifData?.pendingSundooks || 0);
 
   // Close notifications panel on outside click
   useEffect(() => {
@@ -223,14 +224,6 @@ const Topbar = ({ onMenuClick }) => {
                 className="font-bold"
               >
                 View Profile
-              </DropdownItem>
-              <DropdownItem
-                key="edit"
-                startContent={<UserPen size={18} />}
-                onPress={() => router.push(`/admin/users/${userId}/edit`)}
-                className="font-bold"
-              >
-                Edit Profile
               </DropdownItem>
               <DropdownItem
                 key="qr"

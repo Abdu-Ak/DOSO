@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@heroui/autocomplete": "^2.3.34",
     "@heroui/avatar": "^2.2.25",
     "@heroui/button": "^2.2.31",
     "@heroui/calendar": "^2.2.31",

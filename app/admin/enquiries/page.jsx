@@ -193,10 +193,10 @@ export default function EnquiriesPage() {
       {/* Page Header and Filters */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-serif font-bold text-slate-800 dark:text-white">
-            Enquiries
-          </h1>
-          <p className="text-slate-500 text-sm font-medium">
+          <h2 className="text-lg font-body! font-bold text-slate-900 dark:text-white">
+            Enquiries List
+          </h2>
+          <p className="text-slate-600 text-sm dark:text-slate-400">
             Manage student and admissions inquiries efficiently
           </p>
         </div>

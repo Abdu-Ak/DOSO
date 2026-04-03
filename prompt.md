@@ -1,52 +1,54 @@
-# Task: Separate Student Management and Update Education Fields
+# Task: Implement "Sundook" (Welfare Box) Module with Notifications
 
-## Context
+## 1. Context
+We are adding a module called **Sundook** to an existing application. This is a welfare box management system where Alumni submit financial contributions. There are two primary roles: **Admin** and **Alumni**.
 
-I am refactoring a Next.js application using **Mongoose**, **React Hook Form**, and **HeroUI**.
-I am decoupling "Students" from the general User list into a dedicated "Student Management" section.
+## 2. Business Logic & Constraints
+* **Submission Limit:** An Alumni can only submit **one** Sundook record per calendar year.
+* **Approval Workflow:**
+    * Alumni submissions start as `pending`.
+    * Admins must review to `approve` (require Receipt Number) or `reject` (require Rejection Reason).
+    * Admin-created entries are `auto-approved` and require a Receipt Number immediately.
 
-## 1. Schema Updates (models/User.js)
+## 3. Role-Based Requirements
 
-- **Remove field:** `madrasa_name`.
-- **Add field:** `current_madrasa_class` (String) - e.g., "Class 7".
-- **Add field:** `current_school_class` (String) - e.g., "9th Standard".
-- **Hardcoded Role:** Since the Student Management modal is specific to students, the `role` should be automatically set to `student` on the backend/form submission. No role selection UI is needed for this section.
-- **Status:** For public registrations, default `status` remains `Pending`.
+### A. Alumni Portal
+* **Form Fields:** `box_number` and `amount` (visible).
+* **Background Logic:** Auto-pass `alumni_id` and current `year` in the payload.
+* **Table View:** Show personal submissions. 
+    * Show `rejection_reason` if status is rejected.
+    * Show `receipt_number` if status is approved.
 
-## 2. UI Component Update (StudentSection.jsx)
+### B. Admin Portal
+* **Notification System:** The Admin dashboard must feature a **Notification Badge/List** showing the count of "Pending Sundook Submissions" to alert them that action is required.
+* **Management Table:** Master list of all submissions.
+    * **Actions:** Approve (modal for `receipt_number`) or Reject (modal for `rejection_reason`).
+* **Creation Form:** Admin can create for any Alumni (auto-approved).
 
-Update the `StudentSection` component:
+## 4. Communication Logic (Email Triggers)
+The system must trigger automated emails in the following scenarios:
+1.  **On Approval:** Send an email to the Alumni notifying them that their Sundook for [Year] has been approved. Include the `receipt_number` and `amount` in the mail body.
+2.  **On Rejection:** Send an email to the Alumni notifying them that their submission was not accepted. Include the `rejection_reason` and instructions to contact support or resubmit.
 
-- **Remove** the "Madrasa Name" field.
-- **Add** two new InputFields:
-  1. **Current Madrasa Class**: Use `School` icon.
-  2. **Current School Class**: Use `School` or `BookOpen` icon.
-- **Remove Role/Password logic:** Ensure no role selection is present. If it's a new student creation, the password can be generated or handled as per existing logic, but the UI should stay focused on student data.
-- **Public Form:** These changes must reflect in the public-facing registration form.
+## 5. Technical Specifications
 
-## 3. Admin Sidebar & Management Logic
+### Data Schema (Sundook)
+* `id`, `alumni_id`, `box_number`, `amount`, `year`, `status`, `receipt_number`, `rejection_reason`, `created_at`.
 
-- **Sidebar:** Add a "Student Management" menu visible only to `super_admin` and `admin`.
-- **User List Filtering:** - Modify the general **User Management** table to **exclude** all users with `role: "student"`.
-  - Remove student-related filters (districts, etc.) from the general User list.
-- **Student Management Page:**
-  - Create a dedicated view that **only** fetches/displays users with `role: "student"`.
-  - Implement full CRUD (Add, Edit, Delete, View).
+### API Logic
+1.  **POST /sundook**: 
+    * Validate 1 entry per user/year.
+    * If Alumni: Set `status: pending` and trigger an **Admin Notification**.
+    * If Admin: Require `receipt_number` and set `status: approved`.
+2.  **PATCH /sundook/:id/status**:
+    * **If Approved:** Update status + `receipt_number`. Trigger **Alumni Email**.
+    * **If Rejected:** Update status + `rejection_reason`. Trigger **Alumni Email**.
 
-## 4. Authentication Restriction (Temporary)
-
-- **Disable Student Login:** - In the login logic (API route or Auth provider), check the user's role.
-  - If `role === 'student'`, **comment out** the session/JWT generation code.
-  - Return a response: `{ message: "Student login is currently disabled." }`.
-
-## 5. Filtering & UI
-
-- In the new **Student Management** list, add specific filters for:
-  - `district`
-  - `status` (Active/Pending/Inactive)
-  - `current_madrasa_class`
-  - `current_school_class`
-
-## Instructions for AI:
-
-Please provide the updated `StudentSection.jsx`, the modified Mongoose Schema, and the logic for the filtered Student Management table.
+## 6. Instructions for Implementation
+Please generate:
+1.  **Database Migration** for the Sundook table.
+2.  **API Endpoints** with validation, notification logic, and email trigger hooks.
+3.  **Frontend Components**:
+    * Alumni Form & Table.
+    * Admin Dashboard with "Pending" notification badge and management table.
+    * Email templates for Approval and Rejection.

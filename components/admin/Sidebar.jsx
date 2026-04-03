@@ -12,6 +12,7 @@ import {
   ChevronLeft,
   ChevronRight,
   MessageSquareText,
+  Box,
 } from "lucide-react";
 import Logo from "../Logo";
 import { signOut } from "next-auth/react";
@@ -65,6 +66,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       icon: Users,
     },
     { label: "Events", href: "/admin/events", icon: Calendar },
+    { label: "Sundook", href: "/admin/sundook", icon: Box },
     { label: "Enquiries", href: "/admin/enquiries", icon: MessageSquareText },
     { label: "Settings", href: "/admin/settings", icon: Settings },
   ];

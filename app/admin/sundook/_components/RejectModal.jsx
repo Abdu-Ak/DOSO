@@ -1,8 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
-import { Input } from "@heroui/input";
-import { Button } from "@heroui/button";
+import React from "react";
 import {
   Modal,
   ModalContent,
@@ -10,27 +8,27 @@ import {
   ModalBody,
   ModalFooter,
 } from "@heroui/modal";
+import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
 import { CircleX } from "lucide-react";
 
-/**
- * Standardized RejectModal for User Management
- */
-const RejectModal = ({ user, onClose, onReject, isLoading }) => {
-  const [reason, setReason] = useState("");
-
-  const handleReject = () => {
-    onReject({ id: user._id, reason });
-    setReason("");
-  };
-
+const RejectModal = ({
+  isOpen,
+  onOpenChange,
+  record,
+  rejectionReason,
+  setRejectionReason,
+  onReject,
+  isLoading,
+}) => {
   return (
-    <Modal isOpen={!!user} onClose={onClose} hideCloseButton>
+    <Modal isOpen={isOpen} onOpenChange={onOpenChange} hideCloseButton>
       <ModalContent>
         {(onClose) => (
           <>
             <ModalHeader className="flex items-center justify-between">
               <h3 className="text-lg font-body! font-semibold text-slate-800 dark:text-white">
-                Reject Registration
+                Reject Submission
               </h3>
               <button
                 onClick={onClose}
@@ -42,14 +40,14 @@ const RejectModal = ({ user, onClose, onReject, isLoading }) => {
             </ModalHeader>
             <ModalBody>
               <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
-                Rejecting <strong>{user?.name}</strong>. Provide a reason
-                (optional):
+                Rejecting record for <strong>{record?.alumni?.name}</strong>.
+                Provide a reason:
               </p>
               <Input
                 variant="bordered"
                 placeholder="Rejection reason"
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
                 radius="sm"
               />
             </ModalBody>
@@ -57,11 +55,12 @@ const RejectModal = ({ user, onClose, onReject, isLoading }) => {
               <Button
                 color="danger"
                 fullWidth
-                className="font-bold h-12 rounded-lg shadow-lg shadow-danger/20"
+                onPress={onReject}
+                isDisabled={!rejectionReason}
                 isLoading={isLoading}
-                onPress={handleReject}
+                className="font-bold h-12 rounded-lg w-fit"
               >
-                Reject User
+                Reject & Notify
               </Button>
             </ModalFooter>
           </>

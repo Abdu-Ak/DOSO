@@ -25,14 +25,6 @@ export default function ConfirmModal({
       isOpen={isOpen}
       onClose={onClose}
       hideCloseButton
-      // backdrop="opaque"
-      // classNames={{
-      //   backdrop: "bg-slate-900/60",
-      //   base: "bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800",
-      //   header: "border-b border-slate-100 dark:border-slate-800 p-6",
-      //   body: "p-8",
-      //   footer: "p-6 pt-0 border-none",
-      // }}
       motionProps={{
         variants: {
           enter: {

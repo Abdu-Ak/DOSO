@@ -104,7 +104,7 @@ export default function StudentProfilePage() {
           className="font-bold shadow-lg shadow-primary/20"
           radius="xl"
         >
-          Edit Profile
+          Edit
         </Button>
       </div>
 

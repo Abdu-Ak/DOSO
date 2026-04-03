@@ -88,10 +88,10 @@ export default function AlumniModal({ isOpen, onClose, alumni }) {
       onOpenChange={onClose}
       size="2xl"
       scrollBehavior="inside"
-      backdrop="blur"
+      // backdrop="blur"
       classNames={{
-        backdrop: "bg-slate-900/10 backdrop-blur-sm shadow-none",
-        base: "bg-white dark:bg-slate-950 max-h-[90vh]",
+        // backdrop: "bg-slate-900/10 backdrop-blur-sm shadow-none",
+        base: "bg-white dark:bg-slate-950 max-h-[80vh] md:max-h-[96vh]",
         header: "border-0 pb-0",
         body: "px-8 pb-10 pt-4",
         closeButton: "top-6 right-6 hover:bg-slate-100 dark:hover:bg-slate-800",
