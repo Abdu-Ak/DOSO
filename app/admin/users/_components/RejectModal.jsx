@@ -10,7 +10,11 @@ import {
   ModalBody,
   ModalFooter,
 } from "@heroui/modal";
+import { CircleX } from "lucide-react";
 
+/**
+ * Standardized RejectModal for User Management
+ */
 const RejectModal = ({ user, onClose, onReject, isLoading }) => {
   const [reason, setReason] = useState("");
 
@@ -24,10 +28,17 @@ const RejectModal = ({ user, onClose, onReject, isLoading }) => {
       <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader>
+            <ModalHeader className="flex items-center justify-between">
               <h3 className="text-lg font-body! font-semibold text-slate-800 dark:text-white">
                 Reject Registration
               </h3>
+              <button
+                onClick={onClose}
+                className="w-6 h-6 flex items-center justify-center text-red-600 hover:bg-red-400 rounded-full hover:text-white transition-all duration-200"
+                aria-label="Close"
+              >
+                <CircleX size={22} />
+              </button>
             </ModalHeader>
             <ModalBody>
               <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
@@ -43,16 +54,14 @@ const RejectModal = ({ user, onClose, onReject, isLoading }) => {
               />
             </ModalBody>
             <ModalFooter>
-              <Button variant="light" onPress={onClose} className="font-bold">
-                Cancel
-              </Button>
               <Button
                 color="danger"
-                className="font-bold"
+                fullWidth
+                className="font-bold h-12 rounded-lg shadow-lg shadow-danger/20"
                 isLoading={isLoading}
                 onPress={handleReject}
               >
-                Reject
+                Reject User
               </Button>
             </ModalFooter>
           </>

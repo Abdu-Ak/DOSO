@@ -1,43 +1,50 @@
 import React from "react";
-import { AtSign, Smartphone } from "lucide-react";
+import { AtSign, Mail, Phone, Smartphone } from "lucide-react";
+import { getSettings } from "@/lib/settings";
 
-const LEADERSHIP_DATA = [
-  {
-    name: "Sheikh Abdullah Omar",
-    title: "President",
-    email: "president@darulhidaya.edu",
-    extension: "101",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCXgbK0TQHiHIpfyDIN_e-BJJufvl_9GW5FoCZ-AF9LtQuoGS1cv2rGZUUjp54jXsDyepLqAV140JN1fQj5BMcE8PYfa4v2_Jo573o885ajT7XGSkTreIxjvTXEqqXBnO_VYgBlWgaRUJOCicMtzjKj2PJIFZ4oqfo7CubDMUfZoN36tNeT6qUt8s9USVse-YntXERwUIGZNP_GBeptMMTxL6ZJVgg0m781TCTfbmMtmM_jMI51iaVRiSXeB3kXqCQNoGnJiWGWpQ",
-    headerColor: "bg-primary",
-    titleColor: "text-primary",
-    hoverColor: "hover:bg-primary/5",
-  },
-  {
-    name: "Mr. Ahmed Al-Masri",
-    title: "General Secretary",
-    email: "secretary@darulhidaya.edu",
-    extension: "105",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAdF0_Dwq6Z7KNG_AQdFvqErb9SMHabVuX4vaa0gH45p8E24EnfvUEynjJvmsN-QJMNXVMd7ALzYOLYR2xVHbzSUE3UtxOVSODXqA5SIUE0qQMLJoAERq2yoS0uIqXz2lHgdo9AMbxz64PNYZJdswdLny0WRSHtKx17qgOlRK2st7IOpne_VrqR25ii58oJdK0HWqPEIAemJjDn8ECIRHlHoiZYl3xz-9_AfMw2PU_cPOhB6LNb0kQc0BH7Vak3ES0IDVTWmJw0Sg",
-    headerColor: "bg-accent-green",
-    titleColor: "text-accent-green",
-    hoverColor: "hover:bg-accent-green/5",
-  },
-  {
-    name: "Maulana Yusuf Hassan",
-    title: "Head Master",
-    email: "headmaster@darulhidaya.edu",
-    extension: "110",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAEsBOlXNVHfEtmlTuap1Dgtchdwwe74lTGaNMqtjnU7bhpZn1UhhjFhBbi4QTPDgZRLjyXnhN_JX2lF5k0ffhCQ0vc0kJcmi3SkBouZ29nsVXunL3VQuvrt3l-_2-4wc5gH36wgFG5e8vAl_3M5g-VFWm0Uk6yczMrCnlXXR1tlcdn7yRwrC0nagG4jyUk5k6zx8WGsZVot4RaNf6dpFabDpNv6rsNAOO7bRA3FvDgDlxzkqR6yHYUNgLGrW4ubOe8cu-B-Yu8_w",
-    headerColor: "bg-primary",
-    titleColor: "text-primary",
-    hoverColor: "hover:bg-primary/5",
-  },
-];
+export default async function LeadershipSection() {
+  const settings = await getSettings();
+  const { leadership } = settings;
 
-export default function LeadershipSection() {
+  const LEADERSHIP_DATA = [
+    {
+      name: leadership?.president?.name || "Sheikh Abdullah Omar",
+      title: leadership?.president?.title || "President",
+      email: leadership?.president?.email || "president@darulhidaya.edu",
+      phone: leadership?.president?.phone || "101",
+      image:
+        leadership?.president?.image ||
+        "https://images.unsplash.com/photo-1544161515-4af6b1d8c114?q=80&w=2670&auto=format&fit=crop",
+      headerColor: "bg-primary",
+      titleColor: "text-primary",
+      hoverColor: "hover:bg-primary/5",
+    },
+    {
+      name: leadership?.secretary?.name || "Mr. Ahmed Al-Masri",
+      title: leadership?.secretary?.title || "General Secretary",
+      email: leadership?.secretary?.email || "secretary@darulhidaya.edu",
+      phone: leadership?.secretary?.phone || "105",
+      image:
+        leadership?.secretary?.image ||
+        "https://images.unsplash.com/photo-1544161515-4af6b1d8c114?q=80&w=2670&auto=format&fit=crop",
+      headerColor: "bg-accent-green",
+      titleColor: "text-accent-green",
+      hoverColor: "hover:bg-accent-green/5",
+    },
+    {
+      name: leadership?.headmaster?.name || "Maulana Yusuf Hassan",
+      title: leadership?.headmaster?.title || "Head Master",
+      email: leadership?.headmaster?.email || "headmaster@darulhidaya.edu",
+      phone: leadership?.headmaster?.phone || "110",
+      image:
+        leadership?.headmaster?.image ||
+        "https://images.unsplash.com/photo-1544161515-4af6b1d8c114?q=80&w=2670&auto=format&fit=crop",
+      headerColor: "bg-primary",
+      titleColor: "text-primary",
+      hoverColor: "hover:bg-primary/5",
+    },
+  ];
+
   return (
     <section className="py-24 bg-slate-50 dark:bg-slate-900/40 relative">
       <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -79,15 +86,15 @@ export default function LeadershipSection() {
                     className={`flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg ${leader.hoverColor} transition-colors group`}
                     href={`mailto:${leader.email}`}
                   >
-                    <AtSign size={18} className={leader.titleColor} />
+                    <Mail size={18} className={leader.titleColor} />
                     <span className="truncate font-medium">{leader.email}</span>
                   </a>
                   <a
                     className={`flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg ${leader.hoverColor} transition-colors group`}
-                    href={`tel:+12345678900`}
+                    href={`tel:${leader.phone}`}
                   >
-                    <Smartphone size={18} className={leader.titleColor} />
-                    <span className="font-medium">Ext: {leader.extension}</span>
+                    <Phone size={18} className={leader.titleColor} />
+                    <span className="font-medium">{leader.phone}</span>
                   </a>
                 </div>
               </div>

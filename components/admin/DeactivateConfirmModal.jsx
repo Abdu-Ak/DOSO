@@ -9,28 +9,33 @@ import {
   ModalFooter,
 } from "@heroui/modal";
 import { Button } from "@heroui/button";
+import { CircleX } from "lucide-react";
 
+/**
+ * Standardized DeactivateConfirmModal matching project-wide modal standards
+ */
 const DeactivateConfirmModal = ({ isOpen, onOpenChange, onConfirm }) => {
   return (
-    <Modal
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      backdrop="blur"
-      placement="center"
-      className="dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
-    >
+    <Modal isOpen={isOpen} onOpenChange={onOpenChange} hideCloseButton>
       <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader className="flex flex-col gap-1 items-center justify-center pt-8">
-              <div className="w-16 h-16 bg-danger/10 rounded-full flex items-center justify-center text-danger mb-4">
+            <ModalHeader className="flex items-center justify-between">
+              <h3 className="text-lg font-body! font-semibold text-slate-800 dark:text-white">
+                Confirm Deactivation
+              </h3>
+              <button
+                onClick={onClose}
+                className="w-6 h-6 flex items-center justify-center text-red-600 hover:bg-red-400 rounded-full hover:text-white transition-all duration-200"
+                aria-label="Close"
+              >
+                <CircleX size={22} />
+              </button>
+            </ModalHeader>
+            <ModalBody className="text-center px-8 pb-8 pt-6">
+              <div className="w-16 h-16 bg-danger/10 rounded-full flex items-center justify-center text-danger mb-4 mx-auto">
                 <span className="text-3xl font-black">!</span>
               </div>
-              <h2 className="text-xl font-black text-slate-900 dark:text-white">
-                Confirm Deactivation
-              </h2>
-            </ModalHeader>
-            <ModalBody className="text-center px-8 pb-8">
               <p className="text-slate-600 dark:text-slate-400 font-medium">
                 By making your profile{" "}
                 <span className="text-danger font-black">Inactive</span>, you
@@ -42,22 +47,15 @@ const DeactivateConfirmModal = ({ isOpen, onOpenChange, onConfirm }) => {
                 Are you absolutely sure you want to proceed?
               </p>
             </ModalBody>
-            <ModalFooter className="flex gap-3 justify-center pb-8 pt-0">
-              <Button
-                variant="flat"
-                onPress={onClose}
-                className="font-bold text-slate-600 dark:text-slate-400"
-                size="lg"
-              >
-                Cancel
-              </Button>
+            <ModalFooter className="pb-8 pt-0 px-8">
               <Button
                 color="danger"
+                fullWidth
                 onPress={() => {
                   onConfirm();
                   onClose();
                 }}
-                className="px-8 font-black shadow-lg shadow-danger/25"
+                className="font-black h-12 rounded-lg shadow-lg shadow-danger/25"
                 size="lg"
               >
                 Confirm & Logout

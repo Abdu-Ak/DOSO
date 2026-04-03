@@ -35,7 +35,7 @@ export default function HeroStats() {
             traditional knowledge meets modern understanding in an environment
             of spiritual growth.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          {/* <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button className="w-full sm:w-auto bg-white text-primary hover:bg-slate-100 transition-colors font-bold text-base py-3.5 px-8 rounded-lg shadow-lg flex items-center justify-center gap-2">
               <span>Begin Journey</span>
               <span className="material-symbols-outlined text-sm">
@@ -46,7 +46,7 @@ export default function HeroStats() {
               <span>Admissions</span>
               <span className="material-symbols-outlined text-sm">school</span>
             </button>
-          </div>
+          </div> */}
         </div>
       </section>
 

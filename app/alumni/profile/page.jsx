@@ -140,7 +140,7 @@ export default function AlumniProfilePage() {
           className="font-bold shadow-lg shadow-primary/20"
           radius="xl"
         >
-          Edit Profile
+          Edit
         </Button>
       </div>
 
@@ -212,21 +212,6 @@ export default function AlumniProfilePage() {
               </div>
             </CardBody>
           </Card>
-
-          <Card className="bg-primary/5 dark:bg-primary/10 border-primary/10 shadow-sm rounded-3xl border">
-            <CardBody className="p-6 space-y-6">
-              <DetailItem
-                icon={Clock}
-                label="Account Created"
-                value={formatDate(user.createdAt)}
-              />
-              <DetailItem
-                icon={Calendar}
-                label="DOB"
-                value={formatDate(user.dob)}
-              />
-            </CardBody>
-          </Card>
         </div>
 
         {/* Right Column */}
@@ -237,6 +222,11 @@ export default function AlumniProfilePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <DetailItem icon={Mail} label="Email" value={user.email} />
                 <DetailItem icon={Phone} label="Phone" value={user.phone} />
+                <DetailItem
+                  icon={Calendar}
+                  label="Date of Birth"
+                  value={formatDate(user.dob)}
+                />
                 <DetailItem
                   icon={UsersIcon}
                   label="Father's Name"

@@ -10,8 +10,8 @@ export default function AlumniLayout({ children }) {
   const router = useRouter();
 
   const alumniMenus = [
-    { label: "Sundook", href: "/alumni/sundook" },
-    { label: "Welfare", href: "/alumni/welfare" },
+    { label: "Sundook", href: "/alumni/sundook", icon: "Box" },
+    { label: "Welfare", href: "/alumni/welfare", icon: "HeartHandshake" },
   ];
 
   useEffect(() => {
