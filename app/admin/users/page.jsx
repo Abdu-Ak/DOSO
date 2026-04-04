@@ -15,6 +15,7 @@ import UserHeader from "./_components/UserHeader";
 import UserFilters from "./_components/UserFilters";
 import MobileUserList from "./_components/MobileUserList";
 import RejectModal from "./_components/RejectModal";
+import ReportModal from "./_components/ReportModal";
 import { getUserColumns } from "./_components/UserTableColumns";
 import { useUserMutations } from "./_hooks/useUserMutations";
 
@@ -36,6 +37,7 @@ export default function UserManagement() {
   const [rejectModalUser, setRejectModalUser] = useState(null);
   const [pendingDeactivation, setPendingDeactivation] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const { deleteMutation, statusMutation, approveMutation, rejectMutation } =
@@ -144,9 +146,15 @@ export default function UserManagement() {
     label: `Showing ${users.length} of ${totalItems} users`,
   };
 
+  const canShowReport =
+    currentUser?.role === "admin" || currentUser?.role === "super_admin";
+
   return (
     <div className="space-y-6">
-      <UserHeader />
+      <UserHeader
+        onReportClick={() => setIsReportModalOpen(true)}
+        showReportButton={canShowReport}
+      />
 
       {/* Desktop */}
       <div className="hidden lg:block">
@@ -211,6 +219,13 @@ export default function UserManagement() {
         onReject={handleReject}
         isLoading={rejectMutation.isPending}
         type="Alumni"
+      />
+
+      <ReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        filters={{ searchTerm, role, status, district, batch }}
+        currentUser={currentUser}
       />
     </div>
   );

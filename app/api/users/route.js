@@ -17,6 +17,7 @@ export async function GET(request) {
     const district = searchParams.get("district") || "";
     const batch = searchParams.get("batch") || "";
     const industry = searchParams.get("industry") || "";
+    const all = searchParams.get("all") === "true";
 
     const skip = (page - 1) * limit;
 
@@ -60,10 +61,14 @@ export async function GET(request) {
     }
 
     const total = await User.countDocuments(query);
-    const users = await User.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+
+    let usersQuery = User.find(query).sort({ createdAt: -1 });
+
+    if (!all) {
+      usersQuery = usersQuery.skip(skip).limit(limit);
+    }
+
+    const users = await usersQuery;
 
     return NextResponse.json({
       users,
