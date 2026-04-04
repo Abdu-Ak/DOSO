@@ -294,6 +294,7 @@ export default function StudentManagement() {
         onClose={() => setRejectModalUser(null)}
         onReject={handleReject}
         isLoading={rejectMutation.isPending}
+        type="Student"
       />
     </div>
   );

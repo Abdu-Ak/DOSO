@@ -8,10 +8,10 @@ import { addToast } from "@heroui/toast";
 import { useDebounce } from "@/lib/hooks";
 
 import DataTable from "@/components/admin/ui/DataTable";
-import SundookHeader from "./_components/SundookHeader";
-import SundookFilters from "./_components/SundookFilters";
-import { getSundookColumns } from "./_components/SundookTableColumns";
-import MobileSundookList from "./_components/MobileSundookList";
+import WelfareHeader from "./_components/WelfareHeader";
+import WelfareFilters from "./_components/WelfareFilters";
+import { getWelfareColumns } from "./_components/WelfareTableColumns";
+import MobileWelfareList from "./_components/MobileWelfareList";
 
 // Standalone Modals
 import ApproveModal from "./_components/ApproveModal";
@@ -19,13 +19,14 @@ import RejectModal from "./_components/RejectModal";
 import CreateRecordModal from "./_components/CreateRecordModal";
 import ConfirmModal from "@/components/admin/ui/ConfirmModal";
 
-export default function AdminSundookPage() {
+export default function AdminWelfarePage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [statusFilter, setStatusFilter] = useState("");
-  const [yearFilter, setYearFilter] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
   const [selectedRecord, setSelectedRecord] = useState(null);
@@ -54,8 +55,7 @@ export default function AdminSundookPage() {
   const [newRecordData, setNewRecordData] = useState({
     alumni: "",
     amount: "",
-    box_number: "",
-    year: new Date().getFullYear().toString(),
+    description: "",
     receipt_number: "",
   });
 
@@ -71,20 +71,22 @@ export default function AdminSundookPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: [
-      "sundook",
+      "welfare",
       "all",
       page,
       debouncedSearchTerm,
       statusFilter,
-      yearFilter,
+      fromDate,
+      toDate,
     ],
     queryFn: async () => {
-      const response = await axios.get("/api/sundook", {
+      const response = await axios.get("/api/welfare", {
         params: {
           page,
           limit: 10,
           status: statusFilter,
-          year: yearFilter,
+          fromDate,
+          toDate,
           search: debouncedSearchTerm,
         },
       });
@@ -95,7 +97,7 @@ export default function AdminSundookPage() {
 
   const statusMutation = useMutation({
     mutationFn: async ({ id, status, receipt_number, rejection_reason }) => {
-      const response = await axios.patch(`/api/sundook/${id}/status`, {
+      const response = await axios.patch(`/api/welfare/${id}/status`, {
         status,
         receipt_number,
         rejection_reason,
@@ -103,8 +105,7 @@ export default function AdminSundookPage() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sundook"] });
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["welfare"] });
       addToast({
         title: "Success",
         description: "Status updated successfully",
@@ -124,22 +125,21 @@ export default function AdminSundookPage() {
 
   const createMutation = useMutation({
     mutationFn: async (formData) => {
-      const response = await axios.post("/api/sundook", formData);
+      const response = await axios.post("/api/welfare", formData);
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sundook"] });
+      queryClient.invalidateQueries({ queryKey: ["welfare"] });
       addToast({
         title: "Success",
-        description: "Sundook record created successfully",
+        description: "Welfare record created successfully",
         color: "success",
       });
       onCreateOpenChange(false);
       setNewRecordData({
         alumni: "",
         amount: "",
-        box_number: "",
-        year: new Date().getFullYear().toString(),
+        description: "",
         receipt_number: "",
       });
     },
@@ -151,13 +151,14 @@ export default function AdminSundookPage() {
       });
     },
   });
+
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
-      const response = await axios.delete(`/api/sundook/${id}`);
+      const response = await axios.delete(`/api/welfare/${id}`);
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sundook"] });
+      queryClient.invalidateQueries({ queryKey: ["welfare"] });
       addToast({
         title: "Deleted",
         description: "Record deleted successfully",
@@ -197,8 +198,7 @@ export default function AdminSundookPage() {
     createMutation.mutate({
       alumni: newRecordData.alumni,
       amount: parseFloat(newRecordData.amount),
-      box_number: parseInt(newRecordData.box_number),
-      year: parseInt(newRecordData.year),
+      description: newRecordData.description,
       receipt_number: newRecordData.receipt_number,
     });
   };
@@ -209,8 +209,7 @@ export default function AdminSundookPage() {
       setNewRecordData({
         alumni: "",
         amount: "",
-        box_number: "",
-        year: new Date().getFullYear().toString(),
+        description: "",
         receipt_number: "",
       });
     }
@@ -221,9 +220,9 @@ export default function AdminSundookPage() {
     setPage(1);
   };
 
-  const sundookColumns = useMemo(
+  const welfareColumns = useMemo(
     () =>
-      getSundookColumns({
+      getWelfareColumns({
         onApprove: (r) => {
           setSelectedRecord(r);
           onApproveOpen();
@@ -246,16 +245,18 @@ export default function AdminSundookPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-700">
-      <SundookHeader />
+      <WelfareHeader />
 
       <div className="lg:hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm mb-4">
-        <SundookFilters
+        <WelfareFilters
           searchTerm={searchTerm}
           onSearchChange={handleSearch}
           status={statusFilter}
           setStatus={setStatusFilter}
-          year={yearFilter}
-          setYear={setYearFilter}
+          fromDate={fromDate}
+          setFromDate={setFromDate}
+          toDate={toDate}
+          setToDate={setToDate}
           setPage={setPage}
           showFilters={showFilters}
           setShowFilters={setShowFilters}
@@ -267,7 +268,7 @@ export default function AdminSundookPage() {
       <div className="hidden lg:block">
         <DataTable
           data={records}
-          columns={sundookColumns}
+          columns={welfareColumns}
           isLoading={isLoading}
           pagination={{
             page,
@@ -277,13 +278,15 @@ export default function AdminSundookPage() {
             label: `Showing ${records.length} of ${totalItems} records`,
           }}
           topContent={
-            <SundookFilters
+            <WelfareFilters
               searchTerm={searchTerm}
               onSearchChange={handleSearch}
               status={statusFilter}
               setStatus={setStatusFilter}
-              year={yearFilter}
-              setYear={setYearFilter}
+              fromDate={fromDate}
+              setFromDate={setFromDate}
+              toDate={toDate}
+              setToDate={setToDate}
               setPage={setPage}
               showFilters={showFilters}
               setShowFilters={setShowFilters}
@@ -295,7 +298,7 @@ export default function AdminSundookPage() {
 
       {/* Mobile List */}
       <div className="lg:hidden space-y-4">
-        <MobileSundookList
+        <MobileWelfareList
           records={records}
           isLoading={isLoading}
           onApprove={(r) => {
@@ -366,7 +369,7 @@ export default function AdminSundookPage() {
         message={
           <>
             <p>
-              Are you sure you want to delete the Sundook record for{" "}
+              Are you sure you want to delete the Welfare record for{" "}
               <strong>{recordToDelete?.alumni?.name}</strong>?
             </p>
             <p className="mt-1">This action cannot be undone.</p>

@@ -2,15 +2,9 @@
 
 import React from "react";
 import { Chip } from "@heroui/chip";
-import {
-  CheckCircle2,
-  AlertCircle,
-  Calendar,
-  Box,
-  IndianRupee,
-} from "lucide-react";
+import { CheckCircle2, AlertCircle, Calendar, IndianRupee } from "lucide-react";
 
-export default function SundookMobileList({ records, statusColors }) {
+export default function WelfareMobileList({ records, statusColors }) {
   return (
     <div className="space-y-4">
       {records.map((record) => (
@@ -24,7 +18,7 @@ export default function SundookMobileList({ records, statusColors }) {
                 <Calendar size={14} />
               </div>
               <span className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">
-                Year {record.year}
+                {new Date(record.createdAt).toLocaleDateString()}
               </span>
             </div>
             <Chip
@@ -37,16 +31,7 @@ export default function SundookMobileList({ records, statusColors }) {
             </Chip>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 py-2">
-            <div className="space-y-1">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                Box Number
-              </p>
-              <div className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-300">
-                <Box size={14} className="text-slate-400" />
-                Box #{record.box_number}
-              </div>
-            </div>
+          <div className="grid grid-cols-1 gap-4 py-2">
             <div className="space-y-1">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                 Amount
@@ -54,6 +39,14 @@ export default function SundookMobileList({ records, statusColors }) {
               <div className="flex items-center gap-1.5 font-bold text-primary">
                 <IndianRupee size={14} />
                 {record.amount}
+              </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                Description
+              </p>
+              <div className="font-medium text-slate-700 dark:text-slate-300">
+                {record.description}
               </div>
             </div>
           </div>
@@ -67,14 +60,14 @@ export default function SundookMobileList({ records, statusColors }) {
             )}
             {record.status === "rejected" && (
               <div className="flex items-start gap-2 text-xs font-bold text-danger bg-danger/10 px-3 py-2 rounded-xl">
-                <AlertCircle size={14} className="mt-0.5" />
+                <AlertCircle size={14} className="mt-0.5 shrink-0" />
                 <span className="flex-1">{record.rejection_reason}</span>
               </div>
             )}
             {record.status === "pending" && (
               <div className="p-3 bg-slate-100 dark:bg-slate-800/50 rounded-xl">
                 <p className="text-xs text-slate-400 font-bold italic flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-primary/40 animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-primary/40 animate-pulse block" />
                   Awaiting administrative review
                 </p>
               </div>

@@ -4,7 +4,16 @@ import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { addToast } from "@heroui/toast";
-import { Check, X, Clock, UserCheck, UserX, Box } from "lucide-react";
+import {
+  Check,
+  X,
+  Clock,
+  UserCheck,
+  UserX,
+  Box,
+  CircleX,
+  CheckCircle2,
+} from "lucide-react";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Input } from "@heroui/input";
@@ -20,6 +29,12 @@ const NotificationsPanel = ({ onClose }) => {
   const [rejectingSundookId, setRejectingSundookId] = useState(null);
   const [sundookRejectReason, setSundookRejectReason] = useState("");
 
+  // Welfare States
+  const [approvingWelfareId, setApprovingWelfareId] = useState(null);
+  const [welfareReceiptNumber, setWelfareReceiptNumber] = useState("");
+  const [rejectingWelfareId, setRejectingWelfareId] = useState(null);
+  const [welfareRejectReason, setWelfareRejectReason] = useState("");
+
   const { data, isLoading } = useQuery({
     queryKey: ["notifications"],
     queryFn: async () => {
@@ -27,6 +42,56 @@ const NotificationsPanel = ({ onClose }) => {
       return res.data;
     },
     refetchInterval: 30000,
+  });
+
+  // Student Mutations
+  const studentApproveMutation = useMutation({
+    mutationFn: async (id) => {
+      await axios.patch(`/api/students/${id}/status`, { status: "Active" });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["students"] });
+      addToast({
+        title: "Success",
+        description: "Student approved successfully",
+        color: "success",
+      });
+    },
+    onError: (error) => {
+      addToast({
+        title: "Error",
+        description: error.response?.data?.error || "Failed to approve student",
+        color: "danger",
+      });
+    },
+  });
+
+  const studentRejectMutation = useMutation({
+    mutationFn: async ({ id, reason }) => {
+      await axios.patch(`/api/students/${id}/status`, {
+        status: "Inactive",
+        rejectionReason: reason,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["students"] });
+      setRejectingId(null);
+      setRejectReason("");
+      addToast({
+        title: "Success",
+        description: "Student rejected",
+        color: "success",
+      });
+    },
+    onError: (error) => {
+      addToast({
+        title: "Error",
+        description: error.response?.data?.error || "Failed to reject student",
+        color: "danger",
+      });
+    },
   });
 
   const approveMutation = useMutation({
@@ -109,6 +174,36 @@ const NotificationsPanel = ({ onClose }) => {
     },
   });
 
+  const welfareStatusMutation = useMutation({
+    mutationFn: async ({ id, status, receipt_number, rejection_reason }) => {
+      await axios.patch(`/api/welfare/${id}/status`, {
+        status,
+        receipt_number,
+        rejection_reason,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["welfare"] });
+      setApprovingWelfareId(null);
+      setRejectingWelfareId(null);
+      setWelfareReceiptNumber("");
+      setWelfareRejectReason("");
+      addToast({
+        title: "Success",
+        description: "Welfare status updated",
+        color: "success",
+      });
+    },
+    onError: (error) => {
+      addToast({
+        title: "Error",
+        description: error.response?.data?.error || "Failed to update status",
+        color: "danger",
+      });
+    },
+  });
+
   const timeAgo = (date) => {
     const seconds = Math.floor((new Date() - new Date(date)) / 1000);
     if (seconds < 60) return "Just now";
@@ -122,6 +217,8 @@ const NotificationsPanel = ({ onClose }) => {
 
   const notifications = data?.notifications || [];
   const sundookNotifications = data?.sundookNotifications || [];
+  const welfareNotifications = data?.welfareNotifications || [];
+  const studentNotifications = data?.studentNotifications || [];
 
   return (
     <div className="absolute right-[-60px] xs:right-0 top-full mt-2 w-[calc(100vw-32px)] sm:w-80 md:w-96 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden">
@@ -135,7 +232,9 @@ const NotificationsPanel = ({ onClose }) => {
           variant="flat"
           className="font-black text-[10px] tracking-widest uppercase"
         >
-          {notifications.length + sundookNotifications.length}
+          {notifications.length +
+            sundookNotifications.length +
+            welfareNotifications.length}
         </Chip>
       </div>
 
@@ -144,7 +243,10 @@ const NotificationsPanel = ({ onClose }) => {
           <div className="p-8 text-center text-sm text-slate-400 font-bold animate-pulse">
             Loading notifications...
           </div>
-        ) : notifications.length === 0 && sundookNotifications.length === 0 ? (
+        ) : notifications.length === 0 &&
+          sundookNotifications.length === 0 &&
+          welfareNotifications.length === 0 &&
+          studentNotifications.length === 0 ? (
           <div className="p-12 text-center flex flex-col items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-300">
               <Clock size={24} />
@@ -159,7 +261,7 @@ const NotificationsPanel = ({ onClose }) => {
             {sundookNotifications.map((sundook) => (
               <div
                 key={sundook._id}
-                className="p-4 border-b border-primary/10 bg-primary/[0.02] hover:bg-primary/[0.04] transition-colors"
+                className="p-4 border-b border-primary/10 bg-primary/2 hover:bg-primary/4 transition-colors"
               >
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden shrink-0 border border-primary/20">
@@ -186,8 +288,8 @@ const NotificationsPanel = ({ onClose }) => {
                       >
                         Sundook ₹{sundook.amount}
                       </Chip>
-                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">
-                        #{sundook.box_number} • {sundook.year}
+                      <span className="text-[10px] text-slate-400 font-bold tracking-tighter">
+                        Box #{sundook.box_number} • {sundook.year}
                       </span>
                     </div>
                   </div>
@@ -282,6 +384,7 @@ const NotificationsPanel = ({ onClose }) => {
                       variant="flat"
                       className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
                       onPress={() => setApprovingSundookId(sundook._id)}
+                      startContent={<CheckCircle2 size={14} />}
                     >
                       Approve
                     </Button>
@@ -291,6 +394,267 @@ const NotificationsPanel = ({ onClose }) => {
                       variant="flat"
                       className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
                       onPress={() => setRejectingSundookId(sundook._id)}
+                      startContent={<CircleX size={14} />}
+                    >
+                      Reject
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {/* Welfare Notifications */}
+            {welfareNotifications.map((welfare) => (
+              <div
+                key={welfare._id}
+                className="p-4 border-b border-primary/10 bg-primary/1 hover:bg-primary/3 transition-colors"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden shrink-0 border border-primary/20">
+                    {welfare.alumni?.image ? (
+                      <img
+                        src={welfare.alumni.image}
+                        alt={welfare.alumni.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary font-bold">
+                        {welfare.alumni?.name?.charAt(0)}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-black text-slate-900 dark:text-white truncate">
+                        {welfare.alumni?.name || "Unknown Alumni"}
+                      </p>
+                      <span className="text-[10px] text-slate-400 font-bold tracking-tighter">
+                        {timeAgo(welfare.createdAt)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <Chip
+                        size="sm"
+                        color="secondary"
+                        variant="flat"
+                        className="text-[10px] font-black uppercase tracking-widest h-5"
+                      >
+                        Welfare ₹{welfare.amount}
+                      </Chip>
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-1 line-clamp-1">
+                      {welfare.description}
+                    </p>
+                  </div>
+                </div>
+
+                {approvingWelfareId === welfare._id ? (
+                  <div className="mt-3 space-y-2 p-3 bg-white dark:bg-slate-800 rounded-xl border border-success/20 shadow-inner">
+                    <Input
+                      size="sm"
+                      variant="bordered"
+                      placeholder="Enter Receipt Number"
+                      label="Receipt Number"
+                      labelPlacement="outside"
+                      value={welfareReceiptNumber}
+                      onChange={(e) => setWelfareReceiptNumber(e.target.value)}
+                      radius="md"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        color="success"
+                        className="font-bold flex-1 text-white"
+                        isLoading={welfareStatusMutation.isPending}
+                        isDisabled={!welfareReceiptNumber}
+                        onPress={() =>
+                          welfareStatusMutation.mutate({
+                            id: welfare._id,
+                            status: "approved",
+                            receipt_number: welfareReceiptNumber,
+                          })
+                        }
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="light"
+                        className="font-bold"
+                        onPress={() => setApprovingWelfareId(null)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : rejectingWelfareId === welfare._id ? (
+                  <div className="mt-3 space-y-2 p-3 bg-white dark:bg-slate-800 rounded-xl border border-danger/20 shadow-inner">
+                    <Input
+                      size="sm"
+                      variant="bordered"
+                      placeholder="Reason for rejection"
+                      label="Rejection Reason"
+                      labelPlacement="outside"
+                      value={welfareRejectReason}
+                      onChange={(e) => setWelfareRejectReason(e.target.value)}
+                      radius="md"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        color="danger"
+                        className="font-bold flex-1"
+                        isLoading={welfareStatusMutation.isPending}
+                        isDisabled={!welfareRejectReason}
+                        onPress={() =>
+                          welfareStatusMutation.mutate({
+                            id: welfare._id,
+                            status: "rejected",
+                            rejection_reason: welfareRejectReason,
+                          })
+                        }
+                      >
+                        Reject
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="light"
+                        className="font-bold"
+                        onPress={() => setRejectingWelfareId(null)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      size="sm"
+                      color="success"
+                      variant="flat"
+                      className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
+                      onPress={() => setApprovingWelfareId(welfare._id)}
+                      startContent={<CheckCircle2 size={14} />}
+                    >
+                      Approve
+                    </Button>
+                    <Button
+                      size="sm"
+                      color="danger"
+                      variant="flat"
+                      className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
+                      onPress={() => setRejectingWelfareId(welfare._id)}
+                      startContent={<CircleX size={14} />}
+                    >
+                      Reject
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {/* Student Notifications */}
+            {studentNotifications.map((student) => (
+              <div
+                key={student._id}
+                className="p-4 border-b border-primary/10 bg-primary/1 hover:bg-primary/3 transition-colors"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden shrink-0 border border-primary/20">
+                    {student.image ? (
+                      <img
+                        src={student.image}
+                        alt={student.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary font-bold">
+                        {student.name?.charAt(0)}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-black text-slate-900 dark:text-white truncate">
+                        {student.name}
+                      </p>
+                      <span className="text-[10px] text-slate-400 font-bold tracking-tighter">
+                        {timeAgo(student.createdAt)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <Chip
+                        size="sm"
+                        color="primary"
+                        variant="flat"
+                        className="text-[10px] font-black uppercase tracking-widest h-5"
+                      >
+                        Student
+                      </Chip>
+                    </div>
+                  </div>
+                </div>
+
+                {rejectingId === student._id ? (
+                  <div className="mt-3 space-y-2 p-3 bg-white dark:bg-slate-800 rounded-xl border border-danger/20 shadow-inner">
+                    <Input
+                      size="sm"
+                      variant="bordered"
+                      placeholder="Reason (optional)"
+                      label="Rejection Reason"
+                      labelPlacement="outside"
+                      value={rejectReason}
+                      onChange={(e) => setRejectReason(e.target.value)}
+                      radius="md"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        color="danger"
+                        className="font-bold flex-1"
+                        isLoading={studentRejectMutation.isPending}
+                        onPress={() =>
+                          studentRejectMutation.mutate({
+                            id: student._id,
+                            reason: rejectReason,
+                          })
+                        }
+                      >
+                        Reject
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="light"
+                        className="font-bold"
+                        onPress={() => {
+                          setRejectingId(null);
+                          setRejectReason("");
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      size="sm"
+                      color="success"
+                      variant="flat"
+                      className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
+                      isLoading={studentApproveMutation.isPending}
+                      onPress={() => studentApproveMutation.mutate(student._id)}
+                      startContent={<UserCheck size={14} />}
+                    >
+                      Approve
+                    </Button>
+                    <Button
+                      size="sm"
+                      color="danger"
+                      variant="flat"
+                      className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
+                      onPress={() => setRejectingId(student._id)}
+                      startContent={<UserX size={14} />}
                     >
                       Reject
                     </Button>
@@ -320,9 +684,14 @@ const NotificationsPanel = ({ onClose }) => {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-slate-800 dark:text-white truncate">
-                      {user.name}
-                    </p>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-bold text-slate-800 dark:text-white truncate">
+                        {user.name}
+                      </p>
+                      <span className="text-[10px] text-slate-400 font-bold tracking-tighter">
+                        {timeAgo(user.createdAt)}
+                      </span>
+                    </div>
                     <div className="flex items-center gap-2 mt-0.5">
                       <Chip
                         size="sm"
@@ -332,9 +701,6 @@ const NotificationsPanel = ({ onClose }) => {
                       >
                         {user.role}
                       </Chip>
-                      <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
-                        <Clock size={10} /> {timeAgo(user.createdAt)}
-                      </span>
                     </div>
                   </div>
                 </div>
@@ -358,6 +724,7 @@ const NotificationsPanel = ({ onClose }) => {
                         variant="solid"
                         className="font-bold flex-1"
                         isLoading={rejectMutation.isPending}
+                        isDisabled={!rejectReason}
                         onPress={() =>
                           rejectMutation.mutate({
                             id: user._id,
@@ -365,7 +732,7 @@ const NotificationsPanel = ({ onClose }) => {
                           })
                         }
                       >
-                        Confirm Reject
+                        Reject
                       </Button>
                       <Button
                         size="sm"

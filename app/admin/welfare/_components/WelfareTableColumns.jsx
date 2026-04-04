@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
+import { User } from "@heroui/user";
 import { Chip } from "@heroui/chip";
 import { Button } from "@heroui/button";
-import { User as UserComponent } from "@heroui/user";
 import {
   Dropdown,
   DropdownTrigger,
@@ -11,14 +11,14 @@ import {
   DropdownItem,
 } from "@heroui/dropdown";
 import {
-  MoreVertical,
   CheckCircle2,
   XCircle,
-  FileText,
+  MoreVertical,
   Trash2,
+  FileText,
 } from "lucide-react";
 
-export const getSundookColumns = ({ onApprove, onReject, onDelete }) => [
+export const getWelfareColumns = ({ onApprove, onReject, onDelete }) => [
   {
     header: "Alumni",
     accessorKey: "alumni.name",
@@ -26,29 +26,30 @@ export const getSundookColumns = ({ onApprove, onReject, onDelete }) => [
       const record = info.row.original;
       return (
         <div className="flex items-center justify-between gap-2 group">
-          <UserComponent
+          <User
+            name={record?.alumni?.name}
+            description={record?.alumni?.userId}
             avatarProps={{
+              src: record?.alumni?.image,
+              fallback: record?.alumni?.name?.[0],
+              className: "bg-primary/10 text-primary font-bold",
               radius: "lg",
-              src: record.alumni?.image,
-              fallback: record.alumni?.name?.charAt(0),
             }}
-            description={`@${record.alumni?.userId}`}
-            name={record.alumni?.name || "Unknown Alumni"}
           />
           <Dropdown placement="bottom-end">
             <DropdownTrigger>
-              <Button isIconOnly size="sm" variant="light">
+              <Button isIconOnly variant="light" size="sm">
                 <MoreVertical size={18} className="text-slate-400" />
               </Button>
             </DropdownTrigger>
-            <DropdownMenu aria-label="Sundook actions" variant="flat">
+            <DropdownMenu aria-label="Welfare actions" variant="flat">
               {record.status === "pending" && (
                 <DropdownItem
                   key="approve"
-                  color="success"
                   startContent={<CheckCircle2 size={16} />}
                   onPress={() => onApprove(record)}
                   className="text-success font-bold"
+                  color="success"
                 >
                   Approve Record
                 </DropdownItem>
@@ -56,20 +57,20 @@ export const getSundookColumns = ({ onApprove, onReject, onDelete }) => [
               {record.status === "pending" && (
                 <DropdownItem
                   key="reject"
-                  color="danger"
                   startContent={<XCircle size={16} />}
                   onPress={() => onReject(record)}
                   className="text-danger font-bold"
+                  color="danger"
                 >
                   Reject Record
                 </DropdownItem>
               )}
               <DropdownItem
                 key="delete"
-                color="danger"
                 startContent={<Trash2 size={16} />}
                 onPress={() => onDelete(record)}
                 className="text-danger font-bold"
+                color="danger"
               >
                 Delete Record
               </DropdownItem>
@@ -80,10 +81,25 @@ export const getSundookColumns = ({ onApprove, onReject, onDelete }) => [
     },
   },
   {
-    header: "Year",
-    accessorKey: "year",
+    header: "Date",
+    accessorKey: "createdAt",
+    cell: (info) => {
+      const record = info.row.original;
+      return (
+        <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
+          {new Date(record.createdAt).toLocaleDateString()}
+        </span>
+      );
+    },
+  },
+  {
+    header: "Description",
+    accessorKey: "description",
     cell: (info) => (
-      <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
+      <span
+        className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate max-w-[200px] block"
+        title={info.getValue()}
+      >
         {info.getValue()}
       </span>
     ),
@@ -96,19 +112,10 @@ export const getSundookColumns = ({ onApprove, onReject, onDelete }) => [
     ),
   },
   {
-    header: "Box Number",
-    accessorKey: "box_number",
-    cell: (info) => (
-      <span className="text-slate-700 dark:text-slate-300 text-xs font-bold">
-        Box #{info.getValue()}
-      </span>
-    ),
-  },
-  {
     header: "Status",
     accessorKey: "status",
     cell: (info) => {
-      const status = info.getValue();
+      const status = info.getValue() || "pending";
       const colors = {
         pending: "warning",
         approved: "success",
@@ -116,10 +123,10 @@ export const getSundookColumns = ({ onApprove, onReject, onDelete }) => [
       };
       return (
         <Chip
-          className="font-black text-[10px] tracking-wider uppercase h-6"
+          variant="flat"
           color={colors[status] || "default"}
           size="sm"
-          variant="flat"
+          className="font-black text-[10px] tracking-wider uppercase h-6 w-[80px]"
         >
           {status}
         </Chip>

@@ -8,14 +8,13 @@ import {
   Users,
   Settings,
   Calendar,
-  LogOut,
   ChevronLeft,
   ChevronRight,
   MessageSquareText,
   Box,
+  HeartHandshake,
 } from "lucide-react";
 import Logo from "../Logo";
-import { signOut } from "next-auth/react";
 import CustomTooltip from "./ui/CustomTooltip";
 const SidebarItem = ({ icon: Icon, label, href, active, collapsed }) => {
   const content = (
@@ -67,6 +66,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
     },
     { label: "Events", href: "/admin/events", icon: Calendar },
     { label: "Sundook", href: "/admin/sundook", icon: Box },
+    { label: "Welfare", href: "/admin/welfare", icon: HeartHandshake },
     { label: "Enquiries", href: "/admin/enquiries", icon: MessageSquareText },
     { label: "Settings", href: "/admin/settings", icon: Settings },
   ];
@@ -111,19 +111,6 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
           />
         ))}
       </nav>
-
-      {/* Sidebar Footer */}
-      <div className="p-4 border-t border-slate-200 dark:border-slate-800">
-        <div className={collapsed ? "flex justify-center" : ""}>
-          <button
-            onClick={() => signOut({ callbackUrl: "/" })}
-            className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors font-semibold text-sm ${collapsed ? "justify-center px-0 w-12" : ""}`}
-          >
-            <LogOut size={22} className="shrink-0" />
-            {!collapsed && <span>Sign Out</span>}
-          </button>
-        </div>
-      </div>
 
       {/* Collapse Toggle Button */}
       <button

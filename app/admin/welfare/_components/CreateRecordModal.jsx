@@ -9,19 +9,25 @@ import {
   ModalFooter,
 } from "@heroui/modal";
 import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
+import { Input, Textarea } from "@heroui/input";
 import { Autocomplete, AutocompleteItem } from "@heroui/autocomplete";
 import { CircleX } from "lucide-react";
 
-const CreateRecordModal = ({
+export default function CreateRecordModal({
   isOpen,
   onOpenChange,
-  alumniList,
+  alumniList = [],
   formData,
   setFormData,
   onSubmit,
   isLoading,
-}) => {
+}) {
+  const isFormValid =
+    formData.alumni &&
+    formData.amount &&
+    formData.description &&
+    formData.receipt_number;
+
   return (
     <Modal
       isOpen={isOpen}
@@ -36,7 +42,7 @@ const CreateRecordModal = ({
             <ModalHeader className="flex items-center justify-between">
               <div className="flex flex-col gap-2">
                 <h3 className="text-lg font-body! font-semibold text-slate-800 dark:text-white">
-                  Create Sundook Record
+                  Create Welfare Record
                 </h3>
                 <p className="text-sm text-slate-600 font-normal dark:text-slate-400 -mt-2">
                   Create and auto-approve a record for an alumni.
@@ -78,27 +84,17 @@ const CreateRecordModal = ({
                 ))}
               </Autocomplete>
 
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  label="Box Number"
-                  labelPlacement="outside"
-                  placeholder="e.g. 101"
+              <div className="grid grid-cols-1 gap-4">
+                <Textarea
+                  label="Description"
+                  placeholder="Welfare fund description"
                   variant="bordered"
-                  radius="sm"
-                  value={formData.box_number}
-                  onChange={(e) =>
-                    setFormData({ ...formData, box_number: e.target.value })
-                  }
-                />
-                <Input
-                  label="Year"
                   labelPlacement="outside"
-                  placeholder="2024"
-                  variant="bordered"
                   radius="sm"
-                  value={formData.year}
-                  onChange={(e) =>
-                    setFormData({ ...formData, year: e.target.value })
+                  minRows={2}
+                  value={formData.description}
+                  onValueChange={(val) =>
+                    setFormData({ ...formData, description: val })
                   }
                 />
               </div>
@@ -106,25 +102,25 @@ const CreateRecordModal = ({
               <div className="grid grid-cols-2 gap-4">
                 <Input
                   label="Amount (₹)"
-                  labelPlacement="outside"
                   placeholder="0.00"
                   type="number"
                   variant="bordered"
+                  labelPlacement="outside"
                   radius="sm"
                   value={formData.amount}
-                  onChange={(e) =>
-                    setFormData({ ...formData, amount: e.target.value })
+                  onValueChange={(val) =>
+                    setFormData({ ...formData, amount: val })
                   }
                 />
                 <Input
                   label="Receipt Number"
-                  labelPlacement="outside"
-                  placeholder="REC-XXXXX"
+                  placeholder="Enter receipt number"
                   variant="bordered"
+                  labelPlacement="outside"
                   radius="sm"
                   value={formData.receipt_number}
-                  onChange={(e) =>
-                    setFormData({ ...formData, receipt_number: e.target.value })
+                  onValueChange={(val) =>
+                    setFormData({ ...formData, receipt_number: val })
                   }
                 />
               </div>
@@ -135,13 +131,7 @@ const CreateRecordModal = ({
                 fullWidth
                 onPress={onSubmit}
                 isLoading={isLoading}
-                isDisabled={
-                  !formData.alumni ||
-                  !formData.amount ||
-                  !formData.box_number ||
-                  !formData.year ||
-                  !formData.receipt_number
-                }
+                isDisabled={!isFormValid}
                 className="font-bold text-white h-12 rounded-lg"
               >
                 Create & Approve
@@ -152,6 +142,4 @@ const CreateRecordModal = ({
       </ModalContent>
     </Modal>
   );
-};
-
-export default CreateRecordModal;
+}
