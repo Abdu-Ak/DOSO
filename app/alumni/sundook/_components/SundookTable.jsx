@@ -40,7 +40,7 @@ export default function SundookTable({ records, statusColors }) {
           >
             <TableCell className="font-bold">{record.year}</TableCell>
             <TableCell className="font-bold text-slate-500 dark:text-slate-400">
-              #{record.box_number}
+              Box #{record.box_number}
             </TableCell>
             <TableCell className="font-bold text-primary">
               ₹{record.amount}

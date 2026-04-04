@@ -210,6 +210,7 @@ export default function UserManagement() {
         onClose={() => setRejectModalUser(null)}
         onReject={handleReject}
         isLoading={rejectMutation.isPending}
+        type="Alumni"
       />
     </div>
   );

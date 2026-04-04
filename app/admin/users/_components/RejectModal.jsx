@@ -13,10 +13,13 @@ import {
 import { CircleX } from "lucide-react";
 
 /**
- * Standardized RejectModal for User Management
+ * Standardized RejectModal for User & Student Management
  */
-const RejectModal = ({ user, onClose, onReject, isLoading }) => {
+const RejectModal = ({ user, onClose, onReject, isLoading, type = "User" }) => {
   const [reason, setReason] = useState("");
+
+  const isStudent = type?.toLowerCase() === "student";
+  const isRequired = !isStudent; // Required for all except students
 
   const handleReject = () => {
     onReject({ id: user._id, reason });
@@ -43,7 +46,7 @@ const RejectModal = ({ user, onClose, onReject, isLoading }) => {
             <ModalBody>
               <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
                 Rejecting <strong>{user?.name}</strong>. Provide a reason
-                (optional):
+                {!isRequired && "(optional)"}:
               </p>
               <Input
                 variant="bordered"
@@ -59,9 +62,10 @@ const RejectModal = ({ user, onClose, onReject, isLoading }) => {
                 fullWidth
                 className="font-bold h-12 rounded-lg shadow-lg shadow-danger/20"
                 isLoading={isLoading}
+                isDisabled={isRequired && !reason}
                 onPress={handleReject}
               >
-                Reject User
+                Reject {type}
               </Button>
             </ModalFooter>
           </>

@@ -62,11 +62,14 @@ export default function AlumniSundookPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-1 items-start justify-between">
         <h1 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-3">
           <Box className="text-primary" />
           Sundook
         </h1>
+        <p className="text-slate-500 mt-1 font-medium">
+          Submit and track your annual Sundook contributions.
+        </p>
       </div>
 
       <SundookForm
