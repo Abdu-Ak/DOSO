@@ -9,8 +9,6 @@ const MobileEnquiryList = ({
   isLoading,
   onStatusChange,
   onDelete,
-  statusColorMap,
-  statusIconMap,
 }) => {
   if (isLoading) {
     return (
@@ -25,7 +23,7 @@ const MobileEnquiryList = ({
 
   if (enquiries.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 gap-3 bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
+      <div className="lg:hidden flex flex-col items-center justify-center py-20 gap-3 bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
         <Inbox className="text-slate-200 dark:text-slate-800" size={64} />
         <p className="text-slate-400 font-medium">
           No enquiries matches the criteria.
@@ -42,8 +40,6 @@ const MobileEnquiryList = ({
           enquiry={enquiry}
           onStatusChange={onStatusChange}
           onDelete={onDelete}
-          statusColorMap={statusColorMap}
-          statusIconMap={statusIconMap}
         />
       ))}
     </div>
