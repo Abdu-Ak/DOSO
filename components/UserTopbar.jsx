@@ -27,15 +27,16 @@ const UserTopbar = ({ menus = [] }) => {
   const userId = user?._id || user?.id;
   const role = user?.role;
 
-  const portalTitle = role === "student" ? "Student Portal" : "Alumni Portal";
+  const portalTitle = role === "student" ? "Student" : "Alumni";
 
   return (
     <header className="h-20 bg-surface-light dark:bg-surface-dark border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 sticky top-0 z-30 shadow-sm transition-colors duration-300">
       <div className="flex items-center gap-8">
         <Link href={`/${role}/profile`} className="flex items-center gap-2">
           <Logo imgClassName="w-10 h-10" />
-          <span className="text-xl font-bold text-slate-800 dark:text-white">
-            DOSO
+          <span className="text-xl font-body! font-bold text-slate-900 dark:text-white tracking-tight">
+            {portalTitle}
+            <span className="text-primary">Panel</span>
           </span>
         </Link>
 
