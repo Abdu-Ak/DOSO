@@ -9,18 +9,6 @@ import MobileEnquiryList from "./_components/MobileEnquiryList";
 import EnquiryFilters from "./_components/EnquiryFilters";
 import { getEnquiryColumns } from "./_components/EnquiryTableColumns";
 
-const statusColorMap = {
-  Pending: "warning",
-  Completed: "success",
-  Cancelled: "danger",
-};
-
-const statusIconMap = {
-  Pending: <Clock size={16} />,
-  Completed: <CheckCircle2 size={16} />,
-  Cancelled: <XCircle size={16} />,
-};
-
 export default function EnquiriesPage() {
   const { enquiries, isLoading, updateStatusMutation, deleteMutation } =
     useEnquiries();
@@ -136,15 +124,17 @@ export default function EnquiriesPage() {
       </div>
 
       {/* Mobile View */}
-      <MobileEnquiryList
-        enquiries={filteredEnquiries}
-        isLoading={isLoading}
-        onStatusChange={handleStatusChange}
-        onDelete={(enquiry) => {
-          setEnquiryToDelete(enquiry);
-          setIsDeleteModalOpen(true);
-        }}
-      />
+      <div className="lg:hidden">
+        <MobileEnquiryList
+          enquiries={filteredEnquiries}
+          isLoading={isLoading}
+          onStatusChange={handleStatusChange}
+          onDelete={(enquiry) => {
+            setEnquiryToDelete(enquiry);
+            setIsDeleteModalOpen(true);
+          }}
+        />
+      </div>
 
       <ConfirmModal
         isOpen={isDeleteModalOpen}
