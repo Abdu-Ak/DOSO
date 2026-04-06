@@ -21,6 +21,7 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page")) || 1;
     const limit = parseInt(searchParams.get("limit")) || 10;
+    const all = searchParams.get("all") === "true";
     const skip = (page - 1) * limit;
 
     let query = {};
@@ -50,11 +51,15 @@ export async function GET(request) {
     }
 
     const total = await Sundook.countDocuments(query);
-    const records = await Sundook.find(query)
+    let recordsQuery = Sundook.find(query)
       .populate("alumni", "name email userId phone image")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+      .sort({ createdAt: -1 });
+
+    if (!all) {
+      recordsQuery = recordsQuery.skip(skip).limit(limit);
+    }
+
+    const records = await recordsQuery;
 
     return NextResponse.json({
       records,

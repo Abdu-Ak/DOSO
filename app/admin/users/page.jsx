@@ -15,7 +15,7 @@ import UserHeader from "./_components/UserHeader";
 import UserFilters from "./_components/UserFilters";
 import MobileUserList from "./_components/MobileUserList";
 import RejectModal from "./_components/RejectModal";
-import ReportModal from "./_components/ReportModal";
+import ReportModal from "@/components/admin/ReportModal";
 import { getUserColumns } from "./_components/UserTableColumns";
 import { useUserMutations } from "./_hooks/useUserMutations";
 
