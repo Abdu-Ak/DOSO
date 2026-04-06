@@ -16,6 +16,7 @@ import StudentHeader from "./_components/StudentHeader";
 import StudentFilters from "./_components/StudentFilters";
 import MobileStudentList from "./_components/MobileStudentList";
 import RejectModal from "../users/_components/RejectModal";
+import ReportModal from "@/components/admin/ReportModal";
 import { getStudentColumns } from "./_components/StudentTableColumns";
 
 export default function StudentManagement() {
@@ -37,6 +38,7 @@ export default function StudentManagement() {
   const [rejectModalUser, setRejectModalUser] = useState(null);
   const [pendingDeactivation, setPendingDeactivation] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const statusMutation = useMutation({
@@ -231,7 +233,12 @@ export default function StudentManagement() {
 
   return (
     <div className="space-y-6">
-      <StudentHeader />
+      <StudentHeader
+        showReportButton={
+          currentUser?.role === "admin" || currentUser?.role === "super_admin"
+        }
+        onReportClick={() => setIsReportModalOpen(true)}
+      />
 
       {/* Desktop */}
       <div className="hidden lg:block">
@@ -295,6 +302,20 @@ export default function StudentManagement() {
         onReject={handleReject}
         isLoading={rejectMutation.isPending}
         type="Student"
+      />
+
+      <ReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        filters={{
+          search: debouncedSearchTerm,
+          status,
+          district,
+          current_madrasa_class: madrasaClass,
+          current_school_class: schoolClass,
+        }}
+        currentUser={currentUser}
+        moduleType="students"
       />
     </div>
   );

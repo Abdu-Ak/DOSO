@@ -58,6 +58,7 @@ export async function GET(request) {
     const madrasa_class = searchParams.get("current_madrasa_class") || "";
     const school_class = searchParams.get("current_school_class") || "";
 
+    const all = searchParams.get("all") === "true";
     const skip = (page - 1) * limit;
 
     const query = {};
@@ -76,10 +77,13 @@ export async function GET(request) {
     if (school_class) query.current_school_class = school_class;
 
     const total = await Student.countDocuments(query);
-    const students = await Student.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+    let studentsQuery = Student.find(query).sort({ createdAt: -1 });
+
+    if (!all) {
+      studentsQuery = studentsQuery.skip(skip).limit(limit);
+    }
+
+    const students = await studentsQuery;
 
     return NextResponse.json({
       students,

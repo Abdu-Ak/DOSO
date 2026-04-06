@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useDisclosure } from "@heroui/modal";
+import { useSession } from "next-auth/react";
 import { addToast } from "@heroui/toast";
 import { useDebounce } from "@/lib/hooks";
 
@@ -17,6 +18,7 @@ import MobileSundookList from "./_components/MobileSundookList";
 import ApproveModal from "./_components/ApproveModal";
 import RejectModal from "./_components/RejectModal";
 import CreateRecordModal from "./_components/CreateRecordModal";
+import ReportModal from "@/components/admin/ReportModal";
 import ConfirmModal from "@/components/admin/ui/ConfirmModal";
 
 export default function AdminSundookPage() {
@@ -33,6 +35,9 @@ export default function AdminSundookPage() {
   const [rejectionReason, setRejectionReason] = useState("");
   const [recordToDelete, setRecordToDelete] = useState(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const { data: session } = useSession();
+  const currentUser = session?.user;
 
   const {
     isOpen: isApproveOpen,
@@ -246,7 +251,12 @@ export default function AdminSundookPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-700">
-      <SundookHeader />
+      <SundookHeader
+        showReportButton={
+          currentUser?.role === "admin" || currentUser?.role === "super_admin"
+        }
+        onReportClick={() => setIsReportModalOpen(true)}
+      />
 
       <div className="lg:hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm mb-4">
         <SundookFilters
@@ -372,6 +382,18 @@ export default function AdminSundookPage() {
             <p className="mt-1">This action cannot be undone.</p>
           </>
         }
+      />
+
+      <ReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        filters={{
+          search: debouncedSearchTerm,
+          status: statusFilter,
+          year: yearFilter,
+        }}
+        currentUser={currentUser}
+        moduleType="sundook"
       />
     </div>
   );
