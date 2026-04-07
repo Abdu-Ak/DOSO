@@ -9,8 +9,6 @@ const MobileEnquiryList = ({
   isLoading,
   onStatusChange,
   onDelete,
-  statusColorMap,
-  statusIconMap,
 }) => {
   if (isLoading) {
     return (
@@ -35,15 +33,13 @@ const MobileEnquiryList = ({
   }
 
   return (
-    <div className="lg:hidden grid grid-cols-1 md:grid-cols-2 gap-4 pb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-8">
       {enquiries.map((enquiry) => (
         <EnquiryCard
           key={enquiry._id}
           enquiry={enquiry}
           onStatusChange={onStatusChange}
           onDelete={onDelete}
-          statusColorMap={statusColorMap}
-          statusIconMap={statusIconMap}
         />
       ))}
     </div>

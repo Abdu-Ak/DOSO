@@ -21,13 +21,19 @@ import {
 } from "lucide-react";
 import CustomTooltip from "@/components/admin/ui/CustomTooltip";
 
-const EnquiryCard = ({
-  enquiry,
-  onStatusChange,
-  onDelete,
-  statusColorMap,
-  statusIconMap,
-}) => {
+const statusColorMap = {
+  Pending: "warning",
+  Completed: "success",
+  Cancelled: "danger",
+};
+
+const statusIconMap = {
+  Pending: <Clock size={16} />,
+  Completed: <CheckCircle2 size={16} />,
+  Cancelled: <XCircle size={16} />,
+};
+
+const EnquiryCard = ({ enquiry, onStatusChange, onDelete }) => {
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
       {/* Header: Name and Status */}
@@ -62,7 +68,7 @@ const EnquiryCard = ({
           </DropdownTrigger>
           <DropdownMenu
             aria-label="Change Status"
-            onSelectionChange={(keys) => onStatusChange(enquiry._id, keys)}
+            onAction={(key) => onStatusChange(enquiry._id, key)}
             selectionMode="single"
             selectedKeys={[enquiry.status]}
           >
