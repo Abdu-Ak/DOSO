@@ -286,6 +286,21 @@ const ReportModal = ({
       },
       imageField: "alumni",
     },
+    dashboard: {
+      title: "Dashboard Summary Report",
+      fileName: "dashboard_report",
+      endpoint: "/api/dashboard/stats",
+      dataKey: "reportData",
+      csvHeaders: ["Metric", "Value", "Details"],
+      pdfHeaders: ["Metric", "Value", "Details"],
+      getCSVRow: (r) => [r.metric || "", r.value || "0", r.details || ""],
+      getPDFRow: (r) => [r.metric || "-", r.value || "0", r.details || "-"],
+      columnStyles: {
+        0: { cellWidth: 80, fontStyle: "bold" },
+        1: { cellWidth: 40, halign: "right" },
+        2: { cellWidth: 60 },
+      },
+    },
   };
 
   const currentConfig = REPORT_CONFIG[moduleType];

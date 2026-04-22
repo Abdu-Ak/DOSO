@@ -2,50 +2,120 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import Student from "@/models/Student";
+import Sundook from "@/models/Sundook";
+import Welfare from "@/models/Welfare";
+import Event from "@/models/Event";
+import Enquiry from "@/models/Enquiry";
 
-export async function GET() {
+export async function GET(req) {
   try {
     await dbConnect();
+    const { searchParams } = new URL(req.url);
+    const startDate = searchParams.get("startDate");
+    const endDate = searchParams.get("endDate");
 
-    // Get counts
+    let query = {};
+    if (startDate && endDate) {
+      query.createdAt = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      };
+    }
+
+    // Get basic counts (cumulative)
     const totalSystemUsers = await User.countDocuments({
       role: { $ne: "super_admin" },
     });
     const students = await Student.countDocuments();
-    const totalUsers = totalSystemUsers + students;
-
     const alumni = await User.countDocuments({ role: "alumni" });
     const admins = await User.countDocuments({ role: "admin" });
 
-    // New users in last 30 days
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const newSystemUsersLast30Days = await User.countDocuments({
-      createdAt: { $gte: thirtyDaysAgo },
+    // Get stats for the specific range
+    const rangeSystemUsers = await User.countDocuments({
+      ...query,
       role: { $ne: "super_admin" },
     });
-    const newStudentsLast30Days = await Student.countDocuments({
-      createdAt: { $gte: thirtyDaysAgo },
-    });
-    const newUsersLast30Days = newSystemUsersLast30Days + newStudentsLast30Days;
+    const rangeStudents = await Student.countDocuments(query);
+    const rangeAlumni = await User.countDocuments({ ...query, role: "alumni" });
+    const rangeAdmins = await User.countDocuments({ ...query, role: "admin" });
 
-    // Calculate growth percentages
-    const previousTotal = totalUsers - newUsersLast30Days;
-    const growthTrend =
-      previousTotal > 0
-        ? `+${Math.round((newUsersLast30Days / previousTotal) * 100)}%`
-        : "+100%";
+    // Sundook & Welfare (Only Approved)
+    const sundookStats = await Sundook.aggregate([
+      { $match: { ...query, status: "approved" } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]);
+
+    const welfareStats = await Welfare.aggregate([
+      { $match: { ...query, status: "approved" } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]);
+
+    // Additional Stats for internal use
+    const totalEvents = await Event.countDocuments(query);
+    const pendingEnquiries = await Enquiry.countDocuments({
+      ...query,
+      status: "Pending",
+    });
+
+    const formatCurrency = (val) => {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 0,
+      }).format(val);
+    };
+
+    const sundookTotal = sundookStats[0]?.total || 0;
+    const welfareTotal = welfareStats[0]?.total || 0;
+
+    const reportData = [
+      {
+        metric: "Total Users",
+        value: rangeSystemUsers + rangeStudents,
+        details: `Alumni: ${rangeAlumni}, Admins: ${rangeAdmins}`,
+      },
+      {
+        metric: "Total Students",
+        value: rangeStudents,
+        details: "",
+      },
+      {
+        metric: "Sundook Total (Approved)",
+        value: formatCurrency(sundookTotal),
+        details: "",
+      },
+      {
+        metric: "Welfare Total (Approved)",
+        value: formatCurrency(welfareTotal),
+        details: "",
+      },
+      {
+        metric: "Total Events",
+        value: totalEvents,
+        details: "",
+      },
+      {
+        metric: "Pending Enquiries",
+        value: pendingEnquiries,
+        details: "",
+      },
+    ];
 
     return NextResponse.json({
-      totalUsers,
-      students,
-      alumni,
-      admins,
-      newUsersLast30Days,
-      trends: {
-        total: growthTrend,
-        alumni: "+5%", // These could be calculated similarly if needed
-        student: "+8%",
+      totalUsers: rangeSystemUsers + rangeStudents,
+      students: rangeStudents,
+      alumni: rangeAlumni,
+      admins: rangeAdmins,
+      sundookTotal,
+      welfareTotal,
+      totalEvents,
+      pendingEnquiries,
+      reportData,
+      cumulative: {
+        totalUsers: totalSystemUsers + students,
+        students,
+        alumni,
+        admins,
       },
     });
   } catch (error) {

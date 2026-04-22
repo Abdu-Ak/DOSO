@@ -9,6 +9,7 @@ const StatCard = ({
   bgColor,
   iconColor,
   isLoading,
+  extra,
 }) => {
   if (isLoading) {
     return (
@@ -24,26 +25,23 @@ const StatCard = ({
   }
 
   return (
-    <div className="bg-surface-light dark:bg-surface-dark p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all group">
-      <div className="flex justify-between items-start mb-3">
+    <div className="bg-surface-light dark:bg-surface-dark p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all group min-h-[140px] flex flex-col justify-center gap-4">
+      <div className="flex items-center gap-4">
         <div
-          className={`p-3 rounded-xl ${bgColor} transition-all duration-300 group-hover:scale-110`}
+          className={`p-3.5 rounded-2xl ${bgColor} transition-all duration-300 group-hover:scale-110 shrink-0`}
         >
-          <Icon className={iconColor} size={24} />
+          <Icon className={iconColor} size={28} />
         </div>
-        {trend && (
-          <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded-lg">
-            <TrendingUp size={14} />
-            {trend}
-          </span>
-        )}
+        <div className="flex-1 min-w-0">
+          <h3 className="text-slate-500 dark:text-slate-400 text-sm font-semibold truncate mb-0.5">
+            {title}
+          </h3>
+          <p className="text-2xl font-black text-slate-900 dark:text-white leading-none tracking-tight">
+            {value}
+          </p>
+        </div>
       </div>
-      <h3 className="text-slate-500 dark:text-slate-400 text-sm font-medium">
-        {title}
-      </h3>
-      <p className="text-2xl font-bold text-slate-800 dark:text-white mt-1">
-        {value}
-      </p>
+      {extra && <div className="mt-1">{extra}</div>}
     </div>
   );
 };
