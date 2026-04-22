@@ -3,51 +3,76 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { Users, GraduationCap, UserPlus, ShieldCheck } from "lucide-react";
+import {
+  Users,
+  GraduationCap,
+  Coins,
+  Heart,
+  ShieldCheck,
+  UserCheck,
+} from "lucide-react";
 import StatCard from "./StatCard";
+import { Chip } from "@heroui/chip";
 
-const DashboardStats = () => {
+const DashboardStats = ({ startDate, endDate }) => {
   const { data, isLoading } = useQuery({
-    queryKey: ["dashboard-stats"],
+    queryKey: ["dashboard-stats", startDate, endDate],
     queryFn: async () => {
-      const resp = await axios.get("/api/dashboard/stats");
+      const resp = await axios.get("/api/dashboard/stats", {
+        params: { startDate, endDate },
+      });
       return resp.data;
     },
   });
 
+  const formatCurrency = (val) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 0,
+    }).format(val);
+  };
+
   const stats = [
     {
-      title: "Total Users & Students",
+      title: "Total Users",
       value: data?.totalUsers?.toLocaleString() || "0",
       icon: Users,
-      trend: data?.trends?.total || "+0%",
       bgColor: "bg-blue-50 dark:bg-blue-500/10 shadow-sm shadow-blue-500/5",
       iconColor: "text-blue-600 dark:text-blue-400",
+      extra: (
+        <div className="flex items-center gap-2">
+          <Chip variant="flat" color="primary" className="font-bold h-7">
+            Alumni: {data?.alumni || 0}
+          </Chip>
+          <Chip variant="flat" color="warning" className="font-bold h-7">
+            Admins: {data?.admins || 0}
+          </Chip>
+        </div>
+      ),
     },
     {
-      title: "Active alumni",
-      value: data?.alumni?.toLocaleString() || "0",
+      title: "Total Students",
+      value: data?.students?.toLocaleString() || "0",
       icon: GraduationCap,
-      trend: data?.trends?.alumni,
       bgColor:
         "bg-emerald-50 dark:bg-emerald-500/10 shadow-sm shadow-emerald-500/5",
       iconColor: "text-emerald-600 dark:text-emerald-400",
     },
     {
-      title: "New Students",
-      value: data?.students?.toLocaleString() || "0",
-      icon: UserPlus,
-      trend: data?.trends?.student,
+      title: "Sundook Total",
+      value: formatCurrency(data?.sundookTotal || 0),
+      icon: Coins,
       bgColor:
         "bg-purple-50 dark:bg-purple-500/10 shadow-sm shadow-purple-500/5",
       iconColor: "text-purple-600 dark:text-purple-400",
     },
     {
-      title: "System Admins",
-      value: data?.admins?.toLocaleString() || "0",
-      icon: ShieldCheck,
-      bgColor: "bg-amber-50 dark:bg-amber-500/10 shadow-sm shadow-amber-500/5",
-      iconColor: "text-amber-600 dark:text-amber-400",
+      title: "Welfare Total",
+      value: formatCurrency(data?.welfareTotal || 0),
+      icon: Heart,
+      bgColor: "bg-rose-50 dark:bg-rose-500/10 shadow-sm shadow-rose-500/5",
+      iconColor: "text-rose-600 dark:text-rose-400",
     },
   ];
 
