@@ -1,54 +1,76 @@
-# Task: Implement "Sundook" (Welfare Box) Module with Notifications
+# Prompt for Alumni Debt Module Development
 
-## 1. Context
-We are adding a module called **Sundook** to an existing application. This is a welfare box management system where Alumni submit financial contributions. There are two primary roles: **Admin** and **Alumni**.
+## **Project Context**
+We are implementing a **Debt/Loan Management Module** in our existing application. The application follows a specific architectural pattern (Next js, Tailwind css). This module involves two primary personas: **Alumni** and **Admins**.
 
-## 2. Business Logic & Constraints
-* **Submission Limit:** An Alumni can only submit **one** Sundook record per calendar year.
-* **Approval Workflow:**
-    * Alumni submissions start as `pending`.
-    * Admins must review to `approve` (require Receipt Number) or `reject` (require Rejection Reason).
-    * Admin-created entries are `auto-approved` and require a Receipt Number immediately.
+---
 
-## 3. Role-Based Requirements
+## **1. Core Requirements & Logic**
 
-### A. Alumni Portal
-* **Form Fields:** `box_number` and `amount` (visible).
-* **Background Logic:** Auto-pass `alumni_id` and current `year` in the payload.
-* **Table View:** Show personal submissions. 
-    * Show `rejection_reason` if status is rejected.
-    * Show `receipt_number` if status is approved.
+### **A. Debt Request (Alumni Side)**
+- **Constraints:**
+    - Maximum Amount: **50,000**.
+    - Payment Types: **Single Payment** or **EMI**.
+    - Duration: **1, 2, or 3 months** (Max 3).
+- **Repayment Logic:**
+    - *Single Payment:* Total amount due on the date of the chosen month.
+    - *EMI:* Amount is split equally by the number of months; due monthly.
+- **Witness Requirement:**
+    - The requester must select **2 Alumni** as witnesses.
+    - The request remains "Pending Witness Approval" until both respond.
 
-### B. Admin Portal
-* **Notification System:** The Admin dashboard must feature a **Notification Badge/List** showing the count of "Pending Sundook Submissions" to alert them that action is required.
-* **Management Table:** Master list of all submissions.
-    * **Actions:** Approve (modal for `receipt_number`) or Reject (modal for `rejection_reason`).
-* **Creation Form:** Admin can create for any Alumni (auto-approved).
+### **B. Witness Workflow**
+- **Notification:** Selected witnesses receive an in-app notification and an **email** with a redirect link to the portal.
+- **Action:** Witnesses can **Accept** or **Reject**.
+- **Rejection:** If a witness rejects, a **Reason** is mandatory.
 
-## 4. Communication Logic (Email Triggers)
-The system must trigger automated emails in the following scenarios:
-1.  **On Approval:** Send an email to the Alumni notifying them that their Sundook for [Year] has been approved. Include the `receipt_number` and `amount` in the mail body.
-2.  **On Rejection:** Send an email to the Alumni notifying them that their submission was not accepted. Include the `rejection_reason` and instructions to contact support or resubmit.
+### **C. Admin Workflow**
+- **Visibility:** Admin sees the request only after both witnesses have responded.
+- **Action:** Admin can **Approve** (requires a **Receipt Number**) or **Reject** (requires a **Reason**).
+- **Tracking:** Admin dashboard must show a table with statuses (e.g., "Approved by Witness 1", "Rejected by Witness 2", "Reason: [text]").
 
-## 5. Technical Specifications
+### **D. Notification & Mail System**
+- **To Witnesses:** "Alumni [Name] requested you as a witness. [Link to Portal]"
+- **To Requester:** - Notification/Mail when a witness accepts or rejects.
+    - Notification/Mail when Admin approves (including Receipt No) or rejects (including Reason).
 
-### Data Schema (Sundook)
-* `id`, `alumni_id`, `box_number`, `amount`, `year`, `status`, `receipt_number`, `rejection_reason`, `created_at`.
+---
 
-### API Logic
-1.  **POST /sundook**: 
-    * Validate 1 entry per user/year.
-    * If Alumni: Set `status: pending` and trigger an **Admin Notification**.
-    * If Admin: Require `receipt_number` and set `status: approved`.
-2.  **PATCH /sundook/:id/status**:
-    * **If Approved:** Update status + `receipt_number`. Trigger **Alumni Email**.
-    * **If Rejected:** Update status + `rejection_reason`. Trigger **Alumni Email**.
+## **2. Technical Tasks & Structure**
 
-## 6. Instructions for Implementation
-Please generate:
-1.  **Database Migration** for the Sundook table.
-2.  **API Endpoints** with validation, notification logic, and email trigger hooks.
-3.  **Frontend Components**:
-    * Alumni Form & Table.
-    * Admin Dashboard with "Pending" notification badge and management table.
-    * Email templates for Approval and Rejection.
+### **A. Database Schema (Models)**
+- **DebtRequest Model:**
+    - `requester_id` (FK to User)
+    - `amount` (Decimal, max 50000)
+    - `payment_type` (Enum: single, emi)
+    - `duration_months` (Int: 1, 2, 3)
+    - `witness1_id`, `witness2_id` (FK to User)
+    - `witness1_status`, `witness2_status` (Enum: pending, approved, rejected)
+    - `witness1_reason`, `witness2_reason` (String, nullable)
+    - `admin_status` (Enum: pending, approved, rejected)
+    - `admin_reason` (String, nullable)
+    - `receipt_no` (String, nullable)
+    - `status` (Calculated/Enum: Pending Witness, Pending Admin, Approved, Rejected)
+
+### **B. Component Development**
+- **Alumni Portal:**
+    - `DebtRequestForm`: Form with validation for amount, months, and witness selection.
+    - `AlumniDebtTable`: Detail view showing status, witness feedback, admin reasons, and receipt numbers.
+- **Witness Portal:**
+    - `WitnessActionCard`: Component to view request details and submit Accept/Reject with reason. - make this in as notification panel like the admin's but for the alumni's
+- **Admin Portal:**
+    - `AdminDebtManagementTable`: Comprehensive view for admins to process requests and view full audit trails.
+
+---
+
+## **3. Implementation Instructions**
+1.  **Strictly adhere** to the current design pattern and UI component library used in the project.
+2.  **API Endpoints:** Create RESTful endpoints for `POST /debt-requests`, `PATCH /debt-requests/:id/witness-respond`, and `PATCH /debt-requests/:id/admin-respond`.
+3.  **Security:** Ensure an Alumni cannot approve their own debt or act as their own witness.
+4.  **Email Service:** Integrate the existing mailer to trigger the specific notifications described above.
+5.  **Validations:** Implement frontend and backend checks for the 50,000 limit and the 3-month duration limit.
+
+---
+
+## **4. Expected Output**
+Provide the code for the **Models**, **API Controllers**, and the **Frontend Components** (using our existing structure) to complete this feature.
