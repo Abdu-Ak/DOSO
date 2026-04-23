@@ -36,7 +36,7 @@ export default async function ContactInfo() {
                 <Phone size={20} />
               </div>
               <div>
-                <p className="font-bold text-lg">Switchboard</p>
+                <p className="font-bold text-lg">Head Office</p>
                 <p className="text-white/80">{contact?.phone}</p>
               </div>
             </div>
