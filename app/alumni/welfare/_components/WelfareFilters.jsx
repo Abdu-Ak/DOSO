@@ -68,6 +68,7 @@ export default function WelfareFilters({
             }
           }}
           aria-label="Filter by date range"
+          showMonthAndYearPickers
         />
         {hasFilters && (
           <Button

@@ -57,18 +57,18 @@ export async function PUT(request) {
         email: data.get("leadership.secretary.email"),
         phone: data.get("leadership.secretary.phone"),
       },
-      headmaster: {
-        name: data.get("leadership.headmaster.name"),
-        title: data.get("leadership.headmaster.title"),
-        email: data.get("leadership.headmaster.email"),
-        phone: data.get("leadership.headmaster.phone"),
+      treasurer: {
+        name: data.get("leadership.treasurer.name"),
+        title: data.get("leadership.treasurer.title"),
+        email: data.get("leadership.treasurer.email"),
+        phone: data.get("leadership.treasurer.phone"),
       },
     };
 
     // Handle Images
     const presidentImage = data.get("leadership.president.image");
     const secretaryImage = data.get("leadership.secretary.image");
-    const headmasterImage = data.get("leadership.headmaster.image");
+    const treasurerImage = data.get("leadership.treasurer.image");
 
     if (presidentImage && typeof presidentImage !== "string") {
       leadership.president.image = await uploadToCloudinary(
@@ -90,14 +90,14 @@ export async function PUT(request) {
         data.get("leadership.secretary.currentImage") || "";
     }
 
-    if (headmasterImage && typeof headmasterImage !== "string") {
-      leadership.headmaster.image = await uploadToCloudinary(
-        headmasterImage,
+    if (treasurerImage && typeof treasurerImage !== "string") {
+      leadership.treasurer.image = await uploadToCloudinary(
+        treasurerImage,
         "doso_settings/leadership",
       );
     } else {
-      leadership.headmaster.image =
-        data.get("leadership.headmaster.currentImage") || "";
+      leadership.treasurer.image =
+        data.get("leadership.treasurer.currentImage") || "";
     }
 
     // Parse contact data

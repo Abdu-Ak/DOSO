@@ -42,6 +42,7 @@ import { useDisclosure } from "@heroui/modal";
 import DeactivateConfirmModal from "@/components/admin/DeactivateConfirmModal";
 import { useSession, signOut } from "next-auth/react";
 import { canManageUser } from "@/lib/permissions";
+import { calculateAge } from "@/lib/utils";
 
 const DetailItem = ({ icon: Icon, label, value, color = "primary" }) => (
   <div className="space-y-1.5 group">
@@ -49,7 +50,7 @@ const DetailItem = ({ icon: Icon, label, value, color = "primary" }) => (
       {Icon && <Icon size={12} className={`text-${color}`} />}
       {label}
     </p>
-    <p className="text-slate-900 dark:text-white font-bold text-sm leading-tight break-words min-w-0">
+    <p className="text-slate-900 dark:text-white font-bold text-sm leading-tight wrap-break-word min-w-0">
       {value || "—"}
     </p>
   </div>
@@ -239,7 +240,7 @@ export default function UserDetailPage() {
                 </p>
               )}
               <p className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-xs mt-2 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
-                @{user.userId}
+                {user.userId}
               </p>
 
               <div className="flex flex-col gap-3 mt-8 w-full">
@@ -361,6 +362,13 @@ export default function UserDetailPage() {
                   label="Date of Birth"
                   value={formatDate(user.dob)}
                 />
+                {user.dob && (
+                  <DetailItem
+                    icon={Clock}
+                    label="Age"
+                    value={`${calculateAge(user.dob)} years`}
+                  />
+                )}
                 {user.father_name && (
                   <DetailItem
                     icon={UsersIcon}
@@ -380,7 +388,7 @@ export default function UserDetailPage() {
                   title={
                     user.role === "student"
                       ? "Academic Information"
-                      : "Education & Batch"
+                      : "Education & Career"
                   }
                   icon={user.role === "student" ? School : GraduationCap}
                 />
@@ -412,6 +420,11 @@ export default function UserDetailPage() {
                             ? user.custom_job
                             : user.current_job
                         }
+                      />
+                      <DetailItem
+                        icon={MapPin}
+                        label="Job Location"
+                        value={user.job_location}
                       />
                     </>
                   )}

@@ -124,7 +124,7 @@ export default function StudentProfilePage() {
                 {user.name}
               </h2>
               <p className="text-slate-500 font-bold uppercase tracking-widest text-xs mt-2 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
-                @{user.userId}
+                {user.userId}
               </p>
 
               <div className="w-full mt-8 space-y-3">

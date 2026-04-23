@@ -57,11 +57,7 @@ export function getUserColumns({
                 src: user.image,
                 fallback: user.name.charAt(0),
               }}
-              description={
-                user.studentId || user.userId
-                  ? `@${user.studentId || user.userId}`
-                  : user.phone || ""
-              }
+              description={user.studentId || user.userId || user.phone || ""}
               name={info.getValue()}
             >
               {user.email}

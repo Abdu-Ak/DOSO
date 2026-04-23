@@ -150,6 +150,7 @@ const AlumniSection = ({
                       field.onChange(date.toString());
                       setIsCalendarOpen(false);
                     }}
+                    showMonthAndYearPickers
                   />
                 </PopoverContent>
               </Popover>
@@ -324,6 +325,14 @@ const AlumniSection = ({
           error={errors.custom_job}
         />
       )}
+
+      <InputField
+        {...register("job_location")}
+        label="Job Location"
+        placeholder="Enter job location"
+        startContent={<MapPin size={18} className="text-slate-400" />}
+        error={errors.job_location}
+      />
 
       {!isPublic && !isSelfEdit && (
         <div className="space-y-1">

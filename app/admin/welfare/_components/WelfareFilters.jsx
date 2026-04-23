@@ -105,6 +105,7 @@ const WelfareFilters = ({
             setPage(1);
           }}
           aria-label="Filter by date range"
+          showMonthAndYearPickers
         />
 
         {(status || fromDate || toDate || searchTerm) && (

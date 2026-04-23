@@ -113,6 +113,7 @@ export default function EventFilters({
             }
           }}
           aria-label="Filter by date range"
+          showMonthAndYearPickers
         />
 
         <Button

@@ -38,8 +38,8 @@ const EditForm = ({
             handleImageChange={handleImageChange}
           />
           <LeaderEditCard
-            role="headmaster"
-            title="Head Master Configuration"
+            role="treasurer"
+            title="Treasurer Configuration"
             errors={errors}
             register={register}
             previews={previews}

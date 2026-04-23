@@ -72,11 +72,7 @@ const StudentCard = ({
             {student.name}
           </p>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            {student.studentId
-              ? `@${student.studentId}`
-              : student.phone
-                ? student.phone
-                : ""}
+            {student.studentId || student.phone || ""}
           </p>
           <div className="flex flex-wrap gap-1.5 mt-1.5">
             <Chip

@@ -181,6 +181,7 @@ export async function POST(request) {
       userFields.dob = data.get("dob") ? new Date(data.get("dob")) : undefined;
       userFields.current_job = data.get("current_job");
       userFields.custom_job = data.get("custom_job");
+      userFields.job_location = data.get("job_location");
 
       const districtForId =
         data.get("district") === "Other"

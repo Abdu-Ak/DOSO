@@ -39,6 +39,7 @@ import { useDisclosure } from "@heroui/modal";
 import DeactivateConfirmModal from "@/components/admin/DeactivateConfirmModal";
 import { useSession, signOut } from "next-auth/react";
 import { canManageUser } from "@/lib/permissions";
+import { calculateAge } from "@/lib/utils";
 
 const DetailItem = ({ icon: Icon, label, value, color = "primary" }) => (
   <div className="space-y-1.5 group">
@@ -215,7 +216,7 @@ export default function StudentDetailPage() {
                 {user.name}
               </h1>
               <p className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-xs mt-2 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
-                @{user.studentId || "—"}
+                {user.studentId || "—"}
               </p>
 
               <div className="flex flex-col gap-3 mt-8 w-full">
@@ -334,10 +335,27 @@ export default function StudentDetailPage() {
                   label="Date of Birth"
                   value={formatDate(user.dob)}
                 />
+                {user.dob && (
+                  <DetailItem
+                    icon={Clock}
+                    label="Age"
+                    value={`${calculateAge(user.dob)} years`}
+                  />
+                )}
                 <DetailItem
                   icon={UsersIcon}
                   label="Father's Name"
                   value={user.father_name}
+                />
+                <DetailItem
+                  icon={Lock}
+                  label="Aadhar Number"
+                  value={user.aadhar_number}
+                />
+                <DetailItem
+                  icon={Clock}
+                  label="Identification Mark"
+                  value={user.identification_mark}
                 />
               </div>
             </CardBody>

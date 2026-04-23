@@ -14,7 +14,7 @@ const settingSchema = new mongoose.Schema(
     leadership: {
       president: { type: leaderSchema, default: () => ({}) },
       secretary: { type: leaderSchema, default: () => ({}) },
-      headmaster: { type: leaderSchema, default: () => ({}) },
+      treasurer: { type: leaderSchema, default: () => ({}) },
     },
     contact: {
       email: { type: String, default: "" },

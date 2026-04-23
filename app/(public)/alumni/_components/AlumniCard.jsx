@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  Mail,
-  Linkedin,
-  MapPin,
-  Briefcase,
-  GraduationCap,
-  Phone,
-} from "lucide-react";
+import { Mail, MapPin, Briefcase, GraduationCap, Phone } from "lucide-react";
 
 export default function AlumniCard({
   alumni,
@@ -23,8 +16,8 @@ export default function AlumniCard({
     address,
     email,
     phone,
-    linkedin,
     image,
+    job_location,
   } = alumni;
   const occupation = current_job || custom_job || "Alumni";
   const displayImage =

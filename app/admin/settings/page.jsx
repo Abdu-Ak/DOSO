@@ -23,7 +23,7 @@ export default function SettingsPage() {
   const [previews, setPreviews] = useState({
     president: "",
     secretary: "",
-    headmaster: "",
+    treasurer: "",
   });
 
   const {
@@ -38,13 +38,7 @@ export default function SettingsPage() {
       leadership: {
         president: { name: "", title: "", email: "", phone: "", image: "" },
         secretary: { name: "", title: "", email: "", phone: "", image: "" },
-        headmaster: {
-          name: "",
-          title: "",
-          email: "",
-          phone: "",
-          image: "",
-        },
+        treasurer: { name: "", title: "", email: "", phone: "", image: "" },
       },
       contact: { email: "", phone: "", address: "", mapLink: "" },
     },
@@ -56,7 +50,7 @@ export default function SettingsPage() {
       setPreviews({
         president: settings.leadership?.president?.image || "",
         secretary: settings.leadership?.secretary?.image || "",
-        headmaster: settings.leadership?.headmaster?.image || "",
+        treasurer: settings.leadership?.treasurer?.image || "",
       });
     }
   }, [settings, reset]);
@@ -77,7 +71,7 @@ export default function SettingsPage() {
     setPreviews({
       president: settings?.leadership?.president?.image || "",
       secretary: settings?.leadership?.secretary?.image || "",
-      headmaster: settings?.leadership?.headmaster?.image || "",
+      treasurer: settings?.leadership?.treasurer?.image || "",
     });
     setIsEditing(false);
   };
@@ -89,7 +83,7 @@ export default function SettingsPage() {
     formData.append("contact.address", data.contact.address);
     formData.append("contact.mapLink", data.contact.mapLink);
 
-    ["president", "secretary", "headmaster"].forEach((role) => {
+    ["president", "secretary", "treasurer"].forEach((role) => {
       formData.append(`leadership.${role}.name`, data.leadership[role].name);
       formData.append(`leadership.${role}.title`, data.leadership[role].title);
       formData.append(
@@ -149,18 +143,20 @@ export default function SettingsPage() {
           <div className="lg:col-span-8 space-y-4">
             <LeaderViewCard
               role="president"
-              title="President"
+              title={settings?.leadership?.president?.title || "President"}
               data={settings?.leadership?.president}
             />
             <LeaderViewCard
               role="secretary"
-              title="General Secretary"
+              title={
+                settings?.leadership?.secretary?.title || "General Secretary"
+              }
               data={settings?.leadership?.secretary}
             />
             <LeaderViewCard
-              role="headmaster"
-              title="Head Master"
-              data={settings?.leadership?.headmaster}
+              role="treasurer"
+              title={settings?.leadership?.treasurer?.title || "Treasurer"}
+              data={settings?.leadership?.treasurer}
             />
           </div>
           <div className="lg:col-span-4">

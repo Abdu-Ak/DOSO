@@ -92,6 +92,7 @@ const EnquiryFilters = ({
             inputWrapper:
               "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 h-10",
           }}
+          showMonthAndYearPickers
         />
 
         {(searchTerm || status || startDate || endDate) && (
