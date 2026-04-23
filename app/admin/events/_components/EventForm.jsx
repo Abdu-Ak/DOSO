@@ -283,6 +283,7 @@ export default function EventForm({
                               field.onChange(date.toString());
                               setIsCalendarOpen(false);
                             }}
+                            showMonthAndYearPickers
                           />
                         </PopoverContent>
                       </Popover>

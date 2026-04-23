@@ -31,19 +31,19 @@ export default async function LeadershipSection() {
       titleColor: "text-accent-green",
       hoverColor: "hover:bg-accent-green/5",
     },
-    // {
-    //   name: leadership?.headmaster?.name || "Maulana Yusuf Hassan",
-    //   title: leadership?.headmaster?.title || "Head Master",
-    //   email: leadership?.headmaster?.email || "headmaster@darulhidaya.edu",
-    //   phone: leadership?.headmaster?.phone || "110",
-    //   image:
-    //     leadership?.headmaster?.image ||
-    //     "https://images.unsplash.com/photo-1544161515-4af6b1d8c114?q=80&w=2670&auto=format&fit=crop",
-    //   headerColor: "bg-primary",
-    //   titleColor: "text-primary",
-    //   hoverColor: "hover:bg-primary/5",
-    // },
-  ].slice(0, 2);
+    {
+      name: leadership?.treasurer?.name || "Maulana Yusuf Hassan",
+      title: leadership?.treasurer?.title || "Treasurer",
+      email: leadership?.treasurer?.email || "treasurer@darulhidaya.edu",
+      phone: leadership?.treasurer?.phone || "110",
+      image:
+        leadership?.treasurer?.image ||
+        "https://images.unsplash.com/photo-1544161515-4af6b1d8c114?q=80&w=2670&auto=format&fit=crop",
+      headerColor: "bg-primary",
+      titleColor: "text-primary",
+      hoverColor: "hover:bg-primary/5",
+    },
+  ];
 
   return (
     <section className="py-24 bg-slate-50 dark:bg-slate-900/40 relative">

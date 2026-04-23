@@ -55,7 +55,7 @@ export function getStudentColumns({
                 src: student.image,
                 fallback: student.name?.charAt(0),
               }}
-              description={student.studentId ? `@${student.studentId}` : ""}
+              description={student.studentId || ""}
               name={info.getValue()}
             />
             {showActions && (

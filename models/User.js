@@ -49,6 +49,7 @@ const UserSchema = new mongoose.Schema(
     education: String,
     current_job: String,
     custom_job: String,
+    job_location: String,
 
     // Public registration fields
     source: {

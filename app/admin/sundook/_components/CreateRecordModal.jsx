@@ -66,12 +66,12 @@ const CreateRecordModal = ({
                 {(alumniList || []).map((u) => (
                   <AutocompleteItem
                     key={u._id}
-                    textValue={`${u.name} (@${u.userId})`}
+                    textValue={`${u.name} (${u.userId})`}
                   >
                     <div className="flex flex-col">
                       <span className="font-bold">{u.name}</span>
                       <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
-                        @{u.userId}
+                        {u.userId}
                       </span>
                     </div>
                   </AutocompleteItem>

@@ -90,6 +90,7 @@ export default function EventsFilter({
             value={dateRange}
             onChange={setDateRange}
             className="w-full"
+            showMonthAndYearPickers
           />
         </div>
 

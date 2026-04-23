@@ -99,6 +99,8 @@ export async function PUT(request, { params }) {
         : student.date_of_admission,
       image: imageUrl,
       imagePublicId,
+      aadhar_number: data.get("aadhar_number"),
+      identification_mark: data.get("identification_mark"),
     };
 
     const updatedStudent = await Student.findByIdAndUpdate(id, updateData, {

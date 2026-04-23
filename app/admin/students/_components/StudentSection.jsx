@@ -19,6 +19,8 @@ import {
   CalendarDays,
   BriefcaseIcon,
   BookOpen,
+  ShieldUser,
+  Fingerprint,
 } from "lucide-react";
 import InputField from "@/components/admin/ui/InputField";
 
@@ -109,6 +111,7 @@ const StudentSection = ({
                       field.onChange(date.toString());
                       setIsCalendarOpen(false);
                     }}
+                    showMonthAndYearPickers
                   />
                 </PopoverContent>
               </Popover>
@@ -119,6 +122,34 @@ const StudentSection = ({
               )}
             </div>
           )}
+        />
+      </div>
+
+      <InputField
+        {...register("aadhar_number")}
+        label="Aadhar Number"
+        placeholder="Enter aadhar number"
+        required={false}
+        startContent={<ShieldUser size={18} className="text-slate-400" />}
+        error={errors.aadhar_number}
+      />
+
+      <div className="md:col-span-2 space-y-1">
+        <Textarea
+          {...register("identification_mark")}
+          label={
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              Identification Mark
+            </span>
+          }
+          labelPlacement="outside"
+          placeholder="Enter identification mark"
+          startContent={<Fingerprint size={18} className="text-slate-400" />}
+          variant="bordered"
+          radius="sm"
+          minRows={2}
+          isInvalid={!!errors.identification_mark}
+          errorMessage={errors.identification_mark?.message}
         />
       </div>
 
@@ -176,6 +207,7 @@ const StudentSection = ({
                       field.onChange(date.toString());
                       setIsAdmissionCalendarOpen(false);
                     }}
+                    showMonthAndYearPickers
                   />
                 </PopoverContent>
               </Popover>

@@ -23,6 +23,7 @@ import {
   MailboxIcon,
   ChevronDown,
   UserPen,
+  Briefcase,
 } from "lucide-react";
 import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/card";
@@ -38,6 +39,7 @@ import { useDisclosure } from "@heroui/modal";
 import { useSession, signOut } from "next-auth/react";
 import UserForm from "@/components/admin/UserForm";
 import DeactivateConfirmModal from "@/components/admin/DeactivateConfirmModal";
+import { calculateAge } from "@/lib/utils";
 
 const DetailItem = ({ icon: Icon, label, value, color = "primary" }) => (
   <div className="space-y-1.5 group text-left">
@@ -160,11 +162,11 @@ export default function AlumniProfilePage() {
                 {user.name}
               </h2>
               <p className="text-slate-500 font-bold uppercase tracking-widest text-xs mt-2 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
-                @{user.userId}
+                {user.userId}
               </p>
 
               <div className="w-full mt-8 space-y-3">
-                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                {/* <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800">
                   <span className="text-xs font-black uppercase tracking-wider text-slate-400">
                     Status
                   </span>
@@ -200,7 +202,7 @@ export default function AlumniProfilePage() {
                       </DropdownItem>
                     </DropdownMenu>
                   </Dropdown>
-                </div>
+                </div> */}
                 <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800">
                   <span className="text-xs font-black uppercase tracking-wider text-slate-400">
                     Joined
@@ -227,6 +229,13 @@ export default function AlumniProfilePage() {
                   label="Date of Birth"
                   value={formatDate(user.dob)}
                 />
+                {user.dob && (
+                  <DetailItem
+                    icon={Clock}
+                    label="Age"
+                    value={`${calculateAge(user.dob)} years`}
+                  />
+                )}
                 <DetailItem
                   icon={UsersIcon}
                   label="Father's Name"
@@ -238,7 +247,7 @@ export default function AlumniProfilePage() {
 
           <Card className="bg-surface-light dark:bg-surface-dark border-slate-200 dark:border-slate-800 shadow-sm rounded-3xl">
             <CardBody className="p-8 text-left">
-              <SectionHeader title="Education & Batch" icon={GraduationCap} />
+              <SectionHeader title="Education & Career" icon={GraduationCap} />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <DetailItem
                   icon={ScrollText}
@@ -249,6 +258,20 @@ export default function AlumniProfilePage() {
                   icon={GraduationCap}
                   label="Batch"
                   value={user.batch}
+                />
+                <DetailItem
+                  icon={Briefcase}
+                  label="Current Job"
+                  value={
+                    user.current_job === "Other"
+                      ? user.custom_job
+                      : user.current_job
+                  }
+                />
+                <DetailItem
+                  icon={MapPin}
+                  label="Job Location"
+                  value={user.job_location}
                 />
               </div>
             </CardBody>

@@ -25,7 +25,7 @@ const DetailItem = ({ icon: Icon, label, value, color = "primary" }) => (
         {label}
       </span>
     </div>
-    <p className="text-slate-900 dark:text-white font-bold text-sm leading-tight break-words pl-5.5">
+    <p className="text-slate-900 dark:text-white font-bold text-sm leading-tight wrap-break-word pl-5.5">
       {value || "—"}
     </p>
   </div>
@@ -76,6 +76,7 @@ export default function AlumniModal({ isOpen, onClose, alumni }) {
     phone,
     dob,
     father_name,
+    job_location,
   } = alumni;
 
   const occupation =
@@ -149,6 +150,11 @@ export default function AlumniModal({ isOpen, onClose, alumni }) {
                     icon={ScrollText}
                     label="Education"
                     value={education}
+                  />
+                  <DetailItem
+                    icon={MapPin}
+                    label="Job Location"
+                    value={job_location}
                   />
                 </Section>
 

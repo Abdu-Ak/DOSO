@@ -32,7 +32,7 @@ export const getSundookColumns = ({ onApprove, onReject, onDelete }) => [
               src: record.alumni?.image,
               fallback: record.alumni?.name?.charAt(0),
             }}
-            description={`@${record.alumni?.userId}`}
+            description={record.alumni?.userId}
             name={record.alumni?.name || "Unknown Alumni"}
           />
           <Dropdown placement="bottom-end">

@@ -234,7 +234,8 @@ const NotificationsPanel = ({ onClose }) => {
         >
           {notifications.length +
             sundookNotifications.length +
-            welfareNotifications.length}
+            welfareNotifications.length +
+            studentNotifications.length}
         </Chip>
       </div>
 

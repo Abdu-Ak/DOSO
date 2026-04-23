@@ -85,6 +85,14 @@ const StudentSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    aadhar_number: {
+      type: String,
+      trim: true,
+    },
+    identification_mark: {
+      type: String,
+      trim: true,
+    },
   },
   {
     timestamps: true,

@@ -58,6 +58,7 @@ export async function PUT(request, { params }) {
     const education = data.get("education");
     const current_job = data.get("current_job");
     const custom_job = data.get("custom_job");
+    const job_location = data.get("job_location");
 
     // Check if new email/userId is taken by another user
     const existingUser = await User.findOne({
@@ -92,6 +93,7 @@ export async function PUT(request, { params }) {
       education,
       current_job,
       custom_job,
+      job_location,
     };
 
     if (password) {

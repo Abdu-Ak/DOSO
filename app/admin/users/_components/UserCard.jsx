@@ -42,8 +42,7 @@ const UserCard = ({
 }) => {
   const showActions = canManageUser(currentUser, user);
   const showStatus = canManageUser(currentUser, user, "status");
-  const isPendingPublic =
-    user.status === "Pending" && user.source === "public";
+  const isPendingPublic = user.status === "Pending" && user.source === "public";
 
   let availableStatuses = [];
   if (user.status === "Pending") availableStatuses = ["Active", "Inactive"];
@@ -72,7 +71,7 @@ const UserCard = ({
             {user.name}
           </p>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            @{user.userId}
+            {user.userId}
           </p>
           <div className="flex flex-wrap gap-1.5 mt-1.5">
             <Chip
@@ -165,8 +164,7 @@ const UserCard = ({
               : "N/A"}
             {user.date_of_admission && (
               <span className="text-primary font-medium ml-2">
-                Adm:{" "}
-                {new Date(user.date_of_admission).toLocaleDateString()}
+                Adm: {new Date(user.date_of_admission).toLocaleDateString()}
               </span>
             )}
           </span>

@@ -165,6 +165,8 @@ export async function POST(request) {
       date_of_admission: new Date(data.get("date_of_admission")),
       source: data.get("source") || "admin",
       studentId,
+      aadhar_number: data.get("aadhar_number"),
+      identification_mark: data.get("identification_mark"),
       image: imageUrl,
       imagePublicId,
     };
