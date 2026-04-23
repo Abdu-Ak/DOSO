@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import dbConnect from "@/lib/mongodb";
 import Setting from "@/models/Setting";
 import cloudinary from "@/lib/cloudinary";
@@ -112,6 +113,9 @@ export async function PUT(request) {
       { leadership, contact },
       { upsert: true, new: true },
     );
+
+    revalidatePath("/");
+    revalidatePath("/contact");
 
     return NextResponse.json({
       success: true,
