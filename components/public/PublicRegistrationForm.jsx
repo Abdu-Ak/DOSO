@@ -156,6 +156,7 @@ const PublicRegistrationForm = ({ role }) => {
                           <Camera size={32} className="mx-auto mb-2" />
                           <span className="text-xs font-bold uppercase tracking-wider">
                             Upload Photo
+                            <span className="text-danger font-bold">*</span>
                           </span>
                         </div>
                       )}
