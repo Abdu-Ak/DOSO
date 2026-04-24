@@ -26,6 +26,7 @@ import {
   BookOpen,
   Download,
   Lock,
+  FileDown,
 } from "lucide-react";
 import { generateStudentPdf } from "@/lib/pdf/generateStudentPdf";
 import { Button } from "@heroui/button";
@@ -193,25 +194,24 @@ export default function StudentDetailPage() {
           startContent={<ArrowLeft size={18} />}
           className="flex font-bold text-slate-500 hover:text-primary pl-0"
         >
-          Back to students
+          Back to list
         </Button>
         <div className="flex items-center gap-3">
           <Button
+            color="secondary"
             variant="flat"
-            color="primary"
             startContent={
               isPdfLoading ? (
                 <Loader2 size={16} className="animate-spin" />
               ) : (
-                <Download size={16} />
+                <FileDown size={16} />
               )
             }
             onPress={handleDownloadPdf}
             isDisabled={isPdfLoading}
-            className="font-bold"
-            radius="xl"
+            className="font-bold self-start md:self-auto shadow-sm"
           >
-            {isPdfLoading ? "Generating..." : "Download PDF"}
+            PDF
           </Button>
           {canManageUser(currentUser, user, "edit") && (
             <Button
@@ -222,7 +222,7 @@ export default function StudentDetailPage() {
               className="font-bold shadow-lg shadow-primary/20"
               radius="xl"
             >
-              Edit Student
+              Edit
             </Button>
           )}
         </div>
