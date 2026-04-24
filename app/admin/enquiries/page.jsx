@@ -73,7 +73,7 @@ export default function EnquiriesPage() {
             Enquiries List
           </h2>
           <p className="text-slate-500 text-sm dark:text-slate-400 mt-1">
-            Manage student and admissions inquiries efficiently
+            Manage student and admissions enquiries efficiently
           </p>
         </div>
       </div>
@@ -102,7 +102,7 @@ export default function EnquiriesPage() {
           data={filteredEnquiries}
           columns={enquiryColumns}
           isLoading={isLoading}
-          emptyContent="No inquiries matches the criteria."
+          emptyContent="No enquiries matches the criteria."
           topContent={
             <EnquiryFilters
               searchTerm={searchTerm}

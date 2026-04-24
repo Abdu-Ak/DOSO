@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Pagination } from "@heroui/pagination";
-import { Loader2 } from "lucide-react";
+import { Loader2, Inbox } from "lucide-react";
 import EventFilters from "./EventFilters";
 import EventCard from "./EventCard";
 
@@ -21,12 +21,16 @@ const MobileEventList = ({
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-12">
-          <Loader2 className="animate-spin text-primary" size={32} />
+        <div className="flex flex-col items-center justify-center py-20 gap-4">
+          <Loader2 className="animate-spin text-primary" size={40} />
+          <p className="text-sm font-medium text-slate-400">
+            Loading events...
+          </p>
         </div>
       ) : events.length === 0 ? (
-        <div className="text-center py-12 text-sm text-slate-400">
-          No events found
+        <div className="flex flex-col items-center justify-center py-20 gap-3 bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
+          <Inbox className="text-slate-200 dark:text-slate-800" size={64} />
+          <p className="text-slate-400 font-medium">No events found.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

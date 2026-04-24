@@ -16,7 +16,7 @@ const enquirySchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: [
-        "Admissions Inquiry",
+        "Admissions Enquiry",
         "General Information",
         "Support Our Institute",
         "Technical Issue",

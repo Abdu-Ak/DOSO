@@ -76,7 +76,7 @@ export default function EventDetailsPage() {
           startContent={<ArrowLeft size={18} />}
           className="flex font-bold text-slate-500 hover:text-primary pl-0"
         >
-          Back to events
+          Back to list
         </Button>
         <div className="flex items-center gap-3">
           <Button

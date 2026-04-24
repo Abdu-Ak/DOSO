@@ -163,7 +163,7 @@ export default function StudentDetailPage() {
           variant="flat"
           className="mt-4 font-bold"
         >
-          Back to Students
+          Back to list
         </Button>
       </div>
     );

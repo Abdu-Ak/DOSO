@@ -11,9 +11,9 @@ import { Select, SelectItem } from "@heroui/select";
 import { Button } from "@heroui/button";
 
 const subjects = [
-  "Admissions Inquiry",
+  "Admissions Enquiry",
   "General Information",
-  "Support Our Institute",
+  "Support Our Institute",  
   "Technical Issue",
 ];
 
@@ -28,7 +28,7 @@ export default function ContactForm() {
     defaultValues: {
       name: "",
       phone: "",
-      subject: "Admissions Inquiry",
+      subject: "Admissions Enquiry",
       message: "",
     },
   });
@@ -148,7 +148,7 @@ export default function ContactForm() {
             labelPlacement="outside"
             variant="flat"
             radius="lg"
-            defaultSelectedKeys={["Admissions Inquiry"]}
+            defaultSelectedKeys={["Admissions Enquiry"]}
             isInvalid={!!errors.subject}
             errorMessage={errors.subject?.message}
             classNames={selectClasses}

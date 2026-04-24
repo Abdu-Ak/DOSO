@@ -11,10 +11,13 @@ import {
   Calendar,
   IndianRupee,
   FileText,
+  Loader2,
+  Inbox,
 } from "lucide-react";
 
 export default function MobileWelfareList({
   records,
+  isLoading,
   onApprove,
   onReject,
   onDelete,
@@ -24,6 +27,26 @@ export default function MobileWelfareList({
     approved: "success",
     rejected: "danger",
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <Loader2 className="animate-spin text-primary" size={40} />
+        <p className="text-sm font-medium text-slate-400">
+          Loading welfare records...
+        </p>
+      </div>
+    );
+  }
+
+  if (!records || records.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-3 bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
+        <Inbox className="text-slate-200 dark:text-slate-800" size={64} />
+        <p className="text-slate-400 font-medium">No welfare data found.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
