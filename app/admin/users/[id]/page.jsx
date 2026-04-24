@@ -11,8 +11,6 @@ import {
   Phone,
   Calendar,
   ShieldCheck,
-  Edit2,
-  Trash2,
   ArrowLeft,
   Clock,
   Loader2,
@@ -27,7 +25,7 @@ import {
   ScrollText,
   ChevronDown,
   UserPen,
-  Download,
+  FileDown,
 } from "lucide-react";
 import { generateAlumniPdf } from "@/lib/pdf/generateAlumniPdf";
 import { Button } from "@heroui/button";
@@ -179,7 +177,7 @@ export default function UserDetailPage() {
           variant="flat"
           className="mt-4 font-bold"
         >
-          Back to Users
+          Back to list
         </Button>
       </div>
     );
@@ -215,21 +213,20 @@ export default function UserDetailPage() {
         <div className="flex items-center gap-3">
           {user?.role === "alumni" && (
             <Button
+              color="secondary"
               variant="flat"
-              color="primary"
               startContent={
                 isPdfLoading ? (
                   <Loader2 size={16} className="animate-spin" />
                 ) : (
-                  <Download size={16} />
+                  <FileDown size={16} />
                 )
               }
               onPress={handleDownloadPdf}
               isDisabled={isPdfLoading}
-              className="font-bold"
-              radius="xl"
+              className="font-bold self-start md:self-auto shadow-sm"
             >
-              {isPdfLoading ? "Generating..." : "Download PDF"}
+              PDF
             </Button>
           )}
           {canManageUser(currentUser, user, "edit") && (
