@@ -14,6 +14,7 @@ import {
   FileText,
   Loader2,
   Trash2,
+  Inbox,
 } from "lucide-react";
 
 /**
@@ -28,20 +29,18 @@ const MobileSundookList = ({
 }) => {
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 text-slate-400">
-        <Loader2 className="animate-spin mb-2" size={32} />
-        <p className="text-sm font-bold uppercase tracking-widest">
-          Loading records...
-        </p>
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <Loader2 className="animate-spin text-primary" size={40} />
+        <p className="text-sm font-medium text-slate-400">Loading records...</p>
       </div>
     );
   }
 
   if (records.length === 0) {
     return (
-      <div className="text-center p-12 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800">
-        <Package className="mx-auto text-slate-300 mb-2" size={48} />
-        <p className="text-slate-500 font-bold">No records found</p>
+      <div className="flex flex-col items-center justify-center py-20 gap-3 bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
+        <Inbox className="text-slate-200 dark:text-slate-800" size={64} />
+        <p className="text-slate-400 font-medium">No records found.</p>
       </div>
     );
   }

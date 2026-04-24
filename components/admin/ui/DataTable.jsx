@@ -20,7 +20,7 @@ import {
 import { Pagination } from "@heroui/pagination";
 import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2, Inbox } from "lucide-react";
 
 /**
  * A highly reusable and flexible DataTable component.
@@ -39,7 +39,12 @@ const DataTable = ({
   columns,
   data = [],
   isLoading = false,
-  emptyContent = "No data found",
+  emptyContent = (
+    <div className="flex flex-col items-center justify-center py-16 gap-3 bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 m-4">
+      <Inbox className="text-slate-200 dark:text-slate-800" size={64} />
+      <p className="text-slate-400 font-medium">No records found.</p>
+    </div>
+  ),
   pagination,
   search,
   topContent,

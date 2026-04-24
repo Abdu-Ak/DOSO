@@ -208,7 +208,7 @@ export default function UserDetailPage() {
           startContent={<ArrowLeft size={18} />}
           className="flex font-bold text-slate-500 hover:text-primary pl-0"
         >
-          {isOwnProfile ? "Back to dashboard" : "Back to users"}
+          {isOwnProfile ? "Back to dashboard" : "Back to list"}
         </Button>
         <div className="flex items-center gap-3">
           {user?.role === "alumni" && (
