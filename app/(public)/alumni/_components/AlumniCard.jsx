@@ -18,7 +18,22 @@ export default function AlumniCard({
     phone,
     image,
     job_location,
+    house_name,
+    district,
+    custom_district,
+    post_office,
+    pincode,
   } = alumni;
+
+  const formattedAddress = [
+    house_name,
+    address,
+    district === "Other" ? custom_district : district,
+    post_office,
+    pincode,
+  ]
+    .filter(Boolean)
+    .join(", ");
   const occupation = current_job || custom_job || "Alumni";
   const displayImage =
     image ||
@@ -74,24 +89,24 @@ export default function AlumniCard({
           </p>
 
           {/* Occupation Badge */}
-          <div
+          {/* <div
             className={`mt-3 flex items-center justify-center gap-1 text-sm font-medium ${occupationColorClasses[occupationColor]} py-1 px-2 rounded-full mx-auto w-fit`}
           >
             <Briefcase size={18} className="shrink-0" />
             <span>{occupation}</span>
-          </div>
+          </div> */}
 
           <div className="text-xs text-slate-500 dark:text-slate-400 mt-3 space-y-1">
-            {education && (
+            {/* {education && (
               <p className="flex items-center justify-center gap-1.5 truncate">
                 <GraduationCap size={12} className="shrink-0" />
                 <span className="truncate">{education}</span>
               </p>
-            )}
-            {address && (
+            )} */}
+            {formattedAddress && (
               <p className="flex items-center justify-center gap-1.5 truncate">
                 <MapPin size={12} className="shrink-0" />
-                <span className="truncate">{address}</span>
+                <span className="truncate">{formattedAddress}</span>
               </p>
             )}
           </div>
@@ -99,7 +114,7 @@ export default function AlumniCard({
 
         {/* Footer */}
         <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
-          <div className="flex gap-2">
+          <div className="flex gap-4">
             {email && (
               <a
                 className="text-slate-400 hover:text-primary transition-colors cursor-pointer"
