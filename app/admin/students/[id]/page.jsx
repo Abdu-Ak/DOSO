@@ -24,7 +24,10 @@ import {
   ChevronDown,
   UserPen,
   BookOpen,
+  Download,
+  Lock,
 } from "lucide-react";
+import { generateStudentPdf } from "@/lib/pdf/generateStudentPdf";
 import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/card";
 import { Avatar } from "@heroui/avatar";
@@ -68,6 +71,16 @@ export default function StudentDetailPage() {
   const queryClient = useQueryClient();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [pendingStatus, setPendingStatus] = React.useState(null);
+  const [isPdfLoading, setIsPdfLoading] = React.useState(false);
+
+  const handleDownloadPdf = async () => {
+    setIsPdfLoading(true);
+    try {
+      await generateStudentPdf(user);
+    } finally {
+      setIsPdfLoading(false);
+    }
+  };
 
   const { data: session } = useSession();
   const currentUser = session?.user;
@@ -183,6 +196,23 @@ export default function StudentDetailPage() {
           Back to students
         </Button>
         <div className="flex items-center gap-3">
+          <Button
+            variant="flat"
+            color="primary"
+            startContent={
+              isPdfLoading ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Download size={16} />
+              )
+            }
+            onPress={handleDownloadPdf}
+            isDisabled={isPdfLoading}
+            className="font-bold"
+            radius="xl"
+          >
+            {isPdfLoading ? "Generating..." : "Download PDF"}
+          </Button>
           {canManageUser(currentUser, user, "edit") && (
             <Button
               as={Link}
