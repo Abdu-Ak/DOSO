@@ -1,63 +1,9 @@
-import React from "react";
-import {
-  Mail,
-  Phone,
-  Calendar,
-  MapPin,
-  Home,
-  Briefcase,
-  Users as UsersIcon,
-  GraduationCap,
-  MapPinned,
-  MailboxIcon,
-  ScrollText,
-  User as UserIcon,
-} from "lucide-react";
+import { Mail, Phone, MapPin } from "lucide-react";
 import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
 import { Avatar } from "@heroui/avatar";
-import { Divider } from "@heroui/divider";
-
-const DetailItem = ({ icon: Icon, label, value, color = "primary" }) => (
-  <div className="flex flex-col gap-1">
-    <div className="flex items-center gap-2 text-slate-400 dark:text-slate-500">
-      {Icon && <Icon size={14} className={`text-${color}`} />}
-      <span className="text-[10px] font-black uppercase tracking-widest">
-        {label}
-      </span>
-    </div>
-    <p className="text-slate-900 dark:text-white font-bold text-sm leading-tight wrap-break-word pl-5.5">
-      {value || "—"}
-    </p>
-  </div>
-);
-
-const Section = ({ title, icon: Icon, children }) => (
-  <div className="space-y-4">
-    <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
-      <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary shrink-0">
-        {Icon && <Icon size={16} />}
-      </div>
-      <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
-        {title}
-      </h3>
-    </div>
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 px-1 pb-2">
-      {children}
-    </div>
-  </div>
-);
 
 export default function AlumniModal({ isOpen, onClose, alumni }) {
   if (!alumni) return null;
-
-  const formatDate = (date) => {
-    if (!date) return null;
-    return new Date(date).toLocaleDateString("en-US", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
 
   const {
     name,
@@ -79,15 +25,24 @@ export default function AlumniModal({ isOpen, onClose, alumni }) {
     job_location,
   } = alumni;
 
+  const formattedAddress = [
+    house_name,
+    address,
+    district === "Other" ? custom_district : district,
+    post_office,
+    pincode,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
   const occupation =
     current_job === "Other" ? custom_job : current_job || "Alumni";
-  const displayDistrict = district === "Other" ? custom_district : district;
 
   return (
     <Modal
       isOpen={isOpen}
       onOpenChange={onClose}
-      size="2xl"
+      size="xl"
       scrollBehavior="inside"
       // backdrop="blur"
       classNames={{
@@ -119,79 +74,68 @@ export default function AlumniModal({ isOpen, onClose, alumni }) {
                     <p className="text-primary font-black text-[10px] uppercase tracking-widest bg-primary/5 px-3 py-1 rounded-full border border-primary/10">
                       Batch of {batch}
                     </p>
-                    {occupation && (
+                    {/* {occupation && (
                       <p className="text-slate-500 dark:text-slate-400 font-bold text-[10px] uppercase tracking-widest bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
                         {occupation}
                       </p>
-                    )}
+                    )} */}
                   </div>
                 </div>
               </div>
 
               {/* Sections Container */}
-              <div className="space-y-3">
-                {/* Personal & Contact Details */}
-                <Section title="Personal & Contact Information" icon={UserIcon}>
-                  <DetailItem icon={Mail} label="Email Address" value={email} />
-                  <DetailItem icon={Phone} label="Phone Number" value={phone} />
-                  <DetailItem
-                    icon={Calendar}
-                    label="Date of Birth"
-                    value={formatDate(dob)}
-                  />
-                  {father_name && (
-                    <DetailItem
-                      icon={UsersIcon}
-                      label="Father's Name"
-                      value={father_name}
-                    />
+              <div className="space-y-6 pt-4">
+                {/* Simplified Contact & Location Info */}
+                <div className="grid grid-cols-1 gap-6 px-1">
+                  {formattedAddress && (
+                    <div className="flex items-start gap-3">
+                      <div className="mt-2 w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary shrink-0">
+                        <MapPin size={16} />
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                          Place
+                        </span>
+                        <p className="text-slate-900 dark:text-white font-bold text-sm leading-tight">
+                          {formattedAddress}
+                        </p>
+                      </div>
+                    </div>
                   )}
-                  <DetailItem
-                    icon={ScrollText}
-                    label="Education"
-                    value={education}
-                  />
-                  <DetailItem
-                    icon={MapPin}
-                    label="Job Location"
-                    value={job_location}
-                  />
-                </Section>
 
-                {/* Address Info */}
-                {(address || district || house_name) && (
-                  <Section title="Address Details" icon={MapPin}>
-                    {house_name && (
-                      <div className="sm:col-span-2">
-                        <DetailItem
-                          icon={Home}
-                          label="House Name"
-                          value={house_name}
-                        />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {email && (
+                      <div className="flex items-start gap-3">
+                        <div className="mt-2 w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary shrink-0">
+                          <Mail size={16} />
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                            Email Address
+                          </span>
+                          <p className="text-slate-900 dark:text-white font-bold text-sm leading-tight break-all">
+                            {email}
+                          </p>
+                        </div>
                       </div>
                     )}
-                    {address && (
-                      <div className="sm:col-row-span-2">
-                        <DetailItem
-                          icon={MapPin}
-                          label="Full Address"
-                          value={address}
-                        />
+                    {phone && (
+                      <div className="flex items-start gap-3">
+                        <div className="mt-2 w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary shrink-0">
+                          <Phone size={16} />
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                            Phone Number
+                          </span>
+                          <p className="text-slate-900 dark:text-white font-bold text-sm leading-tight">
+                            {phone}
+                          </p>
+                        </div>
                       </div>
                     )}
-                    <DetailItem
-                      icon={MapPinned}
-                      label="District"
-                      value={displayDistrict}
-                    />
-                    <DetailItem
-                      icon={MailboxIcon}
-                      label="Post Office"
-                      value={post_office}
-                    />
-                    <DetailItem icon={MapPin} label="Pincode" value={pincode} />
-                  </Section>
-                )}
+                  </div>
+                </div>
               </div>
             </ModalBody>
           </>

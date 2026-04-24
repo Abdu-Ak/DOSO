@@ -6,13 +6,14 @@ import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
 
+const currentYear = new Date().getFullYear();
+const startYear = 1980;
 const BATCHES = [
   "All Batches",
-  "Batch of 2023",
-  "Batch of 2022",
-  "Batch of 2021",
-  "Batch of 2020",
-  "Batch of 2019",
+  ...Array.from(
+    { length: currentYear - startYear + 1 },
+    (_, i) => `Batch of ${currentYear - i}`,
+  ),
 ];
 
 const INDUSTRIES = [

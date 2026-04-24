@@ -53,8 +53,11 @@ const AlumniSection = ({
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const selectedDistrict = watch("district");
   const selectedJob = watch("current_job");
-  const batchYears = Array.from({ length: 25 }, (_, i) =>
-    (new Date().getFullYear() - i).toString(),
+  const currentYear = new Date().getFullYear();
+  const startYear = 1980;
+  const batchYears = Array.from(
+    { length: currentYear - startYear + 1 },
+    (_, i) => (currentYear - i).toString(),
   );
 
   return (
