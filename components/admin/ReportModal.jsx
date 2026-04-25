@@ -570,7 +570,7 @@ const ReportModal = ({
   return (
     <Modal isOpen={isOpen} onOpenChange={onClose} size="lg" hideCloseButton>
       <ModalContent>
-        <ModalHeader className="flex items-center justify-between">
+        <ModalHeader className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <div className="p-2 bg-secondary/10 rounded-lg text-secondary">
               <FileDown size={22} />

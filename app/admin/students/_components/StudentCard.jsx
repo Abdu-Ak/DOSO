@@ -127,47 +127,78 @@ const StudentCard = ({
       </div>
 
       {/* Info rows */}
-      <div className="grid grid-cols-1 gap-1.5 text-xs text-slate-600 dark:text-slate-400">
-        <div className="flex items-center gap-2">
-          <Phone size={12} className="shrink-0 text-slate-400" />
-          <span>{student.phone || "N/A"}</span>
+      <div className="space-y-2 py-1">
+        <div className="flex items-center gap-3 text-xs">
+          <div className="flex items-center gap-2 text-slate-400">
+            <Phone size={12} className="shrink-0" />
+            <span>Phone :</span>
+          </div>
+          <span className="font-semibold text-slate-700 dark:text-slate-200">
+            {student.phone || "N/A"}
+          </span>
         </div>
+
         {student.current_madrasa_class && (
-          <div className="flex items-center gap-2">
-            <School size={12} className="shrink-0 text-slate-400" />
-            <span>Madrasa: {student.current_madrasa_class}</span>
+          <div className="flex items-center gap-3 text-xs">
+            <div className="flex items-center gap-2 text-slate-400">
+              <School size={12} className="shrink-0" />
+              <span>Madrasa :</span>
+            </div>
+            <span className="font-semibold text-slate-700 dark:text-slate-200">
+              {student.current_madrasa_class}
+            </span>
           </div>
         )}
+
         {student.current_school_class && (
-          <div className="flex items-center gap-2">
-            <BookOpen size={12} className="shrink-0 text-slate-400" />
-            <span>School: {student.current_school_class}</span>
+          <div className="flex items-center gap-3 text-xs">
+            <div className="flex items-center gap-2 text-slate-400">
+              <BookOpen size={12} className="shrink-0" />
+              <span>School :</span>
+            </div>
+            <span className="font-semibold text-slate-700 dark:text-slate-200">
+              {student.current_school_class}
+            </span>
           </div>
         )}
+
         {(student.district || student.custom_district) && (
-          <div className="flex items-center gap-2">
-            <MapPin size={12} className="shrink-0 text-slate-400" />
-            <span>
+          <div className="flex items-center gap-3 text-xs">
+            <div className="flex items-center gap-2 text-slate-400">
+              <MapPin size={12} className="shrink-0" />
+              <span>District :</span>
+            </div>
+            <span className="font-semibold text-slate-700 dark:text-slate-200">
               {student.district === "Other"
                 ? student.custom_district
                 : student.district}
             </span>
           </div>
         )}
-        <div className="flex items-center gap-2">
-          <Calendar size={12} className="shrink-0 text-slate-400" />
-          <span>
-            Created:{" "}
+
+        <div className="flex items-center gap-3 text-xs">
+          <div className="flex items-center gap-2 text-slate-400">
+            <Calendar size={12} className="shrink-0" />
+            <span>Created :</span>
+          </div>
+          <span className="font-semibold text-slate-700 dark:text-slate-200">
             {student.createdAt
               ? new Date(student.createdAt).toLocaleDateString()
               : "N/A"}
-            {student.date_of_admission && (
-              <span className="text-primary font-medium ml-2">
-                Adm: {new Date(student.date_of_admission).toLocaleDateString()}
-              </span>
-            )}
           </span>
         </div>
+
+        {student.date_of_admission && (
+          <div className="flex items-center gap-3 text-xs">
+            <div className="flex items-center gap-2 text-slate-400">
+              <Calendar size={12} className="shrink-0" />
+              <span>Admission :</span>
+            </div>
+            <span className="font-bold text-slate-700 dark:text-slate-200">
+              {new Date(student.date_of_admission).toLocaleDateString()}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Actions */}

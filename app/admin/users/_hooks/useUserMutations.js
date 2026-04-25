@@ -106,5 +106,37 @@ export function useUserMutations(currentUser) {
     },
   });
 
-  return { deleteMutation, statusMutation, approveMutation, rejectMutation };
+  const renewMutation = useMutation({
+    mutationFn: async ({ id, year, receipt_number }) => {
+      const res = await axios.post(`/api/users/${id}/renew`, {
+        year,
+        receipt_number,
+      });
+      return res.data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      addToast({
+        title: "Success",
+        description: data.message || "Membership renewed successfully",
+        color: "success",
+      });
+    },
+    onError: (error) => {
+      addToast({
+        title: "Error",
+        description:
+          error?.response?.data?.error || "Failed to renew membership",
+        color: "danger",
+      });
+    },
+  });
+
+  return {
+    deleteMutation,
+    statusMutation,
+    approveMutation,
+    rejectMutation,
+    renewMutation,
+  };
 }

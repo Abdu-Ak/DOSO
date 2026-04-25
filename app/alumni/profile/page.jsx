@@ -24,6 +24,7 @@ import {
   ChevronDown,
   UserPen,
   Briefcase,
+  Recycle,
 } from "lucide-react";
 import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/card";
@@ -212,6 +213,59 @@ export default function AlumniProfilePage() {
                     {formatDate(user.createdAt)}
                   </span>
                 </div>
+              </div>
+            </CardBody>
+          </Card>
+
+          {/* Membership Details Card */}
+          <Card className="bg-surface-light dark:bg-surface-dark border-slate-200 dark:border-slate-800 shadow-sm rounded-3xl">
+            <CardBody className="p-6">
+              <SectionHeader title="Membership Details" icon={ScrollText} />
+              <div className="space-y-3">
+                {!user.membership_renewals?.some(
+                  (r) => r.year === new Date().getFullYear(),
+                ) && (
+                  <div className="flex justify-between items-center p-3 bg-warning/5 dark:bg-warning/10 rounded-xl border border-warning/20">
+                    <div>
+                      <p className="font-bold text-sm text-warning-700 dark:text-warning-400">
+                        Year {new Date().getFullYear()}
+                      </p>
+                      <p className="text-[10px] uppercase font-black tracking-widest text-warning-600/70">
+                        Pending Renewal
+                      </p>
+                    </div>
+                    <Chip
+                      variant="flat"
+                      color="warning"
+                      size="sm"
+                      className="font-black text-[10px] uppercase"
+                    >
+                      Pending
+                    </Chip>
+                  </div>
+                )}
+                {[...(user.membership_renewals || [])]
+                  .sort((a, b) => b.year - a.year)
+                  .map((renewal) => (
+                    <div
+                      key={renewal.year}
+                      className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800"
+                    >
+                      <div>
+                        <p className="font-bold text-sm text-slate-900 dark:text-white">
+                          Year {renewal.year}
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          Receipt: {renewal.receipt_number}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          {formatDate(renewal.renewedAt)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
               </div>
             </CardBody>
           </Card>

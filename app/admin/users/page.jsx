@@ -16,6 +16,7 @@ import UserFilters from "./_components/UserFilters";
 import MobileUserList from "./_components/MobileUserList";
 import RejectModal from "./_components/RejectModal";
 import ReportModal from "@/components/admin/ReportModal";
+import RenewMembershipModal from "@/components/admin/RenewMembershipModal";
 import { getUserColumns } from "./_components/UserTableColumns";
 import { useUserMutations } from "./_hooks/useUserMutations";
 
@@ -38,10 +39,16 @@ export default function UserManagement() {
   const [pendingDeactivation, setPendingDeactivation] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [renewModalUser, setRenewModalUser] = useState(null);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-  const { deleteMutation, statusMutation, approveMutation, rejectMutation } =
-    useUserMutations(currentUser);
+  const {
+    deleteMutation,
+    statusMutation,
+    approveMutation,
+    rejectMutation,
+    renewMutation,
+  } = useUserMutations(currentUser);
 
   const { data, isLoading } = useQuery({
     queryKey: [
@@ -114,6 +121,7 @@ export default function UserManagement() {
         approveMutation,
         onReject: setRejectModalUser,
         onDelete: handleDelete,
+        onRenew: setRenewModalUser,
       }),
     [currentUser, handleStatusChange, approveMutation],
   );
@@ -182,6 +190,7 @@ export default function UserManagement() {
         onApprove={(id) => approveMutation.mutate(id)}
         onReject={setRejectModalUser}
         approvePending={approveMutation.isPending}
+        onRenew={setRenewModalUser}
       />
 
       <ConfirmModal
@@ -226,6 +235,20 @@ export default function UserManagement() {
         onClose={() => setIsReportModalOpen(false)}
         filters={{ searchTerm, role, status, district, batch }}
         currentUser={currentUser}
+      />
+
+      <RenewMembershipModal
+        isOpen={!!renewModalUser}
+        onOpenChange={(isOpen) => !isOpen && setRenewModalUser(null)}
+        onConfirm={(data) => {
+          renewMutation.mutate({
+            id: renewModalUser._id,
+            year: data.year,
+            receipt_number: data.receipt_number,
+          });
+          setRenewModalUser(null);
+        }}
+        currentYear={new Date().getFullYear()}
       />
     </div>
   );

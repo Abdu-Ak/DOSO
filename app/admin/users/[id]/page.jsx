@@ -26,8 +26,10 @@ import {
   ChevronDown,
   UserPen,
   FileDown,
+  Recycle,
 } from "lucide-react";
 import { generateAlumniPdf } from "@/lib/pdf/generateAlumniPdf";
+import RenewMembershipModal from "@/components/admin/RenewMembershipModal";
 import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/card";
 import { Avatar } from "@heroui/avatar";
@@ -56,13 +58,16 @@ const DetailItem = ({ icon: Icon, label, value, color = "primary" }) => (
   </div>
 );
 
-const SectionHeader = ({ title, icon: Icon }) => (
-  <h3 className="text-base font-black text-slate-900 dark:text-white mb-6 flex items-center gap-3">
-    <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
-      {Icon && <Icon size={18} />}
-    </div>
-    {title}
-  </h3>
+const SectionHeader = ({ title, icon: Icon, action }) => (
+  <div className="flex items-center justify-between mb-6">
+    <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-3">
+      <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+        {Icon && <Icon size={18} />}
+      </div>
+      {title}
+    </h3>
+    {action}
+  </div>
 );
 
 export default function UserDetailPage() {
@@ -70,6 +75,11 @@ export default function UserDetailPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const {
+    isOpen: isRenewOpen,
+    onOpen: onRenewOpen,
+    onOpenChange: onRenewOpenChange,
+  } = useDisclosure();
   const [pendingStatus, setPendingStatus] = React.useState(null);
   const [isPdfLoading, setIsPdfLoading] = React.useState(false);
 
@@ -154,6 +164,29 @@ export default function UserDetailPage() {
       addToast({
         title: "Error",
         description: "Failed to delete user",
+        color: "danger",
+      });
+    },
+  });
+
+  const renewMutation = useMutation({
+    mutationFn: async (data) => {
+      await axios.post(`/api/users/${id}/renew`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user", id] });
+      addToast({
+        title: "Success",
+        description: "Membership renewed successfully",
+        color: "success",
+      });
+      onRenewOpenChange(false);
+    },
+    onError: (error) => {
+      addToast({
+        title: "Error",
+        description:
+          error?.response?.data?.error || "Failed to renew membership",
         color: "danger",
       });
     },
@@ -349,6 +382,64 @@ export default function UserDetailPage() {
               </div>
             </CardBody>
           </Card>
+
+          {user.role === "alumni" && (
+            <Card className="bg-surface-light dark:bg-surface-dark border-slate-200 dark:border-slate-800 shadow-sm rounded-3xl">
+              <CardBody className="p-6">
+                <SectionHeader
+                  title="Membership Details"
+                  icon={ScrollText}
+                  action={
+                    canManageUser(currentUser, user, "edit") &&
+                    !user.membership_renewals?.some(
+                      (r) => r.year === new Date().getFullYear(),
+                    ) && (
+                      <Button
+                        size="sm"
+                        color="primary"
+                        variant="flat"
+                        startContent={<Recycle size={14} />}
+                        onPress={onRenewOpen}
+                        className="font-bold rounded-lg h-8 px-3"
+                      >
+                        Renew
+                      </Button>
+                    )
+                  }
+                />
+                {user.membership_renewals?.length > 0 ? (
+                  <div className="space-y-3">
+                    {[...user.membership_renewals]
+                      .sort((a, b) => b.year - a.year)
+                      .map((renewal) => (
+                        <div
+                          key={renewal.year}
+                          className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800"
+                        >
+                          <div>
+                            <p className="font-bold text-sm text-slate-900 dark:text-white">
+                              Year {renewal.year}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              Receipt: {renewal.receipt_number}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs text-slate-400 mt-0.5">
+                              {formatDate(renewal.renewedAt)}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-500 italic">
+                    No past membership renewals recorded.
+                  </p>
+                )}
+              </CardBody>
+            </Card>
+          )}
 
           {/* Quick Stats Card */}
           <Card className="bg-primary/5 dark:bg-primary/10 border-primary/10 shadow-sm rounded-3xl border">
@@ -547,6 +638,13 @@ export default function UserDetailPage() {
         isOpen={isOpen}
         onOpenChange={onOpenChange}
         onConfirm={confirmDeactivation}
+      />
+
+      <RenewMembershipModal
+        isOpen={isRenewOpen}
+        onOpenChange={onRenewOpenChange}
+        onConfirm={(data) => renewMutation.mutate(data)}
+        currentYear={new Date().getFullYear()}
       />
     </div>
   );
