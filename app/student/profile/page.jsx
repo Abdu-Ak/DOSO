@@ -83,7 +83,8 @@ export default function StudentProfilePage() {
 
   const formatDate = (date) => {
     if (!date) return null;
-    return new Date(date).toLocaleDateString("en-US", {
+    return new Date(date).toLocaleDateString("en-IN", {
+      timeZone: "Asia/Kolkata",
       day: "numeric",
       month: "long",
       year: "numeric",

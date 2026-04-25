@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import StatCard from "./StatCard";
 import { Chip } from "@heroui/chip";
+import { formatCurrency } from "@/lib/utils";
 
 const DashboardStats = ({ startDate, endDate }) => {
   const { data, isLoading } = useQuery({
@@ -24,14 +25,6 @@ const DashboardStats = ({ startDate, endDate }) => {
       return resp.data;
     },
   });
-
-  const formatCurrency = (val) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-    }).format(val);
-  };
 
   const stats = [
     {

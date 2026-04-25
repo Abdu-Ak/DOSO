@@ -6,6 +6,7 @@ import Sundook from "@/models/Sundook";
 import Welfare from "@/models/Welfare";
 import Event from "@/models/Event";
 import Enquiry from "@/models/Enquiry";
+import { formatCurrency } from "@/lib/utils";
 
 export async function GET(req) {
   try {
@@ -56,14 +57,6 @@ export async function GET(req) {
       ...query,
       status: "Pending",
     });
-
-    const formatCurrency = (val) => {
-      return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        minimumFractionDigits: 0,
-      }).format(val);
-    };
 
     const sundookTotal = sundookStats[0]?.total || 0;
     const welfareTotal = welfareStats[0]?.total || 0;

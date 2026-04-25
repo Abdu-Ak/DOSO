@@ -44,7 +44,8 @@ const EnquiryCard = ({ enquiry, onStatusChange, onDelete }) => {
           </h3>
           <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
             <Calendar size={12} />
-            {new Date(enquiry.createdAt).toLocaleDateString("en-US", {
+            {new Date(enquiry.createdAt).toLocaleDateString("en-IN", {
+              timeZone: "Asia/Kolkata",
               month: "short",
               day: "numeric",
               year: "numeric",

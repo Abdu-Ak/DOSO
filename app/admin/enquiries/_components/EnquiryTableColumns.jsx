@@ -130,7 +130,8 @@ export const getEnquiryColumns = ({ onStatusChange, onDelete }) => [
     accessorKey: "createdAt",
     cell: (info) => (
       <span className="text-xs text-slate-500 font-medium whitespace-nowrap">
-        {new Date(info.getValue()).toLocaleDateString("en-US", {
+        {new Date(info.getValue()).toLocaleDateString("en-IN", {
+          timeZone: "Asia/Kolkata",
           month: "short",
           day: "numeric",
           year: "numeric",
