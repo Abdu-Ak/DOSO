@@ -13,6 +13,7 @@ import {
   MessageSquareText,
   Box,
   HeartHandshake,
+  Wallet,
 } from "lucide-react";
 import Logo from "../Logo";
 import CustomTooltip from "./ui/CustomTooltip";
@@ -67,6 +68,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
     { label: "Events", href: "/admin/events", icon: Calendar },
     { label: "Sundook", href: "/admin/sundook", icon: Box },
     { label: "Welfare", href: "/admin/welfare", icon: HeartHandshake },
+    { label: "Debt", href: "/admin/debt", icon: Wallet },
     { label: "Enquiries", href: "/admin/enquiries", icon: MessageSquareText },
     { label: "Settings", href: "/admin/settings", icon: Settings },
   ];
@@ -100,9 +102,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
 
       {/* Navigation Links */}
       <nav className="flex-1 px-4 py-6 space-y-3 overflow-y-auto">
-        {NAV_ITEMS.filter(
-          (item) => !item.roles || item.roles.includes(userRole),
-        ).map((item) => (
+        {NAV_ITEMS.map((item) => (
           <SidebarItem
             key={item.href}
             {...item}

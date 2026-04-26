@@ -35,6 +35,12 @@ const NotificationsPanel = ({ onClose }) => {
   const [rejectingWelfareId, setRejectingWelfareId] = useState(null);
   const [welfareRejectReason, setWelfareRejectReason] = useState("");
 
+  // Debt States
+  const [approvingDebtId, setApprovingDebtId] = useState(null);
+  const [debtReceiptNumber, setDebtReceiptNumber] = useState("");
+  const [rejectingDebtId, setRejectingDebtId] = useState(null);
+  const [debtRejectReason, setDebtRejectReason] = useState("");
+
   const { data, isLoading } = useQuery({
     queryKey: ["notifications"],
     queryFn: async () => {
@@ -204,6 +210,36 @@ const NotificationsPanel = ({ onClose }) => {
     },
   });
 
+  const debtStatusMutation = useMutation({
+    mutationFn: async ({ id, status, receipt_no, reason }) => {
+      await axios.patch(`/api/debt-requests/${id}/admin`, {
+        status,
+        receipt_no,
+        reason,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-debt-requests"] });
+      setApprovingDebtId(null);
+      setRejectingDebtId(null);
+      setDebtReceiptNumber("");
+      setDebtRejectReason("");
+      addToast({
+        title: "Success",
+        description: "Debt status updated",
+        color: "success",
+      });
+    },
+    onError: (error) => {
+      addToast({
+        title: "Error",
+        description: error.response?.data?.error || "Failed to update status",
+        color: "danger",
+      });
+    },
+  });
+
   const timeAgo = (date) => {
     const seconds = Math.floor((new Date() - new Date(date)) / 1000);
     if (seconds < 60) return "Just now";
@@ -219,6 +255,7 @@ const NotificationsPanel = ({ onClose }) => {
   const sundookNotifications = data?.sundookNotifications || [];
   const welfareNotifications = data?.welfareNotifications || [];
   const studentNotifications = data?.studentNotifications || [];
+  const debtNotifications = data?.debtNotifications || [];
 
   return (
     <div className="absolute right-[-60px] xs:right-0 top-full mt-2 w-[calc(100vw-32px)] sm:w-80 md:w-96 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden">
@@ -235,7 +272,8 @@ const NotificationsPanel = ({ onClose }) => {
           {notifications.length +
             sundookNotifications.length +
             welfareNotifications.length +
-            studentNotifications.length}
+            studentNotifications.length +
+            debtNotifications.length}
         </Chip>
       </div>
 
@@ -247,7 +285,8 @@ const NotificationsPanel = ({ onClose }) => {
         ) : notifications.length === 0 &&
           sundookNotifications.length === 0 &&
           welfareNotifications.length === 0 &&
-          studentNotifications.length === 0 ? (
+          studentNotifications.length === 0 &&
+          debtNotifications.length === 0 ? (
           <div className="p-12 text-center flex flex-col items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-300">
               <Clock size={24} />
@@ -656,6 +695,153 @@ const NotificationsPanel = ({ onClose }) => {
                       className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
                       onPress={() => setRejectingId(student._id)}
                       startContent={<UserX size={14} />}
+                    >
+                      Reject
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {/* Debt Notifications */}
+            {debtNotifications.map((debt) => (
+              <div
+                key={debt._id}
+                className="p-4 border-b border-primary/10 bg-primary/1 hover:bg-primary/3 transition-colors"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden shrink-0 border border-primary/20">
+                    {debt.requester?.image ? (
+                      <img
+                        src={debt.requester.image}
+                        alt={debt.requester.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary font-bold text-sm">
+                        {debt.requester?.name?.charAt(0)}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-black text-slate-900 dark:text-white truncate">
+                        {debt.requester?.name || "Unknown Alumni"}
+                      </p>
+                      <span className="text-[10px] text-slate-400 font-bold tracking-tighter">
+                        {timeAgo(debt.createdAt)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <Chip
+                        size="sm"
+                        color="primary"
+                        variant="flat"
+                        className="text-[10px] font-black uppercase tracking-widest h-5"
+                      >
+                        Debt ₹{debt.amount}
+                      </Chip>
+                    </div>
+                  </div>
+                </div>
+
+                {approvingDebtId === debt._id ? (
+                  <div className="mt-3 space-y-2 p-3 bg-white dark:bg-slate-800 rounded-xl border border-success/20 shadow-inner">
+                    <Input
+                      size="sm"
+                      variant="bordered"
+                      placeholder="Enter Receipt Number"
+                      label="Receipt Number"
+                      labelPlacement="outside"
+                      value={debtReceiptNumber}
+                      onChange={(e) => setDebtReceiptNumber(e.target.value)}
+                      radius="md"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        color="success"
+                        className="font-bold flex-1 text-white"
+                        isLoading={debtStatusMutation.isPending}
+                        isDisabled={!debtReceiptNumber}
+                        onPress={() =>
+                          debtStatusMutation.mutate({
+                            id: debt._id,
+                            status: "approved",
+                            receipt_no: debtReceiptNumber,
+                          })
+                        }
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="light"
+                        className="font-bold"
+                        onPress={() => setApprovingDebtId(null)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : rejectingDebtId === debt._id ? (
+                  <div className="mt-3 space-y-2 p-3 bg-white dark:bg-slate-800 rounded-xl border border-danger/20 shadow-inner">
+                    <Input
+                      size="sm"
+                      variant="bordered"
+                      placeholder="Reason for rejection"
+                      label="Rejection Reason"
+                      labelPlacement="outside"
+                      value={debtRejectReason}
+                      onChange={(e) => setDebtRejectReason(e.target.value)}
+                      radius="md"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        color="danger"
+                        className="font-bold flex-1"
+                        isLoading={debtStatusMutation.isPending}
+                        isDisabled={!debtRejectReason}
+                        onPress={() =>
+                          debtStatusMutation.mutate({
+                            id: debt._id,
+                            status: "rejected",
+                            reason: debtRejectReason,
+                          })
+                        }
+                      >
+                        Reject
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="light"
+                        className="font-bold"
+                        onPress={() => setRejectingDebtId(null)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      size="sm"
+                      color="success"
+                      variant="flat"
+                      className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
+                      onPress={() => setApprovingDebtId(debt._id)}
+                      startContent={<Check size={14} />}
+                    >
+                      Approve
+                    </Button>
+                    <Button
+                      size="sm"
+                      color="danger"
+                      variant="flat"
+                      className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
+                      onPress={() => setRejectingDebtId(debt._id)}
+                      startContent={<X size={14} />}
                     >
                       Reject
                     </Button>

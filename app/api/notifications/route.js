@@ -4,6 +4,7 @@ import User from "@/models/User";
 import Sundook from "@/models/Sundook";
 import Welfare from "@/models/Welfare";
 import Student from "@/models/Student";
+import DebtRequest from "@/models/DebtRequest";
 
 export async function GET() {
   try {
@@ -28,15 +29,23 @@ export async function GET() {
       .sort({ createdAt: -1 })
       .select("name email phone createdAt studentId image");
 
+    const pendingDebtActions = await DebtRequest.find({
+      status: "pending_admin",
+    })
+      .populate("requester", "name image userId")
+      .sort({ createdAt: -1 });
+
     return NextResponse.json({
       notifications: pendingUsers,
       count: pendingUsers.length,
       pendingSundooks: pendingSundooks.length,
       pendingWelfare: pendingWelfare.length,
       pendingStudents: pendingStudents.length,
+      pendingDebt: pendingDebtActions.length,
       sundookNotifications: pendingSundooks,
       welfareNotifications: pendingWelfare,
       studentNotifications: pendingStudents,
+      debtNotifications: pendingDebtActions,
     });
   } catch (error) {
     console.error("Notifications Error:", error);

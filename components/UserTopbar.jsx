@@ -1,7 +1,14 @@
 "use client";
 
 import React from "react";
-import { User, LogOut, ChevronDown, Box, HeartHandshake } from "lucide-react";
+import {
+  User,
+  LogOut,
+  ChevronDown,
+  Box,
+  HeartHandshake,
+  Wallet,
+} from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -18,6 +25,7 @@ import Logo from "./Logo";
 const ICON_MAP = {
   Box: Box,
   HeartHandshake: HeartHandshake,
+  Wallet: Wallet,
 };
 
 const UserTopbar = ({ menus = [] }) => {

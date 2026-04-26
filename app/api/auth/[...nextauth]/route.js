@@ -72,6 +72,19 @@ export const authOptions = {
         session.user._id = token.id;
         session.user.role = token.role;
         session.user.image = token.image;
+
+        // Re-verify user existence and status
+        try {
+          await dbConnect();
+          const dbUser = await User.findById(token.id).select("status");
+          if (!dbUser) {
+            session.error = "ACCOUNT_DELETED";
+          } else if (dbUser.status !== "Active") {
+            session.error = "ACCOUNT_DEACTIVATED";
+          }
+        } catch (error) {
+          console.error("Session verification error:", error);
+        }
       }
       return session;
     },

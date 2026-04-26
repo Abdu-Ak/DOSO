@@ -3,14 +3,29 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import UserTopbar from "@/components/UserTopbar";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
+import { addToast } from "@heroui/toast";
 
 export default function StudentLayout({ children }) {
   const { data: session, status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (session?.error === "ACCOUNT_DELETED") {
+      addToast({
+        title: "Account Deleted",
+        description: "Your account has been deleted, please contact admin",
+        color: "danger",
+      });
+      signOut({ callbackUrl: "/login" });
+    } else if (session?.error === "ACCOUNT_DEACTIVATED") {
+      addToast({
+        title: "Account Deactivated",
+        description: "Account has been deactivated, please contact admin",
+        color: "danger",
+      });
+      signOut({ callbackUrl: "/login" });
+    } else if (status === "unauthenticated") {
       router.push("/login");
     } else if (
       status === "authenticated" &&

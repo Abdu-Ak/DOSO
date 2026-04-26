@@ -301,6 +301,55 @@ const ReportModal = ({
         2: { cellWidth: 60 },
       },
     },
+    debt: {
+      title: "Debt/Loan Request Report",
+      fileName: "debt_report",
+      endpoint: "/api/debt-requests",
+      dataKey: "records",
+      csvHeaders: [
+        "Alumni ID",
+        "Alumni Name",
+        "Amount",
+        "Duration (Months)",
+        "Status",
+        "Receipt Number",
+        "Requested Date",
+      ],
+      pdfHeaders: [
+        "Alumni Profile",
+        "Request Details",
+        "Witness Status",
+        "Status",
+        "Requested Date",
+      ],
+      getCSVRow: (r) => [
+        r.requester?.userId || "",
+        r.requester?.name || "",
+        r.amount || "",
+        r.duration_months || "",
+        r.status || "",
+        r.receipt_no || "",
+        new Date(r.createdAt).toLocaleDateString(),
+      ],
+      getPDFRow: (r) => [
+        `ID: ${r.requester?.userId || "-"}\nName: ${r.requester?.name || "-"}`,
+        `Amount: ₹${r.amount?.toLocaleString() || "0"}\nDuration: ${r.duration_months || "-"} mo`,
+        `W1: ${r.witness1_status || "-"}\nW2: ${r.witness2_status || "-"}`,
+        `${r.status || "-"}`,
+        `${new Date(r.createdAt).toLocaleDateString()}`,
+      ],
+      columnStyles: {
+        0: {
+          cellWidth: 45,
+          cellPadding: { left: 18, top: 4, right: 4, bottom: 4 },
+        },
+        1: { cellWidth: 40 },
+        2: { cellWidth: 40 },
+        3: { cellWidth: 40 },
+        4: { cellWidth: 25 },
+      },
+      imageField: "requester",
+    },
   };
 
   const currentConfig = REPORT_CONFIG[moduleType];
