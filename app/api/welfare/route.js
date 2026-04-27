@@ -4,6 +4,7 @@ import User from "@/models/User";
 import Welfare from "@/models/Welfare";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { logActivity } from "@/lib/activityLogger";
 import {
   createWelfareSchema,
   adminCreateWelfareSchema,
@@ -126,6 +127,16 @@ export async function POST(request) {
       const newRecord = await Welfare.create({
         ...validatedData,
         status: "approved", // Admin created entries are auto-approved
+      });
+
+      const alumniUser = await User.findById(validatedData.alumni);
+
+      await logActivity({
+        actionType: "CREATE",
+        module: "Welfare",
+        title: "Welfare Record Created",
+        description: `Created welfare record for "${alumniUser?.name || "unknown alumni"}" (Amount: ₹${validatedData.amount})`,
+        icon: "HeartHandshake",
       });
 
       return NextResponse.json(newRecord, { status: 201 });

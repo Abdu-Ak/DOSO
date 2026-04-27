@@ -1,85 +1,73 @@
-# Prompt for Alumni Debt Module Development
+# Prompt: Admin Activity Log Module Implementation
 
 ## **Project Context**
-
-We are implementing a **Debt Management Module** in our existing application. The application follows a specific architectural pattern (Next js, Tailwind css). This module involves two primary personas: **Alumni** and **Admins**.
-
----
-
-## **1. Core Requirements & Logic**
-
-### **A. Debt Request (Alumni Side)**
-
-- **Constraints:**
-  - Maximum Amount: **50,000**.
-  - Payment Types: **Single Payment** or **EMI**.
-  - Duration: **1, 2, or 3 months** (Max 3).
-- **Repayment Logic:**
-  - _Single Payment:_ Total amount due on the date of the chosen month.
-  - _EMI:_ Amount is split equally by the number of months; due monthly.
-- **Witness Requirement:**
-  - The requester must select **2 Alumni** as witnesses.
-  - The request remains "Pending Witness Approval" until both respond.
-
-### **B. Witness Workflow**
-
-- **Notification:** Selected witnesses receive an in-app notification and an **email** with a redirect link to the portal.
-- **Action:** Witnesses can **Accept** or **Reject**.
-- **Rejection:** If a witness rejects, a **Reason** is mandatory.
-
-### **C. Admin Workflow**
-
-- **Visibility:** Admin sees the request only after both witnesses have responded.
-- **Action:** Admin can **Approve** (requires a **Receipt Number**) or **Reject** (requires a **Reason**).
-- **Tracking:** Admin dashboard must show a table with statuses (e.g., "Approved by Witness 1", "Rejected by Witness 2", "Reason: [text]").
-
-### **D. Notification & Mail System**
-
-- **To Witnesses:** "Alumni [Name] requested you as a witness. [Link to Portal]"
-- **To Requester:** - Notification/Mail when a witness accepts or rejects.
-  - Notification/Mail when Admin approves (including Receipt No) or rejects (including Reason).
+I am building an **Admin Activity Log** (Audit Trail). The goal is to track significant data-changing actions performed by admins and display them in a "Platform Activity" feed.
 
 ---
 
-## **2. Technical Tasks & Structure**
+## **1. Core Logic & Rules**
+- **Capture Strategy:** Track ONLY actions that modify the database (Create, Update, Delete, Approve, Reject).
+- **Exclude:** Read-only actions (Detail views, filter applications, PDF generations, searches).
+- **Target Modules:** User Management, Debt Module, Events, Welfare, Student Management, Enquires, Settings and Sundook.
 
-### **A. Database Schema (Models)**
+## **2. Functional Requirements**
 
-- **DebtRequest Model:**
-  - `requester_id` (FK to User)
-  - `amount` (Decimal, max 50000)
-  - `payment_type` (Enum: single, emi)
-  - `duration_months` (Int: 1, 2, 3)
-  - `witness1_id`, `witness2_id` (FK to User)
-  - `witness1_status`, `witness2_status` (Enum: pending, approved, rejected)
-  - `witness1_reason`, `witness2_reason` (String, nullable)
-  - `admin_status` (Enum: pending, approved, rejected)
-  - `admin_reason` (String, nullable)
-  - `receipt_no` (String, nullable)
-  - `status` (Calculated/Enum: Pending Witness, Pending Admin, Approved, Rejected)
+### **A. Activity Tracking Data**
+Each activity entry must include:
+- **Admin Reference:** The ID/Name of the admin who performed the action.
+- **Title:** A concise headline (e.g., "Debt Approved", "Alumni Rejected").
+- **Description:** A human-readable summary including the target subject (e.g., "Admin 1 approved debt for Kaleel Rahman").
+- **Icon Type:** An identifier for the UI icon (matching the existing design).
+- **Timestamp:** The exact time the action was performed.
 
-### **B. Component Development**
+### **B. Dashboard Widget (Platform Activity)**
+- **Limit:** Display the **Last 10 activities**.
+- **Design:** Must match the current UI:
+    - Circular icon container with a light background.
+    - Vertical list structure.
+    - Header: Title in bold.
+    - Sub-text: Detailed description.
+    - Footer: Timestamp in uppercase relative format (e.g., "2 HOURS AGO").
+- **Navigation:** Add a **"View All"** button that redirects to the full history page.
 
-- **Alumni Portal:**
-  - `DebtRequestForm`: Form with validation for amount, months, and witness selection.
-  - `AlumniDebtTable`: Detail view showing status, witness feedback, admin reasons, and receipt numbers.
-- **Witness Portal:**
-  - `WitnessActionCard`: Component to view request details and submit Accept/Reject with reason. - make this in as notification panel like the admin's but for the alumni's
-- **Admin Portal:**
-  - `AdminDebtManagementTable`: Comprehensive view for admins to process requests and view full audit trails.
-
----
-
-## **3. Implementation Instructions**
-
-1.  **Strictly adhere** to the current design pattern and UI component library used in the project.
-2.  **API Endpoints:** Create RESTful endpoints for `POST /debt-requests`, `PATCH /debt-requests/:id/witness-respond`, and `PATCH /debt-requests/:id/admin-respond`.
-3.  **Security:** Ensure an Alumni cannot approve their own debt or act as their own witness.
-4.  **Email Service:** Integrate the existing mailer to trigger the specific notifications described above.
-5.  **Validations:** Implement frontend and backend checks for the 50,000 limit and the 3-month duration limit.
+### **C. Activity History Page**
+- **Route:** `/admin/activity-log`
+- **Design:** Standard page layout with:
+    - **Search Bar:** To search by admin name or description content.
+    - **Date Range Filter:** To filter logs between two specific dates.
+    - **Pagination:** To handle large volumes of historical data.
 
 ---
 
-## **4. Expected Output**
+## **3. Technical Tasks**
 
-Provide the code for the **Models**, **API Controllers**, and the **Frontend Components** (using our existing structure) to complete this feature.
+### **A. Database Schema (`ActivityLog`)**
+- `adminId` (Foreign Key)
+- `actionType` (Enum: CREATE, UPDATE, DELETE, APPROVE, REJECT)
+- `module` (String)
+- `title` (String)
+- `description` (String)
+- `icon` (String)
+- `createdAt` (DateTime)
+
+### **B. Backend Implementation**
+- Create a centralized **Activity Logger Utility** that can be called from any controller.
+- **API 1:** `GET /activities/recent` (returns top 10).
+- **API 2:** `GET /activities/all` (with support for `search`, `startDate`, `endDate`, and `page` parameters).
+
+### **C. Frontend Implementation**
+- Update the **Dashboard Component** to fetch and map the real-time activity data.
+- Create the **Activity Log Page** using existing table/list design patterns, ensuring the "Platform Activity" style is maintained.
+
+---
+
+## **4. Design Constraints**
+- Follow the exact typography, spacing, and color palette shown in the screenshots.
+- Ensure the icons are consistent with the `Lucide` or `FontAwesome` set currently used in the project.
+- The relative timestamp logic should be consistent throughout the app.
+
+## Reminder 
+- the activities that super admin performs should not be logged in the activity log.
+
+---
+**Please provide the implementation code for the Model, the Backend Controller/Helper, and the Frontend Components (Dashboard Widget and Full History Page).**

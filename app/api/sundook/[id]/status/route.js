@@ -8,6 +8,7 @@ import {
   sendSundookApprovalEmail,
   sendSundookRejectionEmail,
 } from "@/lib/email";
+import { logActivity } from "@/lib/activityLogger";
 
 export async function PATCH(request, { params }) {
   try {
@@ -39,6 +40,14 @@ export async function PATCH(request, { params }) {
     }
 
     await record.save();
+
+    await logActivity({
+      actionType: status === "approved" ? "APPROVE" : "REJECT",
+      module: "Sundook",
+      title: `Sundook ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+      description: `${status.charAt(0).toUpperCase() + status.slice(1)}d sundook record for "${record.alumni.name}" (Year: ${record.year}, Amount: ₹${record.amount})`,
+      icon: status === "approved" ? "CheckCircle" : "XCircle",
+    });
 
     // Trigger Email Notification
     try {

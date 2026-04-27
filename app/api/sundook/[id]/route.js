@@ -3,6 +3,7 @@ import dbConnect from "@/lib/mongodb";
 import Sundook from "@/models/Sundook";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { logActivity } from "@/lib/activityLogger";
 
 export async function DELETE(request, { params }) {
   try {
@@ -24,6 +25,14 @@ export async function DELETE(request, { params }) {
     if (!deleted) {
       return NextResponse.json({ error: "Record not found" }, { status: 404 });
     }
+
+    await logActivity({
+      actionType: "DELETE",
+      module: "Sundook",
+      title: "Sundook Record Deleted",
+      description: `Deleted sundook record for "${deleted.alumni?.name || "unknown alumni"}" (Year: ${deleted.year})`,
+      icon: "Trash2",
+    });
 
     return NextResponse.json({
       success: true,

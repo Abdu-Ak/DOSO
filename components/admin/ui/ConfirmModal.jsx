@@ -18,6 +18,7 @@ export default function ConfirmModal({
   title = "Confirmation",
   message,
   confirmText = "Delete",
+  btnColor = "danger",
   isLoading = false,
 }) {
   return (
@@ -71,10 +72,10 @@ export default function ConfirmModal({
             </ModalBody>
             <ModalFooter className="flex justify-end pt-0">
               <Button
-                color="danger"
+                color={btnColor}
                 onPress={onConfirm}
                 isLoading={isLoading}
-                className="font-bold rounded-lg shadow-lg shadow-danger/20 px-8 h-10 text-md bg-red-600 hover:bg-red-700"
+                className="font-bold rounded-lg shadow-lg shadow-danger/20 px-8 h-10 text-md"
               >
                 {confirmText}
               </Button>

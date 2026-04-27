@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Enquiry from "@/models/Enquiry";
 import { updateEnquiryStatusSchema } from "@/lib/validations/enquiry.validation";
+import { logActivity } from "@/lib/activityLogger";
 
 export async function PATCH(request, { params }) {
   try {
@@ -32,6 +33,14 @@ export async function PATCH(request, { params }) {
       );
     }
 
+    await logActivity({
+      actionType: "UPDATE",
+      module: "Enquiries",
+      title: "Enquiry Status Updated",
+      description: `Updated status to ${status} for enquiry from "${updatedEnquiry.name}"`,
+      icon: "MessageSquare",
+    });
+
     return NextResponse.json({
       success: true,
       message: "Enquiry status updated",
@@ -59,6 +68,14 @@ export async function DELETE(request, { params }) {
         { status: 404 },
       );
     }
+
+    await logActivity({
+      actionType: "DELETE",
+      module: "Enquiries",
+      title: "Enquiry Deleted",
+      description: `Deleted enquiry from "${deletedEnquiry.name}"`,
+      icon: "MessageSquareX",
+    });
 
     return NextResponse.json({
       success: true,

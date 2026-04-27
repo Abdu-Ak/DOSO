@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Student from "@/models/Student";
 import cloudinary from "@/lib/cloudinary";
+import { logActivity } from "@/lib/activityLogger";
 
 export async function GET(request, { params }) {
   try {
@@ -108,6 +109,14 @@ export async function PUT(request, { params }) {
       runValidators: true,
     });
 
+    await logActivity({
+      actionType: "UPDATE",
+      module: "Student Management",
+      title: "Student Updated",
+      description: `Updated student: "${updatedStudent.name}" (ID: ${updatedStudent.studentId})`,
+      icon: "User",
+    });
+
     return NextResponse.json({ success: true, student: updatedStudent });
   } catch (error) {
     console.error("PUT Student Error:", error);
@@ -133,6 +142,14 @@ export async function DELETE(request, { params }) {
     }
 
     await Student.findByIdAndDelete(id);
+
+    await logActivity({
+      actionType: "DELETE",
+      module: "Student Management",
+      title: "Student Deleted",
+      description: `Deleted student: "${student.name}" (ID: ${student.studentId})`,
+      icon: "UserMinus",
+    });
 
     return NextResponse.json({
       success: true,

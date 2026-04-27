@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Event from "@/models/Event";
 import cloudinary from "@/lib/cloudinary";
+import { logActivity } from "@/lib/activityLogger";
 
 // Helper for Cloudinary Uploads
 const uploadToCloudinary = async (file, folder, resourceType = "auto") => {
@@ -152,6 +153,14 @@ export async function POST(request) {
       mainImage: mainImageUrl,
       galleryImages: uploadedGalleryImages,
       galleryVideos: uploadedGalleryVideos,
+    });
+
+    await logActivity({
+      actionType: "CREATE",
+      module: "Events",
+      title: "Event Created",
+      description: `Created new event: "${title}"`,
+      icon: "CalendarPlus",
     });
 
     return NextResponse.json(

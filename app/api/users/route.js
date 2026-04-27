@@ -3,6 +3,7 @@ import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import cloudinary from "@/lib/cloudinary";
 import bcrypt from "bcryptjs";
+import { logActivity } from "@/lib/activityLogger";
 
 export async function GET(request) {
   try {
@@ -217,6 +218,14 @@ export async function POST(request) {
       password: hashedPassword,
       image: imageData.url,
       imagePublicId: imageData.publicId,
+    });
+
+    await logActivity({
+      actionType: "CREATE",
+      module: "User Management",
+      title: `${role === "admin" ? "Admin" : "Alumni"} Created`,
+      description: `Created new ${role}: "${userFields.name || userFields.userId}"`,
+      icon: role === "admin" ? "UserCog" : "User",
     });
 
     return NextResponse.json(

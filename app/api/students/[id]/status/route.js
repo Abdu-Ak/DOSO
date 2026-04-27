@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Student from "@/models/Student";
+import { logActivity } from "@/lib/activityLogger";
 
 export async function PATCH(request, { params }) {
   try {
@@ -21,6 +22,14 @@ export async function PATCH(request, { params }) {
     if (!student) {
       return NextResponse.json({ error: "Student not found" }, { status: 404 });
     }
+
+    await logActivity({
+      actionType: status === "Active" ? "ACTIVATE" : "DEACTIVATE",
+      module: "Student Management",
+      title: `Student ${status === "Active" ? "Activated" : "Deactivated"}`,
+      description: `${status === "Active" ? "Activated" : "Deactivated"} student: "${student.name}" (ID: ${student.studentId})`,
+      icon: status === "Active" ? "UserCheck" : "UserMinus",
+    });
 
     return NextResponse.json({ success: true, student });
   } catch (error) {

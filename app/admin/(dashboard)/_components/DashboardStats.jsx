@@ -3,14 +3,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import {
-  Users,
-  GraduationCap,
-  Coins,
-  Heart,
-  ShieldCheck,
-  UserCheck,
-} from "lucide-react";
+import { Users, GraduationCap, Coins, Heart, Wallet } from "lucide-react";
 import StatCard from "./StatCard";
 import { Chip } from "@heroui/chip";
 import { formatCurrency } from "@/lib/utils";
@@ -67,10 +60,17 @@ const DashboardStats = ({ startDate, endDate }) => {
       bgColor: "bg-rose-50 dark:bg-rose-500/10 shadow-sm shadow-rose-500/5",
       iconColor: "text-rose-600 dark:text-rose-400",
     },
+    {
+      title: "Debt Total",
+      value: formatCurrency(data?.debtTotal || 0),
+      icon: Wallet,
+      bgColor: "bg-amber-50 dark:bg-amber-500/10 shadow-sm shadow-amber-500/5",
+      iconColor: "text-amber-600 dark:text-amber-400",
+    },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
       {stats.map((stat, index) => (
         <StatCard key={index} {...stat} isLoading={isLoading} />
       ))}

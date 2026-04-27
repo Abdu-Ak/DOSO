@@ -58,6 +58,20 @@ export default function CreateDebtRecordModal({
     }
   }, [paymentType, setValue, durationMonths]);
 
+  useEffect(() => {
+    if (isOpen) {
+      reset({
+        alumni: "",
+        amount: "",
+        payment_type: "single",
+        duration_months: 1,
+        receipt_no: "",
+        witness1: "",
+        witness2: "",
+      });
+    }
+  }, [isOpen, reset]);
+
   const handleClose = () => {
     reset();
     onOpenChange(false);

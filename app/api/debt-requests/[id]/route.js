@@ -3,6 +3,7 @@ import dbConnect from "@/lib/mongodb";
 import DebtRequest from "@/models/DebtRequest";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { logActivity } from "@/lib/activityLogger";
 
 export async function DELETE(request, { params }) {
   try {
@@ -22,6 +23,14 @@ export async function DELETE(request, { params }) {
     if (!debtRequest) {
       return NextResponse.json({ error: "Request not found" }, { status: 404 });
     }
+
+    await logActivity({
+      actionType: "DELETE",
+      module: "Debt Module",
+      title: "Debt Deleted",
+      description: `Deleted debt request for ${debtRequest.requester?.name || "unknown alumni"} (Amount: ₹${debtRequest.amount})`,
+      icon: "Trash2",
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

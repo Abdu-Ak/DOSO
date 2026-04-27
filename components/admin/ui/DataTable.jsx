@@ -89,7 +89,7 @@ const DataTable = ({
     if (!pagination && !bottomContent) return null;
 
     return (
-      <div className="py-4 px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div className="p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
         {pagination && (
           <span className="text-small text-slate-500 font-bold">
             {pagination.label ||
@@ -122,8 +122,8 @@ const DataTable = ({
         classNames={{
           wrapper:
             "bg-surface-light dark:bg-surface-dark border-slate-200 dark:border-slate-800 shadow-sm p-0 overflow-x-auto",
-          th: "bg-slate-50 dark:bg-slate-900/50 text-slate-500 font-bold text-xs uppercase tracking-wider h-14 px-6",
-          td: "py-4 px-6",
+          th: "bg-slate-50 dark:bg-slate-900/50 text-slate-500 font-bold text-xs uppercase tracking-wider h-14 px-4",
+          td: "p-4",
           ...classNames,
         }}
         topContent={renderTopContent}

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import { sendRejectionEmail } from "@/lib/email";
+import { logActivity } from "@/lib/activityLogger";
 
 export async function POST(request, { params }) {
   try {
@@ -30,6 +31,14 @@ export async function POST(request, { params }) {
     } catch (emailError) {
       console.error("Failed to send rejection email:", emailError);
     }
+
+    await logActivity({
+      actionType: "REJECT",
+      module: "User Management",
+      title: "Alumni Rejected",
+      description: `Rejected alumni account for "${user.name}" (ID: ${user.userId})`,
+      icon: "UserX",
+    });
 
     return NextResponse.json({ message: "User rejected successfully" });
   } catch (error) {

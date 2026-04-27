@@ -4,6 +4,7 @@ import DebtRequest from "@/models/DebtRequest";
 import User from "@/models/User";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { logActivity } from "@/lib/activityLogger";
 import {
   createDebtRequestSchema,
   adminCreateDebtSchema,
@@ -144,6 +145,16 @@ export async function POST(request) {
         witness1_status: "approved",
         witness2_status: "approved",
         admin_status: "approved",
+      });
+
+      const alumniUser = await User.findById(validatedData.alumni);
+
+      await logActivity({
+        actionType: "CREATE",
+        module: "Debt Module",
+        title: "Debt Created (Admin)",
+        description: `Created debt record for "${alumniUser?.name || "unknown alumni"}" (Amount: ₹${validatedData.amount})`,
+        icon: "CreditCard",
       });
 
       return NextResponse.json(newRequest, { status: 201 });
