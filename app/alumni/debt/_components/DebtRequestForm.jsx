@@ -113,7 +113,7 @@ export default function DebtRequestForm({ isOpen, onOpenChange }) {
           <form onSubmit={handleSubmit(onSubmit)}>
             <ModalHeader className="flex items-center justify-between gap-3">
               <h3 className="text-lg font-body! font-semibold text-slate-800 dark:text-white">
-                Request New Debt/Loan
+                Request New Debt
               </h3>
 
               <button

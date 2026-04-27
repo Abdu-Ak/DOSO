@@ -39,7 +39,7 @@ export default function WitnessActionModal({
                 {isRejection ? (
                   <>
                     <AlertCircle className="text-danger" size={20} />
-                    Reject Loan Request
+                    Reject Dept Request
                   </>
                 ) : (
                   <>
@@ -59,7 +59,7 @@ export default function WitnessActionModal({
             <ModalBody className="py-4 space-y-4">
               <p className="text-sm font-medium text-slate-500">
                 {isRejection
-                  ? "Are you sure you want to reject this loan request? Please provide a reason for the requester."
+                  ? "Are you sure you want to reject this debt request? Please provide a reason for the requester."
                   : "By approving, you verify that you know the requester and vouch for their credibility in this debt request."}
               </p>
 

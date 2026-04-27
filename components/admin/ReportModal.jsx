@@ -9,7 +9,6 @@ import {
   ModalFooter,
 } from "@heroui/modal";
 import { Button } from "@heroui/button";
-import { Chip } from "@heroui/chip";
 import {
   FileDown,
   FileText,
@@ -302,53 +301,68 @@ const ReportModal = ({
       },
     },
     debt: {
-      title: "Debt/Loan Request Report",
+      title: "Debt Request Report",
       fileName: "debt_report",
       endpoint: "/api/debt-requests",
       dataKey: "records",
       csvHeaders: [
         "Alumni ID",
         "Alumni Name",
+        "Witness 1 - ID",
+        "Witness 1 - Name",
+        "Witness 1 - Status",
+        "Witness 2 - ID",
+        "Witness 2 - Name",
+        "Witness 2 - Status",
         "Amount",
         "Duration (Months)",
+        "Payment Type",
         "Status",
         "Receipt Number",
-        "Requested Date",
+        "Rejected Reason",
+        "Requested Date/Time",
       ],
       pdfHeaders: [
         "Alumni Profile",
-        "Request Details",
-        "Witness Status",
-        "Status",
-        "Requested Date",
+        "Witness 1 Details",
+        "Witness 2 Details",
+        "Debt Details",
+        "Outcome",
+        "Date/Time",
       ],
       getCSVRow: (r) => [
         r.requester?.userId || "",
         r.requester?.name || "",
+        r.witness1?.userId || "",
+        r.witness1?.name || "",
+        r.witness1_status || "",
+        r.witness2?.userId || "",
+        r.witness2?.name || "",
+        r.witness2_status || "",
         r.amount || "",
         r.duration_months || "",
+        r.payment_type || "",
         r.status || "",
         r.receipt_no || "",
-        new Date(r.createdAt).toLocaleDateString(),
+        r.reason || "",
+        new Date(r.createdAt).toLocaleString(),
       ],
       getPDFRow: (r) => [
         `ID: ${r.requester?.userId || "-"}\nName: ${r.requester?.name || "-"}`,
-        `Amount: ₹${r.amount?.toLocaleString() || "0"}\nDuration: ${r.duration_months || "-"} mo`,
-        `W1: ${r.witness1_status || "-"}\nW2: ${r.witness2_status || "-"}`,
-        `${r.status || "-"}`,
-        `${new Date(r.createdAt).toLocaleDateString()}`,
+        `ID: ${r.witness1?.userId || "-"}\nName: ${r.witness1?.name || "-"}\nStatus: ${r.witness1_status || "-"}`,
+        `ID: ${r.witness2?.userId || "-"}\nName: ${r.witness2?.name || "-"}\nStatus: ${r.witness2_status || "-"}`,
+        `Amt: ₹${r.amount?.toLocaleString() || "0"}\nType: ${r.payment_type || "-"}\nDur: ${r.duration_months || "-"} mo`,
+        `Status: ${r.status || "-"}${r.receipt_no ? `\nReceipt: ${r.receipt_no}` : ""}${r.reason ? `\nReason: ${r.reason}` : ""}`,
+        `${new Date(r.createdAt).toLocaleString()}`,
       ],
       columnStyles: {
-        0: {
-          cellWidth: 45,
-          cellPadding: { left: 18, top: 4, right: 4, bottom: 4 },
-        },
-        1: { cellWidth: 40 },
-        2: { cellWidth: 40 },
-        3: { cellWidth: 40 },
-        4: { cellWidth: 25 },
+        0: { cellWidth: 32 },
+        1: { cellWidth: 32 },
+        2: { cellWidth: 32 },
+        3: { cellWidth: 26 },
+        4: { cellWidth: 32 },
+        5: { cellWidth: 28 },
       },
-      imageField: "requester",
     },
   };
 
@@ -519,13 +533,20 @@ const ReportModal = ({
 
       // Prepare images in advance
       const fetchedImages = {};
-      for (const item of data) {
-        const u = currentConfig.imageField === "alumni" ? item.alumni : item;
-        if (u && u._id && u.image) {
-          try {
-            fetchedImages[u._id] = await getUserImageBase64(u.image);
-          } catch (e) {
-            console.error("Failed to pre-fetch image for item:", u._id, e);
+      if (currentConfig.imageField) {
+        for (const item of data) {
+          const u =
+            currentConfig.imageField === "alumni"
+              ? item.alumni
+              : currentConfig.imageField === "requester"
+                ? item.requester
+                : item;
+          if (u && u._id && u.image) {
+            try {
+              fetchedImages[u._id] = await getUserImageBase64(u.image);
+            } catch (e) {
+              console.error("Failed to pre-fetch image for item:", u._id, e);
+            }
           }
         }
       }
@@ -536,10 +557,18 @@ const ReportModal = ({
         head: [currentConfig.pdfHeaders],
         body: data.map((item) => currentConfig.getPDFRow(item)),
         didDrawCell: (cellData) => {
-          if (cellData.section === "body" && cellData.column.index === 0) {
+          if (
+            cellData.section === "body" &&
+            cellData.column.index === 0 &&
+            currentConfig.imageField
+          ) {
             const item = data[cellData.row.index];
             const u =
-              currentConfig.imageField === "alumni" ? item.alumni : item;
+              currentConfig.imageField === "alumni"
+                ? item.alumni
+                : currentConfig.imageField === "requester"
+                  ? item.requester
+                  : item;
 
             if (u && u._id) {
               const base64Img = fetchedImages[u._id];

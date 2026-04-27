@@ -107,7 +107,7 @@ export default function AlumniDebtPage() {
             Debt Management
           </h1>
           <p className="text-slate-500 mt-1 font-medium">
-            Request loans, track your repayments, and verify as a witness for
+            Request debts, track your repayments, and verify as a witness for
             others.
           </p>
         </div>
@@ -179,7 +179,7 @@ export default function AlumniDebtPage() {
                 No debt records found
               </h3>
               <p className="text-sm text-slate-400 font-medium">
-                You haven't requested any loans or served as a witness yet.
+                You haven't requested any debts or served as a witness yet.
               </p>
             </div>
           )}
