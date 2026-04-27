@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { adminResponseSchema } from "@/lib/validations/debt.validation";
 import { sendDebtAdminRespondNotification } from "@/lib/email";
+import { logActivity } from "@/lib/activityLogger";
 
 export async function PATCH(request, { params }) {
   try {
@@ -43,6 +44,14 @@ export async function PATCH(request, { params }) {
     debtRequest.status = status; // "approved" or "rejected"
 
     await debtRequest.save();
+
+    await logActivity({
+      actionType: status === "approved" ? "APPROVE" : "REJECT",
+      module: "Debt Module",
+      title: `Debt ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+      description: `${status.charAt(0).toUpperCase() + status.slice(1)}d debt request for "${debtRequest.requester.name}" (Amount: ₹${debtRequest.amount})`,
+      icon: status === "approved" ? "CheckCircle" : "XCircle",
+    });
 
     // Notify requester
     if (debtRequest.requester?.email) {

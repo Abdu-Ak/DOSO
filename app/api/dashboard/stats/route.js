@@ -4,6 +4,7 @@ import User from "@/models/User";
 import Student from "@/models/Student";
 import Sundook from "@/models/Sundook";
 import Welfare from "@/models/Welfare";
+import DebtRequest from "@/models/DebtRequest";
 import Event from "@/models/Event";
 import Enquiry from "@/models/Enquiry";
 import { formatCurrency } from "@/lib/utils";
@@ -40,13 +41,18 @@ export async function GET(req) {
     const rangeAlumni = await User.countDocuments({ ...query, role: "alumni" });
     const rangeAdmins = await User.countDocuments({ ...query, role: "admin" });
 
-    // Sundook & Welfare (Only Approved)
+    // Sundook, Welfare, Debt (Only Approved)
     const sundookStats = await Sundook.aggregate([
       { $match: { ...query, status: "approved" } },
       { $group: { _id: null, total: { $sum: "$amount" } } },
     ]);
 
     const welfareStats = await Welfare.aggregate([
+      { $match: { ...query, status: "approved" } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]);
+
+    const debtStats = await DebtRequest.aggregate([
       { $match: { ...query, status: "approved" } },
       { $group: { _id: null, total: { $sum: "$amount" } } },
     ]);
@@ -60,6 +66,7 @@ export async function GET(req) {
 
     const sundookTotal = sundookStats[0]?.total || 0;
     const welfareTotal = welfareStats[0]?.total || 0;
+    const debtTotal = debtStats[0]?.total || 0;
 
     const reportData = [
       {
@@ -83,6 +90,11 @@ export async function GET(req) {
         details: "",
       },
       {
+        metric: "Debt Total (Approved)",
+        value: formatCurrency(debtTotal),
+        details: "",
+      },
+      {
         metric: "Total Events",
         value: totalEvents,
         details: "",
@@ -101,6 +113,7 @@ export async function GET(req) {
       admins: rangeAdmins,
       sundookTotal,
       welfareTotal,
+      debtTotal,
       totalEvents,
       pendingEnquiries,
       reportData,

@@ -11,6 +11,7 @@ import {
   sendWelfareApprovalEmail,
   sendWelfareRejectionEmail,
 } from "@/lib/email";
+import { logActivity } from "@/lib/activityLogger";
 
 export async function PATCH(request, { params }) {
   try {
@@ -46,6 +47,14 @@ export async function PATCH(request, { params }) {
     }
 
     await record.save();
+
+    await logActivity({
+      actionType: status === "approved" ? "APPROVE" : "REJECT",
+      module: "Welfare",
+      title: `Welfare ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+      description: `${status.charAt(0).toUpperCase() + status.slice(1)}d welfare record for "${record.alumni.name}" (Amount: ₹${record.amount})`,
+      icon: status === "approved" ? "CheckCircle" : "XCircle",
+    });
 
     // Trigger Email Notification
     try {

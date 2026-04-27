@@ -4,6 +4,7 @@ import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { sendApprovalEmail } from "@/lib/email";
+import { logActivity } from "@/lib/activityLogger";
 
 function generateTempPassword() {
   return crypto.randomBytes(4).toString("hex"); // 8 char hex string
@@ -42,6 +43,14 @@ export async function POST(request, { params }) {
         console.error("Failed to send approval email:", emailError);
       }
 
+      await logActivity({
+        actionType: "APPROVE",
+        module: "User Management",
+        title: "Alumni Approved",
+        description: `Approved alumni account for "${user.name}" (ID: ${user.userId})`,
+        icon: "UserCheck",
+      });
+
       return NextResponse.json({
         message: "User approved successfully. Temporary password email sent.",
         tempPassword,
@@ -51,6 +60,14 @@ export async function POST(request, { params }) {
     // Admin-created users already have a password, just activate
     user.status = "Active";
     await user.save();
+
+    await logActivity({
+      actionType: "APPROVE",
+      module: "User Management",
+      title: "Alumni Approved",
+      description: `Approved alumni account for "${user.name}" (ID: ${user.userId})`,
+      icon: "UserCheck",
+    });
 
     return NextResponse.json({
       message: "User approved successfully",

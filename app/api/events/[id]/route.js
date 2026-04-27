@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Event from "@/models/Event";
 import cloudinary from "@/lib/cloudinary";
+import { logActivity } from "@/lib/activityLogger";
 
 const uploadToCloudinary = async (file, folder, resourceType = "auto") => {
   if (!file || file.size === 0 || typeof file === "string") return file;
@@ -136,6 +137,14 @@ export async function PUT(request, { params }) {
       runValidators: true,
     });
 
+    await logActivity({
+      actionType: "UPDATE",
+      module: "Events",
+      title: "Event Updated",
+      description: `Updated event: "${updatedEvent.title}"`,
+      icon: "Calendar",
+    });
+
     return NextResponse.json(
       { success: true, data: updatedEvent },
       { status: 200 },
@@ -161,6 +170,14 @@ export async function DELETE(request, { params }) {
         { status: 404 },
       );
     }
+
+    await logActivity({
+      actionType: "DELETE",
+      module: "Events",
+      title: "Event Deleted",
+      description: `Deleted event: "${event.title}"`,
+      icon: "CalendarX",
+    });
 
     return NextResponse.json({
       success: true,

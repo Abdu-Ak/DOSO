@@ -1,32 +1,29 @@
-import { Wallet, FileText } from "lucide-react";
 import { Button } from "@heroui/button";
+import { FileDown } from "lucide-react";
 
 export default function DebtHeader({ onReportClick, showReportButton }) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="px-1 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
-        <h1 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-3">
-          <Wallet className="text-primary" />
+        <h2 className="text-lg font-body! font-bold text-slate-900 dark:text-white">
           Debt Management
-        </h1>
-        <p className="text-slate-500 mt-1 font-medium text-sm">
+        </h2>
+        <p className="text-slate-600 text-sm dark:text-slate-400">
           Review and approve debt applications from alumni after witness
           verification.
         </p>
       </div>
-      <div className="flex items-center gap-2">
-        {showReportButton && (
-          <Button
-            variant="flat"
-            color="secondary"
-            startContent={<FileText size={18} />}
-            onPress={onReportClick}
-            className="font-bold shrink-0"
-          >
-            Generate Report
-          </Button>
-        )}
-      </div>
+      {showReportButton && (
+        <Button
+          color="secondary"
+          variant="flat"
+          onPress={onReportClick}
+          startContent={<FileDown size={18} />}
+          className="font-bold self-start md:self-auto shadow-sm"
+        >
+          Generate Report
+        </Button>
+      )}
     </div>
   );
 }

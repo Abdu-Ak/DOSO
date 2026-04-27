@@ -3,6 +3,7 @@ import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import cloudinary from "@/lib/cloudinary";
 import bcrypt from "bcryptjs";
+import { logActivity } from "@/lib/activityLogger";
 
 export async function GET(request, { params }) {
   try {
@@ -128,6 +129,14 @@ export async function PUT(request, { params }) {
       runValidators: true,
     });
 
+    await logActivity({
+      actionType: "UPDATE",
+      module: "User Management",
+      title: "User Updated",
+      description: `Updated profile for ${updatedUser.role}: "${updatedUser.name || updatedUser.userId}"`,
+      icon: updatedUser.role === "admin" ? "UserCog" : "User",
+    });
+
     return NextResponse.json({
       message: "User updated successfully",
       user: updatedUser,
@@ -157,6 +166,14 @@ export async function DELETE(request, { params }) {
     }
 
     await User.findByIdAndDelete(id);
+
+    await logActivity({
+      actionType: "DELETE",
+      module: "User Management",
+      title: "User Deleted",
+      description: `Deleted ${user.role}: "${user.name || user.userId}"`,
+      icon: "UserMinus",
+    });
 
     return NextResponse.json({ message: "User deleted successfully" });
   } catch (error) {

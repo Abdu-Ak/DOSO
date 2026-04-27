@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Student from "@/models/Student";
 import cloudinary from "@/lib/cloudinary";
+import { logActivity } from "@/lib/activityLogger";
 
 const DISTRICT_CODES = {
   Thiruvananthapuram: "TVM",
@@ -172,6 +173,14 @@ export async function POST(request) {
     };
 
     const student = await Student.create(studentData);
+
+    await logActivity({
+      actionType: "CREATE",
+      module: "Student Management",
+      title: "Student Created",
+      description: `Created new student: "${studentData.name}" (ID: ${studentId})`,
+      icon: "UserPlus",
+    });
 
     return NextResponse.json({ success: true, student }, { status: 201 });
   } catch (error) {

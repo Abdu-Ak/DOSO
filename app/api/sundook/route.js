@@ -4,6 +4,7 @@ import User from "@/models/User";
 import Sundook from "@/models/Sundook";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { logActivity } from "@/lib/activityLogger";
 import {
   createSundookSchema,
   adminCreateSundookSchema,
@@ -95,6 +96,16 @@ export async function POST(request) {
       const newRecord = await Sundook.create({
         ...validatedData,
         status: "approved", // Admin created entries are auto-approved
+      });
+
+      const alumniUser = await User.findById(validatedData.alumni);
+
+      await logActivity({
+        actionType: "CREATE",
+        module: "Sundook",
+        title: "Sundook Record Created",
+        description: `Created sundook record for "${alumniUser?.name || "unknown alumni"}" (Year: ${validatedData.year}, Amount: ₹${validatedData.amount})`,
+        icon: "Box",
       });
 
       return NextResponse.json(newRecord, { status: 201 });

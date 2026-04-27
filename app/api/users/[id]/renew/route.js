@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
+import { logActivity } from "@/lib/activityLogger";
 
 export async function POST(request, { params }) {
   try {
@@ -68,6 +69,14 @@ export async function POST(request, { params }) {
     user.status = "Active";
 
     await user.save();
+
+    await logActivity({
+      actionType: "RENEW",
+      module: "User Management",
+      title: "Membership Renewed",
+      description: `Renewed membership for "${user.name}" (Year: ${parsedYear}, Receipt: ${receipt_number})`,
+      icon: "RefreshCw",
+    });
 
     return NextResponse.json({
       message: "Membership renewed successfully",

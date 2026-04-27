@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import dbConnect from "@/lib/mongodb";
 import Setting from "@/models/Setting";
 import cloudinary from "@/lib/cloudinary";
+import { logActivity } from "@/lib/activityLogger";
 
 // Helper for Cloudinary Uploads
 const uploadToCloudinary = async (file, folder) => {
@@ -113,6 +114,14 @@ export async function PUT(request) {
       { leadership, contact },
       { upsert: true, new: true },
     );
+
+    await logActivity({
+      actionType: "UPDATE",
+      module: "Settings",
+      title: "Settings Updated",
+      description: "Updated platform leadership and contact settings",
+      icon: "Settings",
+    });
 
     revalidatePath("/");
     revalidatePath("/contact");
