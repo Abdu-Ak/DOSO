@@ -46,7 +46,7 @@ const DebtRequestSchema = new mongoose.Schema(
     witness2_reason: String,
     admin_status: {
       type: String,
-      enum: ["pending", "approved", "rejected"],
+      enum: ["pending", "approved", "rejected", "repaid"],
       default: "pending",
     },
     admin_reason: String,
@@ -60,6 +60,7 @@ const DebtRequestSchema = new mongoose.Schema(
         "approved",
         "rejected",
         "witness_rejected",
+        "repaid",
       ],
       default: "pending_witness",
     },
@@ -69,5 +70,23 @@ const DebtRequestSchema = new mongoose.Schema(
   },
 );
 
-export default mongoose.models.DebtRequest ||
+// Model for Debt Requests - Updated with repaid status support
+const model =
+  mongoose.models.DebtRequest ||
   mongoose.model("DebtRequest", DebtRequestSchema);
+
+// Force update enums in dev
+if (
+  model.schema.path("admin_status") &&
+  !model.schema.path("admin_status").enumValues.includes("repaid")
+) {
+  model.schema.path("admin_status").enumValues.push("repaid");
+}
+if (
+  model.schema.path("status") &&
+  !model.schema.path("status").enumValues.includes("repaid")
+) {
+  model.schema.path("status").enumValues.push("repaid");
+}
+
+export default model;

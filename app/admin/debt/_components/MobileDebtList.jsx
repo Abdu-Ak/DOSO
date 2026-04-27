@@ -17,7 +17,10 @@ import {
   UserCheck,
   Check,
   X,
+  BadgeCheck,
+  Download,
 } from "lucide-react";
+import { generateDebtNoticePdf } from "@/lib/pdf/generateDebtNoticePdf";
 
 export default function MobileDebtList({
   records,
@@ -25,6 +28,7 @@ export default function MobileDebtList({
   onApprove,
   onReject,
   onDelete,
+  onRepaid,
 }) {
   const statusColors = {
     pending_witness: "warning",
@@ -32,6 +36,7 @@ export default function MobileDebtList({
     approved: "success",
     rejected: "danger",
     witness_rejected: "danger",
+    repaid: "primary",
   };
 
   const statusLabels = {
@@ -40,6 +45,7 @@ export default function MobileDebtList({
     approved: "Approved",
     rejected: "Rejected",
     witness_rejected: "Witness Rejected",
+    repaid: "Repaid",
   };
 
   if (isLoading) {
@@ -156,16 +162,26 @@ export default function MobileDebtList({
               </div>
             </div>
 
-            {record.status === "approved" && record.receipt_no && (
-              <div className="p-2 bg-slate-50 dark:bg-slate-900/50 rounded-xl col-span-2">
-                <p className="text-[10px] text-slate-400 font-black uppercase mb-1 flex items-center gap-1">
-                  <FileText size={10} /> Receipt
-                </p>
-                <p className="font-bold text-sm truncate">
-                  {record.receipt_no}
-                </p>
-              </div>
-            )}
+            {(record.status === "approved" || record.status === "repaid") &&
+              record.receipt_no && (
+                <div
+                  className={`p-2 ${record.status === "repaid" ? "bg-primary/5" : "bg-slate-50 dark:bg-slate-900/50"} rounded-xl col-span-2`}
+                >
+                  <p
+                    className={`text-[10px] ${record.status === "repaid" ? "text-primary" : "text-slate-400"} font-black uppercase mb-1 flex items-center gap-1`}
+                  >
+                    {record.status === "repaid" ? (
+                      <BadgeCheck size={10} />
+                    ) : (
+                      <FileText size={10} />
+                    )}{" "}
+                    {record.status === "repaid" ? "Settled" : "Receipt"}
+                  </p>
+                  <p className="font-bold text-sm truncate">
+                    {record.receipt_no}
+                  </p>
+                </div>
+              )}
 
             {(record.status === "rejected" ||
               record.status === "witness_rejected") && (
@@ -200,6 +216,28 @@ export default function MobileDebtList({
                   onPress={() => onReject(record)}
                 >
                   Reject
+                </Button>
+              </div>
+            )}
+            {(record.status === "approved" || record.status === "repaid") && (
+              <div className="flex gap-2 w-full">
+                {record.status === "approved" && (
+                  <Button
+                    size="sm"
+                    className="flex-1 font-bold bg-primary/10 text-primary"
+                    startContent={<BadgeCheck size={16} />}
+                    onPress={() => onRepaid(record)}
+                  >
+                    Repaid
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  className="flex-1 font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                  startContent={<Download size={16} />}
+                  onPress={() => generateDebtNoticePdf(record)}
+                >
+                  PDF
                 </Button>
               </div>
             )}

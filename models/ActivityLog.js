@@ -18,6 +18,7 @@ const ActivityLogSchema = new mongoose.Schema(
         "ACTIVATE",
         "DEACTIVATE",
         "RENEW",
+        "REPAID",
       ],
       required: true,
     },
@@ -43,5 +44,17 @@ const ActivityLogSchema = new mongoose.Schema(
   },
 );
 
-export default mongoose.models.ActivityLog ||
+// Model for Activity Logs - Updated with REPAID action support
+const model =
+  mongoose.models.ActivityLog ||
   mongoose.model("ActivityLog", ActivityLogSchema);
+
+// Force update enum if model is already compiled in dev environment
+if (
+  model.schema.path("actionType") &&
+  !model.schema.path("actionType").enumValues.includes("REPAID")
+) {
+  model.schema.path("actionType").enumValues.push("REPAID");
+}
+
+export default model;

@@ -40,6 +40,8 @@ export default function AdminDebtPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isRepaidOpen, setIsRepaidOpen] = useState(false);
+  const [recordForRepaid, setRecordForRepaid] = useState(null);
 
   const {
     isOpen: isApproveOpen,
@@ -184,6 +186,21 @@ export default function AdminDebtPage() {
     onRejectOpenChange(false);
   };
 
+  const handleRepaid = (record) => {
+    setRecordForRepaid(record);
+    setIsRepaidOpen(true);
+  };
+
+  const confirmRepaid = () => {
+    statusMutation.mutate({
+      id: recordForRepaid._id,
+      status: "repaid",
+      receipt_no: recordForRepaid.receipt_no,
+    });
+    setIsRepaidOpen(false);
+    setRecordForRepaid(null);
+  };
+
   const debtColumns = useMemo(
     () =>
       getDebtColumns({
@@ -199,8 +216,9 @@ export default function AdminDebtPage() {
           setRecordToDelete(r);
           setIsDeleteOpen(true);
         },
+        onRepaid: handleRepaid,
       }),
-    [onApproveOpen, onRejectOpen],
+    [onApproveOpen, onRejectOpen, handleRepaid],
   );
 
   const records = data?.records || [];
@@ -317,6 +335,30 @@ export default function AdminDebtPage() {
         setRejectionReason={setRejectionReason}
         onReject={handleReject}
         isLoading={statusMutation.isPending}
+      />
+
+      <ConfirmModal
+        isOpen={isRepaidOpen}
+        onClose={() => {
+          setIsRepaidOpen(false);
+          setRecordForRepaid(null);
+        }}
+        onConfirm={confirmRepaid}
+        isLoading={statusMutation.isPending}
+        title="Mark as Repaid"
+        confirmText="Confirm"
+        btnColor="success"
+        message={
+          <>
+            <p>
+              Are you sure you want to mark the debt record for{" "}
+              <strong>{recordForRepaid?.requester?.name}</strong> as settled?
+            </p>
+            <p className="mt-1 font-medium text-primary">
+              This action will mark the debt as fully repaid.
+            </p>
+          </>
+        }
       />
 
       <ConfirmModal

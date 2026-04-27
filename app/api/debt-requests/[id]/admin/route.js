@@ -31,9 +31,19 @@ export async function PATCH(request, { params }) {
       return NextResponse.json({ error: "Request not found" }, { status: 404 });
     }
 
-    if (debtRequest.status !== "pending_admin" && status === "approved") {
+    if (
+      debtRequest.status !== "pending_admin" &&
+      (status === "approved" || status === "rejected")
+    ) {
       return NextResponse.json(
-        { error: "Request is not ready for admin approval" },
+        { error: "Request is not ready for admin response" },
+        { status: 400 },
+      );
+    }
+
+    if (debtRequest.status !== "approved" && status === "repaid") {
+      return NextResponse.json(
+        { error: "Only approved debts can be marked as repaid" },
         { status: 400 },
       );
     }
@@ -41,16 +51,33 @@ export async function PATCH(request, { params }) {
     debtRequest.admin_status = status;
     debtRequest.admin_reason = reason;
     debtRequest.receipt_no = receipt_no;
-    debtRequest.status = status; // "approved" or "rejected"
+    debtRequest.status = status;
 
     await debtRequest.save();
 
+    const actionTypeMap = {
+      approved: "APPROVE",
+      rejected: "REJECT",
+      repaid: "REPAID",
+    };
+
+    const iconMap = {
+      approved: "CheckCircle",
+      rejected: "XCircle",
+      repaid: "BadgeCheck",
+    };
+
+    const description =
+      status === "repaid"
+        ? `Debt request is marked as repaid for "${debtRequest.requester.name}" (Amount: ₹${debtRequest.amount})`
+        : `${status.charAt(0).toUpperCase() + status.slice(1)}d debt request for "${debtRequest.requester.name}" (Amount: ₹${debtRequest.amount})`;
+
     await logActivity({
-      actionType: status === "approved" ? "APPROVE" : "REJECT",
+      actionType: actionTypeMap[status] || "UPDATE",
       module: "Debt Module",
       title: `Debt ${status.charAt(0).toUpperCase() + status.slice(1)}`,
-      description: `${status.charAt(0).toUpperCase() + status.slice(1)}d debt request for "${debtRequest.requester.name}" (Amount: ₹${debtRequest.amount})`,
-      icon: status === "approved" ? "CheckCircle" : "XCircle",
+      description,
+      icon: iconMap[status] || "Info",
     });
 
     // Notify requester

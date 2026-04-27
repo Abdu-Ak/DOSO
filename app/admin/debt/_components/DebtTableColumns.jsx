@@ -19,9 +19,12 @@ import {
   Trash2,
   FileText,
   Clock,
+  BadgeCheck,
+  Download,
 } from "lucide-react";
+import { generateDebtNoticePdf } from "@/lib/pdf/generateDebtNoticePdf";
 
-export const getDebtColumns = ({ onApprove, onReject, onDelete }) => [
+export const getDebtColumns = ({ onApprove, onReject, onDelete, onRepaid }) => [
   {
     header: "Alumni",
     accessorKey: "requester.name",
@@ -66,6 +69,27 @@ export const getDebtColumns = ({ onApprove, onReject, onDelete }) => [
                   color="danger"
                 >
                   Reject Debt
+                </DropdownItem>
+              )}
+              {record.status === "approved" && (
+                <DropdownItem
+                  key="repaid"
+                  startContent={<BadgeCheck size={16} />}
+                  onPress={() => onRepaid(record)}
+                  className="text-primary font-bold"
+                  color="primary"
+                >
+                  Mark as Repaid
+                </DropdownItem>
+              )}
+              {(record.status === "approved" || record.status === "repaid") && (
+                <DropdownItem
+                  key="download"
+                  startContent={<Download size={16} />}
+                  onPress={() => generateDebtNoticePdf(record)}
+                  className="text-slate-700 font-bold"
+                >
+                  Download PDF
                 </DropdownItem>
               )}
               <DropdownItem
@@ -146,6 +170,7 @@ export const getDebtColumns = ({ onApprove, onReject, onDelete }) => [
         approved: "success",
         rejected: "danger",
         witness_rejected: "danger",
+        repaid: "primary",
       };
       const labels = {
         pending_witness: "Witnesses",
@@ -153,6 +178,7 @@ export const getDebtColumns = ({ onApprove, onReject, onDelete }) => [
         approved: "Approved",
         rejected: "Rejected",
         witness_rejected: "Witness Rejected",
+        repaid: "Repaid",
       };
       return (
         <Chip
@@ -189,11 +215,21 @@ export const getDebtColumns = ({ onApprove, onReject, onDelete }) => [
     cell: (info) => {
       const record = info.row.original;
 
-      if (record.status === "approved" && record.receipt_no) {
+      if (
+        (record.status === "approved" || record.status === "repaid") &&
+        record.receipt_no
+      ) {
         return (
           <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] font-bold text-success uppercase tracking-wider flex items-center gap-1">
-              <FileText size={10} /> Receipt
+            <span
+              className={`text-[10px] font-bold ${record.status === "repaid" ? "text-primary" : "text-success"} uppercase tracking-wider flex items-center gap-1`}
+            >
+              {record.status === "repaid" ? (
+                <BadgeCheck size={10} />
+              ) : (
+                <FileText size={10} />
+              )}{" "}
+              {record.status === "repaid" ? "Settled" : "Receipt"}
             </span>
             <span className="text-xs text-slate-700 dark:text-slate-300 font-bold truncate max-w-[120px]">
               {record.receipt_no}

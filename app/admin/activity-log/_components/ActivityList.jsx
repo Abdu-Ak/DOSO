@@ -19,6 +19,7 @@ import {
   Box,
   Loader2,
   Search,
+  BadgeCheck,
 } from "lucide-react";
 import { formatDateRelative } from "@/lib/utils";
 
@@ -38,6 +39,7 @@ const iconMap = {
   MessageSquareX,
   Settings: SettingsIcon,
   Box,
+  BadgeCheck,
 };
 
 const ActivityList = ({ activities, isLoading }) => {
