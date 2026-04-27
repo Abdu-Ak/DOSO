@@ -51,6 +51,15 @@ const UserSchema = new mongoose.Schema(
     custom_job: String,
     job_location: String,
 
+    // Membership renewals for alumni
+    membership_renewals: [
+      {
+        year: { type: Number, required: true },
+        receipt_number: { type: String, required: true },
+        renewedAt: { type: Date, default: Date.now },
+      },
+    ],
+
     // Public registration fields
     source: {
       type: String,

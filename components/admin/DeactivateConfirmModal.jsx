@@ -20,7 +20,7 @@ const DeactivateConfirmModal = ({ isOpen, onOpenChange, onConfirm }) => {
       <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader className="flex items-center justify-between">
+            <ModalHeader className="flex items-center justify-between gap-3">
               <h3 className="text-lg font-body! font-semibold text-slate-800 dark:text-white">
                 Confirm Deactivation
               </h3>

@@ -9,7 +9,6 @@ import {
   ModalFooter,
 } from "@heroui/modal";
 import { Button } from "@heroui/button";
-import { Chip } from "@heroui/chip";
 import {
   FileDown,
   FileText,
@@ -301,6 +300,70 @@ const ReportModal = ({
         2: { cellWidth: 60 },
       },
     },
+    debt: {
+      title: "Debt Request Report",
+      fileName: "debt_report",
+      endpoint: "/api/debt-requests",
+      dataKey: "records",
+      csvHeaders: [
+        "Alumni ID",
+        "Alumni Name",
+        "Witness 1 - ID",
+        "Witness 1 - Name",
+        "Witness 1 - Status",
+        "Witness 2 - ID",
+        "Witness 2 - Name",
+        "Witness 2 - Status",
+        "Amount",
+        "Duration (Months)",
+        "Payment Type",
+        "Status",
+        "Receipt Number",
+        "Rejected Reason",
+        "Requested Date/Time",
+      ],
+      pdfHeaders: [
+        "Alumni Profile",
+        "Witness 1 Details",
+        "Witness 2 Details",
+        "Debt Details",
+        "Outcome",
+        "Date/Time",
+      ],
+      getCSVRow: (r) => [
+        r.requester?.userId || "",
+        r.requester?.name || "",
+        r.witness1?.userId || "",
+        r.witness1?.name || "",
+        r.witness1_status || "",
+        r.witness2?.userId || "",
+        r.witness2?.name || "",
+        r.witness2_status || "",
+        r.amount || "",
+        r.duration_months || "",
+        r.payment_type || "",
+        r.status || "",
+        r.receipt_no || "",
+        r.reason || "",
+        new Date(r.createdAt).toLocaleString(),
+      ],
+      getPDFRow: (r) => [
+        `ID: ${r.requester?.userId || "-"}\nName: ${r.requester?.name || "-"}`,
+        `ID: ${r.witness1?.userId || "-"}\nName: ${r.witness1?.name || "-"}\nStatus: ${r.witness1_status || "-"}`,
+        `ID: ${r.witness2?.userId || "-"}\nName: ${r.witness2?.name || "-"}\nStatus: ${r.witness2_status || "-"}`,
+        `Amt: ₹${r.amount?.toLocaleString() || "0"}\nType: ${r.payment_type || "-"}\nDur: ${r.duration_months || "-"} mo`,
+        `Status: ${r.status || "-"}${r.receipt_no ? `\nReceipt: ${r.receipt_no}` : ""}${r.reason ? `\nReason: ${r.reason}` : ""}`,
+        `${new Date(r.createdAt).toLocaleString()}`,
+      ],
+      columnStyles: {
+        0: { cellWidth: 32 },
+        1: { cellWidth: 32 },
+        2: { cellWidth: 32 },
+        3: { cellWidth: 26 },
+        4: { cellWidth: 32 },
+        5: { cellWidth: 28 },
+      },
+    },
   };
 
   const currentConfig = REPORT_CONFIG[moduleType];
@@ -470,13 +533,20 @@ const ReportModal = ({
 
       // Prepare images in advance
       const fetchedImages = {};
-      for (const item of data) {
-        const u = currentConfig.imageField === "alumni" ? item.alumni : item;
-        if (u && u._id && u.image) {
-          try {
-            fetchedImages[u._id] = await getUserImageBase64(u.image);
-          } catch (e) {
-            console.error("Failed to pre-fetch image for item:", u._id, e);
+      if (currentConfig.imageField) {
+        for (const item of data) {
+          const u =
+            currentConfig.imageField === "alumni"
+              ? item.alumni
+              : currentConfig.imageField === "requester"
+                ? item.requester
+                : item;
+          if (u && u._id && u.image) {
+            try {
+              fetchedImages[u._id] = await getUserImageBase64(u.image);
+            } catch (e) {
+              console.error("Failed to pre-fetch image for item:", u._id, e);
+            }
           }
         }
       }
@@ -487,10 +557,18 @@ const ReportModal = ({
         head: [currentConfig.pdfHeaders],
         body: data.map((item) => currentConfig.getPDFRow(item)),
         didDrawCell: (cellData) => {
-          if (cellData.section === "body" && cellData.column.index === 0) {
+          if (
+            cellData.section === "body" &&
+            cellData.column.index === 0 &&
+            currentConfig.imageField
+          ) {
             const item = data[cellData.row.index];
             const u =
-              currentConfig.imageField === "alumni" ? item.alumni : item;
+              currentConfig.imageField === "alumni"
+                ? item.alumni
+                : currentConfig.imageField === "requester"
+                  ? item.requester
+                  : item;
 
             if (u && u._id) {
               const base64Img = fetchedImages[u._id];
@@ -570,7 +648,7 @@ const ReportModal = ({
   return (
     <Modal isOpen={isOpen} onOpenChange={onClose} size="lg" hideCloseButton>
       <ModalContent>
-        <ModalHeader className="flex items-center justify-between">
+        <ModalHeader className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <div className="p-2 bg-secondary/10 rounded-lg text-secondary">
               <FileDown size={22} />

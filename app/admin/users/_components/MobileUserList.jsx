@@ -21,6 +21,7 @@ const MobileUserList = ({
   onApprove,
   onReject,
   approvePending,
+  onRenew,
 }) => {
   return (
     <div className="lg:hidden space-y-4">
@@ -55,6 +56,7 @@ const MobileUserList = ({
               onApprove={onApprove}
               onReject={onReject}
               approvePending={approvePending}
+              onRenew={onRenew}
             />
           ))}
         </div>

@@ -16,6 +16,9 @@ import {
   MapPin,
   Calendar,
   GraduationCap,
+  ScrollText,
+  CheckCircle2,
+  Recycle,
 } from "lucide-react";
 import {
   Dropdown,
@@ -39,6 +42,7 @@ const UserCard = ({
   onApprove,
   onReject,
   approvePending,
+  onRenew,
 }) => {
   const showActions = canManageUser(currentUser, user);
   const showStatus = canManageUser(currentUser, user, "status");
@@ -82,14 +86,7 @@ const UserCard = ({
             >
               {user.role}
             </Chip>
-            <Chip
-              className="capitalize font-black text-xs tracking-wider"
-              color={user.source === "public" ? "secondary" : "default"}
-              size="sm"
-              variant="flat"
-            >
-              {user.source || "admin"}
-            </Chip>
+
             {showStatus && availableStatuses.length > 0 ? (
               <Dropdown>
                 <DropdownTrigger>
@@ -134,40 +131,99 @@ const UserCard = ({
       </div>
 
       {/* Info rows */}
-      <div className="grid grid-cols-1 gap-1.5 text-xs text-slate-600 dark:text-slate-400">
-        <div className="flex items-center gap-2">
-          <Mail size={12} className="shrink-0 text-slate-400" />
-          <span className="truncate">{user.email || "N/A"}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Phone size={12} className="shrink-0 text-slate-400" />
-          <span>{user.phone || "N/A"}</span>
-        </div>
-        {user.district && (
-          <div className="flex items-center gap-2">
-            <MapPin size={12} className="shrink-0 text-slate-400" />
-            <span>{user.district}</span>
+      <div className="space-y-2 py-1">
+        <div className="flex items-center gap-3 text-xs">
+          <div className="flex items-center gap-2 text-slate-400">
+            <Mail size={12} className="shrink-0" />
+            <span>Email :</span>
           </div>
-        )}
-        {user.batch && (
-          <div className="flex items-center gap-2">
-            <GraduationCap size={12} className="shrink-0 text-slate-400" />
-            <span>Batch: {user.batch}</span>
-          </div>
-        )}
-        <div className="flex items-center gap-2">
-          <Calendar size={12} className="shrink-0 text-slate-400" />
-          <span>
-            Created:{" "}
-            {user.createdAt
-              ? new Date(user.createdAt).toLocaleDateString()
-              : "N/A"}
-            {user.date_of_admission && (
-              <span className="text-primary font-medium ml-2">
-                Adm: {new Date(user.date_of_admission).toLocaleDateString()}
-              </span>
-            )}
+          <span className="font-semibold text-slate-700 dark:text-slate-200 truncate max-w-[200px]">
+            {user.email || "N/A"}
           </span>
+        </div>
+
+        <div className="flex items-center gap-3 text-xs">
+          <div className="flex items-center gap-2 text-slate-400">
+            <Phone size={12} className="shrink-0" />
+            <span>Phone :</span>
+          </div>
+          <span className="font-semibold text-slate-700 dark:text-slate-200">
+            {user.phone || "N/A"}
+          </span>
+        </div>
+
+        {user.district && (
+          <div className="flex items-center gap-3 text-xs">
+            <div className="flex items-center gap-2 text-slate-400">
+              <MapPin size={12} className="shrink-0" />
+              <span>District :</span>
+            </div>
+            <span className="font-semibold text-slate-700 dark:text-slate-200">
+              {user.district}
+            </span>
+          </div>
+        )}
+
+        <div className="flex items-center gap-3 text-xs">
+          <div className="flex items-center gap-2 text-slate-400">
+            <GraduationCap size={12} className="shrink-0" />
+            <span>Batch :</span>
+          </div>
+          <span className="font-bold text-primary tracking-wider">
+            {user.batch || "N/A"}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-3 text-xs">
+          <div className="flex items-center gap-2 text-slate-400">
+            <Calendar size={12} className="shrink-0" />
+            <span>Created :</span>
+          </div>
+          <div className="flex flex-col items-end">
+            <span className="font-semibold text-slate-700 dark:text-slate-200">
+              {user.createdAt
+                ? new Date(user.createdAt).toLocaleDateString()
+                : "N/A"}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 pt-1">
+          <div className="flex items-center gap-2 text-slate-400 text-xs">
+            <ScrollText size={12} className="shrink-0" />
+            <span>Membership :</span>
+          </div>
+          <div>
+            {user.role === "alumni" ? (
+              user.membership_renewals?.some(
+                (r) => r.year === new Date().getFullYear(),
+              ) ? (
+                <Chip
+                  color="success"
+                  size="sm"
+                  variant="flat"
+                  className="font-bold text-[10px] h-6 px-2 gap-1 rounded-md"
+                  startContent={<CheckCircle2 size={10} />}
+                >
+                  Valid ({new Date().getFullYear()})
+                </Chip>
+              ) : (
+                <Chip
+                  as="button"
+                  onClick={() => onRenew && onRenew(user)}
+                  color="warning"
+                  size="sm"
+                  variant="flat"
+                  className="font-bold text-[10px] h-6 px-2 gap-1 cursor-pointer hover:opacity-80 transition-opacity rounded-md"
+                  startContent={<Recycle size={10} />}
+                >
+                  Renew ({new Date().getFullYear()})
+                </Chip>
+              )
+            ) : (
+              <span className="text-slate-500 font-medium">-</span>
+            )}
+          </div>
         </div>
       </div>
 

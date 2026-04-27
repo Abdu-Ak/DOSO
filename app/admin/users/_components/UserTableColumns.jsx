@@ -20,6 +20,8 @@ import {
   UserCheck,
   UserX,
   MoreVertical,
+  CheckCircle2,
+  Recycle,
 } from "lucide-react";
 import { canManageUser } from "@/lib/permissions";
 
@@ -35,6 +37,7 @@ export function getUserColumns({
   approveMutation,
   onReject,
   onDelete,
+  onRenew,
   basePath = "/admin/users",
   role,
   entityLabel = "User",
@@ -57,7 +60,7 @@ export function getUserColumns({
                 src: user.image,
                 fallback: user.name.charAt(0),
               }}
-              description={user.studentId || user.userId || user.phone || ""}
+              description={user.userId || user.phone || ""}
               name={info.getValue()}
             >
               {user.email}
@@ -126,41 +129,22 @@ export function getUserColumns({
         );
       },
     },
-    ...(role !== "student"
-      ? [
-          {
-            header: "Role",
-            accessorKey: "role",
-            cell: (info) => (
-              <Chip
-                className="capitalize font-black text-xs tracking-wider"
-                color="primary"
-                size="sm"
-                variant="flat"
-              >
-                {info.getValue()}
-              </Chip>
-            ),
-          },
-        ]
-      : []),
+
     {
-      header: "Source",
-      accessorKey: "source",
-      cell: (info) => {
-        const value = info.getValue();
-        return (
-          <Chip
-            className="capitalize font-black text-xs tracking-wider"
-            color={value === "public" ? "secondary" : "default"}
-            size="sm"
-            variant="flat"
-          >
-            {value || "admin"}
-          </Chip>
-        );
-      },
+      header: "Role",
+      accessorKey: "role",
+      cell: (info) => (
+        <Chip
+          className="capitalize font-black text-xs tracking-wider"
+          color="primary"
+          size="sm"
+          variant="flat"
+        >
+          {info.getValue()}
+        </Chip>
+      ),
     },
+
     {
       header: "Contact",
       id: "contact",
@@ -179,6 +163,50 @@ export function getUserColumns({
         );
       },
     },
+
+    {
+      header: "Membership",
+      id: "membership",
+      cell: (info) => {
+        const user = info.row.original;
+
+        if (user.role !== "alumni") {
+          return <span className="text-slate-500 font-medium">-</span>;
+        }
+
+        const currentYear = new Date().getFullYear();
+        const renewals = user.membership_renewals || [];
+        const isRenewed = renewals.some((r) => r.year === currentYear);
+
+        if (isRenewed) {
+          return (
+            <Chip
+              color="success"
+              size="sm"
+              variant="flat"
+              className="font-bold text-xs rounded-md gap-1"
+              startContent={<CheckCircle2 size={12} />}
+            >
+              Valid ({currentYear})
+            </Chip>
+          );
+        }
+        return (
+          <Chip
+            as="button"
+            onClick={() => onRenew && onRenew(user)}
+            color="warning"
+            size="sm"
+            variant="flat"
+            className="text-xs rounded-md cursor-pointer hover:opacity-80 transition-opacity font-bold gap-1"
+            startContent={<Recycle size={12} />}
+          >
+            Renew ({currentYear})
+          </Chip>
+        );
+      },
+    },
+
     {
       header: "Admission/Joined",
       id: "dates",
@@ -213,19 +241,17 @@ export function getUserColumns({
         </span>
       ),
     },
-    ...(role !== "student"
-      ? [
-          {
-            header: "Batch",
-            accessorKey: "batch",
-            cell: (info) => (
-              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
-                {info.getValue() || "N/A"}
-              </span>
-            ),
-          },
-        ]
-      : []),
+
+    {
+      header: "Batch",
+      accessorKey: "batch",
+      cell: (info) => (
+        <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
+          {info.getValue() || "N/A"}
+        </span>
+      ),
+    },
+
     {
       header: "Status",
       accessorKey: "status",

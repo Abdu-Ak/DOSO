@@ -3,7 +3,8 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import UserTopbar from "@/components/UserTopbar";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
+import { addToast } from "@heroui/toast";
 
 export default function AlumniLayout({ children }) {
   const { data: session, status } = useSession();
@@ -12,10 +13,25 @@ export default function AlumniLayout({ children }) {
   const alumniMenus = [
     { label: "Sundook", href: "/alumni/sundook", icon: "Box" },
     { label: "Welfare", href: "/alumni/welfare", icon: "HeartHandshake" },
+    { label: "Debt", href: "/alumni/debt", icon: "Wallet" },
   ];
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (session?.error === "ACCOUNT_DELETED") {
+      addToast({
+        title: "Account Deleted",
+        description: "Your account has been deleted, please contact admin",
+        color: "danger",
+      });
+      signOut({ callbackUrl: "/login" });
+    } else if (session?.error === "ACCOUNT_DEACTIVATED") {
+      addToast({
+        title: "Account Deactivated",
+        description: "Account has been deactivated, please contact admin",
+        color: "danger",
+      });
+      signOut({ callbackUrl: "/login" });
+    } else if (status === "unauthenticated") {
       router.push("/login");
     } else if (status === "authenticated" && session?.user?.role !== "alumni") {
       // Redirect to appropriate portal if role doesn't match

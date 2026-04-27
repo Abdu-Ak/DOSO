@@ -4,7 +4,8 @@ import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Sidebar from "@/components/admin/Sidebar";
 import Topbar from "@/components/admin/Topbar";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
+import { addToast } from "@heroui/toast";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function AdminLayout({ children }) {
@@ -21,10 +22,24 @@ export default function AdminLayout({ children }) {
   }, [pathname]);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (session?.error === "ACCOUNT_DELETED") {
+      addToast({
+        title: "Account Deleted",
+        description: "Your account has been deleted, please contact admin",
+        color: "danger",
+      });
+      signOut({ callbackUrl: "/login" });
+    } else if (session?.error === "ACCOUNT_DEACTIVATED") {
+      addToast({
+        title: "Account Deactivated",
+        description: "Account has been deactivated, please contact admin",
+        color: "danger",
+      });
+      signOut({ callbackUrl: "/login" });
+    } else if (status === "unauthenticated") {
       router.push("/login");
     }
-  }, [status, router]);
+  }, [status, session, router]);
 
   if (status === "loading") {
     return (

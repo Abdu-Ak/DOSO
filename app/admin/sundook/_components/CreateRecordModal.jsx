@@ -33,7 +33,7 @@ const CreateRecordModal = ({
       <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader className="flex items-center justify-between">
+            <ModalHeader className="flex items-center justify-between gap-3">
               <div className="flex flex-col gap-2">
                 <h3 className="text-lg font-body! font-semibold text-slate-800 dark:text-white">
                   Create Sundook Record
