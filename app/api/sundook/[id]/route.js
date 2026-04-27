@@ -17,7 +17,7 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     const deleted = await Sundook.findByIdAndDelete(id);
 
