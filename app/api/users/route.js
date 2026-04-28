@@ -50,7 +50,13 @@ export async function GET(request) {
     }
 
     if (batch) {
-      query.batch = batch;
+      // Extract 4-digit year if present (handles "Batch of 2024" or just "2024")
+      const yearMatch = batch.match(/\d{4}/);
+      const year = yearMatch ? yearMatch[0] : batch;
+
+      // Use regex to match the year, ensuring it works even if stored as a slightly different string
+      // or to handle potential leading/trailing characters.
+      query.batch = { $regex: year, $options: "i" };
     }
 
     if (industry && industry !== "All Industries") {

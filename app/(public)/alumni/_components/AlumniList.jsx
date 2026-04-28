@@ -39,7 +39,10 @@ export default function AlumniList() {
       };
 
       if (debouncedSearchTerm) params.search = debouncedSearchTerm;
-      if (batchYear !== "All Batches") params.batch = batchYear;
+      if (batchYear !== "All Batches") {
+        const yearMatch = batchYear.match(/\d{4}/);
+        params.batch = yearMatch ? yearMatch[0] : batchYear;
+      }
       if (industry !== "All Industries") params.industry = industry;
 
       const response = await axios.get("/api/users", { params });
