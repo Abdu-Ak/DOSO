@@ -159,12 +159,15 @@ const UserFilters = ({
             setPage(1);
           }}
         >
-          <SelectItem key="" value="">
+          <SelectItem key="" textValue="All Batches">
             All Batches
           </SelectItem>
-          {Array.from({ length: 11 }, (_, i) => 2020 + i).map((year) => (
-            <SelectItem key={year.toString()} value={year.toString()}>
-              {year}
+          {Array.from(
+            { length: new Date().getFullYear() - 1980 + 1 },
+            (_, i) => new Date().getFullYear() - i,
+          ).map((year) => (
+            <SelectItem key={year.toString()} textValue={year.toString()}>
+              {year.toString()}
             </SelectItem>
           ))}
         </Select>
