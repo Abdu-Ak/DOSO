@@ -107,7 +107,7 @@ export default function EventsManagementPage() {
 
   return (
     <div className="space-y-6">
-      <EventHeader />
+      <EventHeader count={totalItems} />
 
       {/* Desktop view */}
       <div className="hidden lg:block">

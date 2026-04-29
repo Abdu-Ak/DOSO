@@ -238,6 +238,7 @@ export default function StudentManagement() {
           currentUser?.role === "admin" || currentUser?.role === "super_admin"
         }
         onReportClick={() => setIsReportModalOpen(true)}
+        count={totalItems}
       />
 
       {/* Desktop */}

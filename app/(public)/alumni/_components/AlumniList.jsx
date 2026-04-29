@@ -11,7 +11,7 @@ export default function AlumniList() {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [batchYear, setBatchYear] = useState("All Batches");
-  const [industry, setIndustry] = useState("All Industries");
+  const [district, setDistrict] = useState("All Districts");
   const [page, setPage] = useState(1);
   const [limit] = useState(12);
   const [showFilters, setShowFilters] = useState(false);
@@ -19,7 +19,7 @@ export default function AlumniList() {
   // Reset page when filters change
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearchTerm, batchYear, industry]);
+  }, [debouncedSearchTerm, batchYear, district]);
 
   const { data, isLoading } = useQuery({
     queryKey: [
@@ -28,7 +28,7 @@ export default function AlumniList() {
       limit,
       debouncedSearchTerm,
       batchYear,
-      industry,
+      district,
     ],
     queryFn: async () => {
       const params = {
@@ -43,7 +43,7 @@ export default function AlumniList() {
         const yearMatch = batchYear.match(/\d{4}/);
         params.batch = yearMatch ? yearMatch[0] : batchYear;
       }
-      if (industry !== "All Industries") params.industry = industry;
+      if (district !== "All Districts") params.district = district;
 
       const response = await axios.get("/api/users", { params });
       return response.data;
@@ -54,7 +54,7 @@ export default function AlumniList() {
   const handleReset = () => {
     setSearchTerm("");
     setBatchYear("All Batches");
-    setIndustry("All Industries");
+    setDistrict("All Districts");
     setPage(1);
   };
 
@@ -65,8 +65,8 @@ export default function AlumniList() {
         setSearchTerm={setSearchTerm}
         batchYear={batchYear}
         setBatchYear={setBatchYear}
-        industry={industry}
-        setIndustry={setIndustry}
+        district={district}
+        setDistrict={setDistrict}
         showFilters={showFilters}
         setShowFilters={setShowFilters}
         onReset={handleReset}

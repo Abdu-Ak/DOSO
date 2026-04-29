@@ -16,13 +16,23 @@ const BATCHES = [
   ),
 ];
 
-const INDUSTRIES = [
-  "All Industries",
-  "Islamic Studies",
-  "Education",
-  "Technology",
-  "Healthcare",
-  "Business",
+const DISTRICTS = [
+  "All Districts",
+  "Thiruvananthapuram",
+  "Kollam",
+  "Pathanamthitta",
+  "Alappuzha",
+  "Kottayam",
+  "Idukki",
+  "Ernakulam",
+  "Thrissur",
+  "Palakkad",
+  "Malappuram",
+  "Kozhikode",
+  "Wayanad",
+  "Kannur",
+  "Kasaragod",
+  "Other",
 ];
 
 export default function SearchFilter({
@@ -30,8 +40,8 @@ export default function SearchFilter({
   setSearchTerm,
   batchYear,
   setBatchYear,
-  industry,
-  setIndustry,
+  district,
+  setDistrict,
   showFilters,
   setShowFilters,
   onReset,
@@ -100,20 +110,20 @@ export default function SearchFilter({
           </Select>
         </div>
 
-        {/* Occupation Filter */}
+        {/* District Filter */}
         <div className="md:col-span-3">
           <Select
-            label="Field / Industry"
-            placeholder="All Industries"
+            label="District"
+            placeholder="All Districts"
             variant="bordered"
-            selectedKeys={industry ? [industry] : []}
+            selectedKeys={district ? [district] : []}
             onSelectionChange={(keys) =>
-              setIndustry([...keys][0] || "All Industries")
+              setDistrict([...keys][0] || "All Districts")
             }
           >
-            {INDUSTRIES.map((i) => (
-              <SelectItem key={i} value={i}>
-                {i}
+            {DISTRICTS.map((d) => (
+              <SelectItem key={d} value={d}>
+                {d}
               </SelectItem>
             ))}
           </Select>
