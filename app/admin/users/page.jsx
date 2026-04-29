@@ -162,6 +162,7 @@ export default function UserManagement() {
       <UserHeader
         onReportClick={() => setIsReportModalOpen(true)}
         showReportButton={canShowReport}
+        count={data?.total || 0}
       />
 
       {/* Desktop */}

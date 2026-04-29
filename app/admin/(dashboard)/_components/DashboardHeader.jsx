@@ -48,6 +48,9 @@ const DashboardHeader = ({
           }}
           aria-label="Filter dashboard by date range"
           showMonthAndYearPickers
+          classNames={{
+            inputWrapper: "bg-white dark:bg-neutral-dark",
+          }}
         />
 
         <Button

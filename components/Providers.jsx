@@ -12,7 +12,7 @@ export default function Providers({ children }) {
 
   return (
     <SessionProvider>
-      <HeroUIProvider>
+      <HeroUIProvider locale="en-IN">
         <ToastProvider />
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>{children}</ThemeProvider>
