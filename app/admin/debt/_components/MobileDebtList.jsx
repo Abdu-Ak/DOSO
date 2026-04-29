@@ -162,32 +162,38 @@ export default function MobileDebtList({
               </div>
             </div>
 
-            {(record.status === "approved" || record.status === "repaid") &&
-              record.receipt_no && (
-                <div
-                  className={`p-2 ${record.status === "repaid" ? "bg-primary/5" : "bg-slate-50 dark:bg-slate-900/50"} rounded-xl col-span-2`}
+            {(record.status === "approved" || record.status === "repaid") && (
+              <div
+                className={`p-2 ${record.status === "repaid" ? "bg-primary/5" : "bg-success/5"} rounded-xl col-span-2`}
+              >
+                <p
+                  className={`text-[10px] ${record.status === "repaid" ? "text-primary" : "text-success"} font-black uppercase mb-1 flex items-center gap-1`}
                 >
-                  <p
-                    className={`text-[10px] ${record.status === "repaid" ? "text-primary" : "text-slate-400"} font-black uppercase mb-1 flex items-center gap-1`}
-                  >
-                    {record.status === "repaid" ? (
-                      <BadgeCheck size={10} />
-                    ) : (
-                      <FileText size={10} />
-                    )}{" "}
-                    {record.status === "repaid" ? "Settled" : "Receipt"}
-                  </p>
-                  <p className="font-bold text-sm truncate">
-                    {record.receipt_no}
-                  </p>
-                </div>
-              )}
+                  {record.status === "repaid" ? (
+                    <BadgeCheck size={10} />
+                  ) : (
+                    <CheckCircle2 size={10} />
+                  )}{" "}
+                  {record.status === "repaid" ? "Settled" : "Approved"}
+                </p>
+                <p className="font-bold text-sm truncate">
+                  {record.receipt_no
+                    ? `Receipt: ${record.receipt_no}`
+                    : record.status === "repaid"
+                      ? "Settled by Admin"
+                      : "Approved by Admin"}
+                </p>
+              </div>
+            )}
 
             {(record.status === "rejected" ||
               record.status === "witness_rejected") && (
               <div className="p-2 bg-danger/10 rounded-xl col-span-2">
                 <p className="text-[10px] text-danger font-black uppercase mb-1 flex items-center gap-1">
-                  <XCircle size={10} /> Reason
+                  <XCircle size={10} />{" "}
+                  {record.status === "witness_rejected"
+                    ? "Witness Rejected"
+                    : "Rejected"}
                 </p>
                 <p className="font-bold text-sm text-danger wrap-break-word">
                   {record.admin_reason ||

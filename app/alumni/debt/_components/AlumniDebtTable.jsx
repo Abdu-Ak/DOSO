@@ -19,6 +19,7 @@ import {
   FileText,
   UserCheck,
   UserX,
+  CheckCircle2,
 } from "lucide-react";
 import { User } from "@heroui/user";
 
@@ -28,6 +29,7 @@ const STATUS_COLOR = {
   approved: "success",
   rejected: "danger",
   witness_rejected: "danger",
+  repaid: "primary",
 };
 
 const STATUS_LABEL = {
@@ -36,6 +38,7 @@ const STATUS_LABEL = {
   approved: "Approved",
   rejected: "Rejected",
   witness_rejected: "Witness Rejected",
+  repaid: "Repaid",
 };
 
 export default function AlumniDebtTable({
@@ -155,16 +158,26 @@ export default function AlumniDebtTable({
         }
         return (
           <div className="flex items-center justify-end min-h-[32px] gap-2">
-            {item.status === "approved" && item.receipt_no && (
-              <div className="flex items-center gap-1.5 text-[10px] font-bold text-success bg-success/10 px-3 py-1 rounded-full whitespace-nowrap">
-                <FileText size={12} />
-                Receipt: {item.receipt_no}
+            {(item.status === "approved" || item.status === "repaid") && (
+              <div
+                className={`flex items-center gap-1.5 text-xs font-bold ${item.status === "repaid" ? "text-primary bg-primary/10" : "text-success bg-success/10"} px-3 py-1 rounded-full whitespace-nowrap`}
+              >
+                {item.status === "repaid" ? (
+                  <CheckCircle2 size={13} />
+                ) : (
+                  <FileText size={13} />
+                )}
+                {item.receipt_no
+                  ? `Receipt: ${item.receipt_no}`
+                  : item.status === "repaid"
+                    ? "Settled by Admin"
+                    : "Approved by Admin"}
               </div>
             )}
             {(item.status === "rejected" ||
               item.status === "witness_rejected") && (
-              <div className="flex items-center gap-1.5 text-[10px] font-bold text-danger bg-danger/10 px-3 py-1 rounded-full max-w-[150px] truncate">
-                <AlertCircle size={12} className="shrink-0" />
+              <div className="flex items-center gap-1.5 text-xs font-bold text-danger bg-danger/10 px-3 py-1 rounded-full max-w-[150px] truncate">
+                <AlertCircle size={13} className="shrink-0" />
                 {item.admin_reason ||
                   item.witness1_reason ||
                   item.witness2_reason ||

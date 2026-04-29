@@ -142,29 +142,18 @@ export default function CreateDebtRecordModal({
                 )}
               />
 
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  {...register("amount", { valueAsNumber: true })}
-                  label="Amount (₹)"
-                  placeholder="0.00"
-                  type="number"
-                  variant="bordered"
-                  labelPlacement="outside"
-                  radius="lg"
-                  isInvalid={!!errors.amount}
-                  errorMessage={errors.amount?.message}
-                />
-                <Input
-                  {...register("receipt_no")}
-                  label="Receipt Number"
-                  placeholder="Enter receipt number"
-                  variant="bordered"
-                  labelPlacement="outside"
-                  radius="lg"
-                  isInvalid={!!errors.receipt_no}
-                  errorMessage={errors.receipt_no?.message}
-                />
-              </div>
+              <Input
+                {...register("amount", { valueAsNumber: true })}
+                label="Amount (₹)"
+                placeholder="0.00"
+                type="number"
+                variant="bordered"
+                labelPlacement="outside"
+                radius="lg"
+                fullWidth
+                isInvalid={!!errors.amount}
+                errorMessage={errors.amount?.message}
+              />
 
               <div className="grid grid-cols-2 gap-4">
                 <Controller

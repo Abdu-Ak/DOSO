@@ -21,7 +21,13 @@ const RegistrationQRModal = ({ isOpen, onClose }) => {
   };
 
   const handleWhatsAppShare = () => {
-    const text = `Join us at DOSO! Register as a ${activeTab === "student" ? "Student" : "Alumni"} here: ${registrationUrl}`;
+    const tabNames = {
+      student: "Student",
+      alumni: "Alumni",
+      sundook: "Sundook Record",
+      welfare: "Welfare Contribution",
+    };
+    const text = `Join us at DOSO! Register/Submit ${tabNames[activeTab]} here: ${registrationUrl}`;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(whatsappUrl, "_blank");
   };
@@ -44,12 +50,12 @@ const RegistrationQRModal = ({ isOpen, onClose }) => {
             </ModalHeader>
             <ModalBody className="pb-6">
               {/* Tab Switch */}
-              <div className="flex gap-2 mb-6">
+              <div className="flex flex-wrap gap-2 mb-2">
                 <Button
                   size="sm"
                   variant={activeTab === "student" ? "solid" : "flat"}
                   color="primary"
-                  className="font-bold flex-1"
+                  className="font-bold flex-1 min-w-fit"
                   onPress={() => setActiveTab("student")}
                 >
                   Student
@@ -58,10 +64,28 @@ const RegistrationQRModal = ({ isOpen, onClose }) => {
                   size="sm"
                   variant={activeTab === "alumni" ? "solid" : "flat"}
                   color="primary"
-                  className="font-bold flex-1"
+                  className="font-bold flex-1 min-w-fit"
                   onPress={() => setActiveTab("alumni")}
                 >
                   Alumni
+                </Button>
+                <Button
+                  size="sm"
+                  variant={activeTab === "sundook" ? "solid" : "flat"}
+                  color="primary"
+                  className="font-bold flex-1 min-w-fit"
+                  onPress={() => setActiveTab("sundook")}
+                >
+                  Sundook
+                </Button>
+                <Button
+                  size="sm"
+                  variant={activeTab === "welfare" ? "solid" : "flat"}
+                  color="primary"
+                  className="font-bold flex-1 min-w-fit"
+                  onPress={() => setActiveTab("welfare")}
+                >
+                  Welfare
                 </Button>
               </div>
 

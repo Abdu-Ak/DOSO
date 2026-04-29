@@ -215,24 +215,22 @@ export const getDebtColumns = ({ onApprove, onReject, onDelete, onRepaid }) => [
     cell: (info) => {
       const record = info.row.original;
 
-      if (
-        (record.status === "approved" || record.status === "repaid") &&
-        record.receipt_no
-      ) {
+      if (record.status === "approved" || record.status === "repaid") {
+        const isRepaid = record.status === "repaid";
         return (
           <div className="flex flex-col gap-0.5">
             <span
-              className={`text-[10px] font-bold ${record.status === "repaid" ? "text-primary" : "text-success"} uppercase tracking-wider flex items-center gap-1`}
+              className={`text-[10px] font-bold ${isRepaid ? "text-primary" : "text-success"} uppercase tracking-wider flex items-center gap-1`}
             >
-              {record.status === "repaid" ? (
-                <BadgeCheck size={10} />
-              ) : (
-                <FileText size={10} />
-              )}{" "}
-              {record.status === "repaid" ? "Settled" : "Receipt"}
+              {isRepaid ? <BadgeCheck size={10} /> : <CheckCircle2 size={10} />}{" "}
+              {isRepaid ? "Settled" : "Approved"}
             </span>
             <span className="text-xs text-slate-700 dark:text-slate-300 font-bold truncate max-w-[120px]">
-              {record.receipt_no}
+              {record.receipt_no
+                ? `Receipt: ${record.receipt_no}`
+                : isRepaid
+                  ? "Settled by Admin"
+                  : "Approved by Admin"}
             </span>
           </div>
         );
@@ -242,6 +240,7 @@ export const getDebtColumns = ({ onApprove, onReject, onDelete, onRepaid }) => [
         record.status === "rejected" ||
         record.status === "witness_rejected"
       ) {
+        const isWitnessRejected = record.status === "witness_rejected";
         const reason =
           record.admin_reason ||
           record.witness1_reason ||
@@ -249,7 +248,8 @@ export const getDebtColumns = ({ onApprove, onReject, onDelete, onRepaid }) => [
         return (
           <div className="flex flex-col gap-0.5">
             <span className="text-[10px] font-bold text-danger uppercase tracking-wider flex items-center gap-1">
-              <XCircle size={10} /> Reason
+              <XCircle size={10} />{" "}
+              {isWitnessRejected ? "Witness Rejected" : "Rejected"}
             </span>
             <span
               className="text-xs text-slate-500 font-medium truncate max-w-[120px]"
