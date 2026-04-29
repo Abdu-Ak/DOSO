@@ -138,7 +138,6 @@ export async function POST(request) {
         amount: validatedData.amount,
         payment_type: validatedData.payment_type,
         duration_months: validatedData.duration_months,
-        receipt_no: validatedData.receipt_no,
         witness1: validatedData.witness1,
         witness2: validatedData.witness2,
         status: "approved",

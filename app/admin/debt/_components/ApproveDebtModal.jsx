@@ -64,20 +64,13 @@ export default function ApproveDebtModal({
               </div>
 
               <div className="space-y-4 py-2">
-                <p className="text-sm text-slate-500 font-medium mb-1">
-                  Please provide the receipt number to authorize this debt.
+                <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">
+                  By confirming this, you are approving the debt of{" "}
+                  <span className="font-bold text-slate-900 dark:text-white">
+                    {record?.requester?.name}
+                  </span>
+                  .
                 </p>
-                <Input
-                //   label="Receipt Number"
-                  placeholder="Enter receipt #"
-                  variant="bordered"
-                  value={receiptNumber}
-                  onValueChange={setReceiptNumber}
-                  labelPlacement="inside"
-                  radius="lg"
-                  autoFocus
-                  isRequired
-                />
               </div>
             </ModalBody>
             <ModalFooter>
@@ -87,9 +80,8 @@ export default function ApproveDebtModal({
                 startContent={<CheckCircle2 size={18} />}
                 onPress={onApprove}
                 isLoading={isLoading}
-                isDisabled={!receiptNumber.trim()}
               >
-                Approve & Authorize
+                Confirm Approval
               </Button>
             </ModalFooter>
           </>

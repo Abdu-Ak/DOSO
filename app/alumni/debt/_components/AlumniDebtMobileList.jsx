@@ -13,6 +13,7 @@ import {
   Check,
   X,
   UserX,
+  BadgeCheck,
 } from "lucide-react";
 
 export default function AlumniDebtMobileList({
@@ -27,6 +28,7 @@ export default function AlumniDebtMobileList({
     approved: "success",
     rejected: "danger",
     witness_rejected: "danger",
+    repaid: "primary",
   };
 
   const statusLabels = {
@@ -35,6 +37,7 @@ export default function AlumniDebtMobileList({
     approved: "Approved",
     rejected: "Rejected",
     witness_rejected: "Witness Rejected",
+    repaid: "Repaid",
   };
 
   return (
@@ -169,10 +172,20 @@ export default function AlumniDebtMobileList({
               </div>
             ) : (
               <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
-                {item.status === "approved" && item.receipt_no && (
-                  <div className="flex items-center gap-2 text-xs font-bold text-success bg-success/10 px-3 py-2 rounded-xl">
-                    <FileText size={14} />
-                    Receipt: {item.receipt_no}
+                {(item.status === "approved" || item.status === "repaid") && (
+                  <div
+                    className={`flex items-center gap-2 text-xs font-bold ${item.status === "repaid" ? "text-primary bg-primary/10" : "text-success bg-success/10"} px-3 py-2 rounded-xl`}
+                  >
+                    {item.status === "repaid" ? (
+                      <BadgeCheck size={14} />
+                    ) : (
+                      <FileText size={14} />
+                    )}
+                    {item.receipt_no
+                      ? `Receipt: ${item.receipt_no}`
+                      : item.status === "repaid"
+                        ? "Settled by Admin"
+                        : "Approved by Admin"}
                   </div>
                 )}
                 {(item.status === "rejected" ||

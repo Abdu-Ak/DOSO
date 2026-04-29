@@ -100,6 +100,15 @@ const PublicRegistrationForm = ({ role }) => {
               Your registration is pending approval. You will receive an email
               with your login credentials once approved.
             </p>
+            <Button
+              color="primary"
+              variant="shadow"
+              fullWidth
+              className="font-black text-white tracking-widest mt-4"
+              onPress={() => setSubmitted(false)}
+            >
+              Register Another
+            </Button>
           </CardBody>
         </Card>
       </div>

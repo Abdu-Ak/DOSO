@@ -94,9 +94,9 @@ export async function PATCH(request, { params }) {
     return NextResponse.json(debtRequest);
   } catch (error) {
     console.error("PATCH Admin Error:", error);
-    if (error.name === "ZodError") {
+    if (error.name === "ZodError" || error.errors) {
       return NextResponse.json(
-        { error: error.errors[0].message },
+        { error: error.errors?.[0]?.message || "Validation error" },
         { status: 400 },
       );
     }
