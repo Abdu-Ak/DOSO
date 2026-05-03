@@ -40,7 +40,7 @@ import { useDisclosure } from "@heroui/modal";
 import { useSession, signOut } from "next-auth/react";
 import UserForm from "@/components/admin/UserForm";
 import DeactivateConfirmModal from "@/components/admin/DeactivateConfirmModal";
-import { calculateAge } from "@/lib/utils";
+import { calculateAge, formatDate } from "@/lib/utils";
 
 const DetailItem = ({ icon: Icon, label, value, color = "primary" }) => (
   <div className="space-y-1.5 group text-left">
@@ -110,16 +110,6 @@ export default function AlumniProfilePage() {
     Active: "success",
     Pending: "warning",
     Inactive: "danger",
-  };
-
-  const formatDate = (date) => {
-    if (!date) return null;
-    return new Date(date).toLocaleDateString("en-IN", {
-      timeZone: "Asia/Kolkata",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
   };
 
   const handleStatusChange = (newStatus) => {

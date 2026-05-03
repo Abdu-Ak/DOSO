@@ -21,6 +21,7 @@ import {
   Download,
 } from "lucide-react";
 import { generateDebtNoticePdf } from "@/lib/pdf/generateDebtNoticePdf";
+import { formatDate } from "@/lib/utils";
 
 export default function MobileDebtList({
   records,
@@ -104,7 +105,7 @@ export default function MobileDebtList({
                 <Calendar size={14} className="text-slate-400 mt-0.5" />
                 <div className="flex flex-col">
                   <span className="text-xs">
-                    {new Date(record.createdAt).toLocaleDateString("en-IN")}
+                    {formatDate(record.createdAt)}
                   </span>
                   <span className="text-[10px] text-slate-400 font-medium">
                     {new Date(record.createdAt).toLocaleTimeString("en-IN", {

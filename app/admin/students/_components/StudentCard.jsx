@@ -23,7 +23,7 @@ import {
   DropdownMenu,
   DropdownItem,
 } from "@heroui/dropdown";
-
+import { formatDate } from "@/lib/utils";
 const statusColors = {
   Active: "success",
   Pending: "warning",
@@ -182,9 +182,7 @@ const StudentCard = ({
             <span>Created :</span>
           </div>
           <span className="font-semibold text-slate-700 dark:text-slate-200">
-            {student.createdAt
-              ? new Date(student.createdAt).toLocaleDateString()
-              : "N/A"}
+            {student.createdAt ? formatDate(student.createdAt) : "N/A"}
           </span>
         </div>
 
@@ -195,7 +193,7 @@ const StudentCard = ({
               <span>Admission :</span>
             </div>
             <span className="font-bold text-slate-700 dark:text-slate-200">
-              {new Date(student.date_of_admission).toLocaleDateString()}
+              {formatDate(student.date_of_admission)}
             </span>
           </div>
         )}

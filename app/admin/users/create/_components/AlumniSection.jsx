@@ -22,6 +22,7 @@ import {
   BriefcaseIcon,
 } from "lucide-react";
 import InputField from "@/components/admin/ui/InputField";
+import { formatDate } from "@/lib/utils";
 
 const KERALA_DISTRICTS = [
   "Thiruvananthapuram",
@@ -139,7 +140,7 @@ const AlumniSection = ({
                     }
                   >
                     {field.value
-                      ? new Date(field.value).toLocaleDateString()
+                      ? formatDate(field.value)
                       : "Select date"}
                   </Button>
                 </PopoverTrigger>

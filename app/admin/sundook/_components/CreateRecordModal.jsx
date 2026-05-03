@@ -62,6 +62,7 @@ const CreateRecordModal = ({
                 onSelectionChange={(key) =>
                   setFormData({ ...formData, alumni: key })
                 }
+                isVirtualized={false}
               >
                 {(alumniList || []).map((u) => (
                   <AutocompleteItem
@@ -69,10 +70,10 @@ const CreateRecordModal = ({
                     textValue={`${u.name} (${u.userId})`}
                   >
                     <div className="flex flex-col">
-                      <span className="font-bold">{u.name}</span>
-                      <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
-                        {u.userId}
+                      <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                        {u.name}
                       </span>
+                      <span className="text-xs text-slate-500">{u.userId}</span>
                     </div>
                   </AutocompleteItem>
                 ))}

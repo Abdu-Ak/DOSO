@@ -22,6 +22,7 @@ import {
   MoreVertical,
 } from "lucide-react";
 import { canManageUser } from "@/lib/permissions";
+import { formatDate } from "@/lib/utils";
 
 const STATUS_COLORS = {
   Active: "success",
@@ -154,10 +155,10 @@ export function getStudentColumns({
       cell: (info) => {
         const student = info.row.original;
         const admission = student.date_of_admission
-          ? new Date(student.date_of_admission).toLocaleDateString()
+          ? formatDate(student.date_of_admission)
           : null;
         const created = student.createdAt
-          ? new Date(student.createdAt).toLocaleDateString()
+          ? formatDate(student.createdAt)
           : "N/A";
         return (
           <div className="flex flex-col gap-1">

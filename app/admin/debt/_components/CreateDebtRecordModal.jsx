@@ -124,20 +124,24 @@ export default function CreateDebtRecordModal({
                     onSelectionChange={field.onChange}
                     isInvalid={!!errors.alumni}
                     errorMessage={errors.alumni?.message}
+                    defaultItems={alumniList || []}
+                    isVirtualized={false}
                   >
-                    {(alumniList || []).map((u) => (
+                    {(u) => (
                       <AutocompleteItem
                         key={u._id}
                         textValue={`${u.name} (${u.userId})`}
                       >
-                        <div className="flex flex-col">
-                          <span className="font-bold">{u.name}</span>
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
+                        <div className="flex flex-col h-full">
+                          <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                            {u.name}
+                          </span>
+                          <span className="text-xs text-slate-500">
                             {u.userId}
                           </span>
                         </div>
                       </AutocompleteItem>
-                    ))}
+                    )}
                   </Autocomplete>
                 )}
               />
@@ -155,7 +159,7 @@ export default function CreateDebtRecordModal({
                 errorMessage={errors.amount?.message}
               />
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Controller
                   name="payment_type"
                   control={control}
@@ -224,7 +228,7 @@ export default function CreateDebtRecordModal({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Controller
                   name="witness1"
                   control={control}
@@ -239,6 +243,7 @@ export default function CreateDebtRecordModal({
                       onSelectionChange={field.onChange}
                       isInvalid={!!errors.witness1}
                       errorMessage={errors.witness1?.message}
+                      isVirtualized={false}
                     >
                       {(alumniList || []).map((u) => (
                         <AutocompleteItem
@@ -246,8 +251,10 @@ export default function CreateDebtRecordModal({
                           textValue={`${u.name} (${u.userId})`}
                         >
                           <div className="flex flex-col">
-                            <span className="font-bold">{u.name}</span>
-                            <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
+                            <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                              {u.name}
+                            </span>
+                            <span className="text-xs text-slate-500">
                               {u.userId}
                             </span>
                           </div>
@@ -270,6 +277,7 @@ export default function CreateDebtRecordModal({
                       onSelectionChange={field.onChange}
                       isInvalid={!!errors.witness2}
                       errorMessage={errors.witness2?.message}
+                      isVirtualized={false}
                     >
                       {(alumniList || []).map((u) => (
                         <AutocompleteItem
@@ -277,8 +285,10 @@ export default function CreateDebtRecordModal({
                           textValue={`${u.name} (${u.userId})`}
                         >
                           <div className="flex flex-col">
-                            <span className="font-bold">{u.name}</span>
-                            <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
+                            <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                              {u.name}
+                            </span>
+                            <span className="text-xs text-slate-500">
                               {u.userId}
                             </span>
                           </div>

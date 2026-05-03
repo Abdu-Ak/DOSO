@@ -23,6 +23,7 @@ import {
   Fingerprint,
 } from "lucide-react";
 import InputField from "@/components/admin/ui/InputField";
+import { formatDate } from "@/lib/utils";
 
 const KERALA_DISTRICTS = [
   "Thiruvananthapuram",
@@ -97,7 +98,7 @@ const StudentSection = ({
                     }
                   >
                     {field.value
-                      ? new Date(field.value).toLocaleDateString()
+                      ? formatDate(field.value)
                       : "Select date"}
                   </Button>
                 </PopoverTrigger>
@@ -193,7 +194,7 @@ const StudentSection = ({
                     }
                   >
                     {field.value
-                      ? new Date(field.value).toLocaleDateString()
+                      ? formatDate(field.value)
                       : "Select date"}
                   </Button>
                 </PopoverTrigger>

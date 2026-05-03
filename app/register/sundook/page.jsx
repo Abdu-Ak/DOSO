@@ -149,12 +149,15 @@ export default function PublicSundookPage() {
                         isInvalid={!!errors.alumni}
                         errorMessage={errors.alumni?.message}
                         fullWidth
+                        isVirtualized={false}
                       >
                         {(alumniData || []).map((u) => (
                           <AutocompleteItem key={u._id} textValue={u.name}>
                             <div className="flex flex-col">
-                              <span className="font-bold">{u.name}</span>
-                              <span className="text-[10px] text-slate-400 uppercase font-black tracking-widest">
+                              <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                                {u.name}
+                              </span>
+                              <span className="text-xs text-slate-500">
                                 {u.userId}
                               </span>
                             </div>

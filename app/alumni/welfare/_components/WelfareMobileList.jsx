@@ -3,6 +3,7 @@
 import React from "react";
 import { Chip } from "@heroui/chip";
 import { CheckCircle2, AlertCircle, Calendar, IndianRupee } from "lucide-react";
+import { formatDate } from "@/lib/utils";
 
 export default function WelfareMobileList({ records, statusColors }) {
   return (
@@ -18,7 +19,7 @@ export default function WelfareMobileList({ records, statusColors }) {
                 <Calendar size={14} />
               </div>
               <span className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">
-                {new Date(record.createdAt).toLocaleDateString()}
+                {formatDate(record.createdAt)}
               </span>
             </div>
             <Chip

@@ -24,6 +24,7 @@ import {
   Recycle,
 } from "lucide-react";
 import { canManageUser } from "@/lib/permissions";
+import { formatDate } from "@/lib/utils";
 
 const STATUS_COLORS = {
   Active: "success",
@@ -213,10 +214,10 @@ export function getUserColumns({
       cell: (info) => {
         const user = info.row.original;
         const joined = user.createdAt
-          ? new Date(user.createdAt).toLocaleDateString()
+          ? formatDate(user.createdAt)
           : "N/A";
         const admission = user.date_of_admission
-          ? new Date(user.date_of_admission).toLocaleDateString()
+          ? formatDate(user.date_of_admission)
           : null;
         return (
           <div className="flex flex-col gap-1">
