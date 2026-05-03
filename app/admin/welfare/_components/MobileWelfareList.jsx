@@ -14,6 +14,7 @@ import {
   Loader2,
   Inbox,
 } from "lucide-react";
+import { formatDate } from "@/lib/utils";
 
 export default function MobileWelfareList({
   records,
@@ -83,7 +84,7 @@ export default function MobileWelfareList({
               </p>
               <div className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-300">
                 <Calendar size={14} className="text-slate-400" />
-                {new Date(record.createdAt).toLocaleDateString()}
+                {formatDate(record.createdAt)}
               </div>
             </div>
             <div className="space-y-1">

@@ -26,6 +26,7 @@ import {
   DropdownMenu,
   DropdownItem,
 } from "@heroui/dropdown";
+import { formatDate } from "@/lib/utils";
 
 const statusColors = {
   Active: "success",
@@ -181,9 +182,7 @@ const UserCard = ({
           </div>
           <div className="flex flex-col items-end">
             <span className="font-semibold text-slate-700 dark:text-slate-200">
-              {user.createdAt
-                ? new Date(user.createdAt).toLocaleDateString()
-                : "N/A"}
+              {user.createdAt ? formatDate(user.createdAt) : "N/A"}
             </span>
           </div>
         </div>

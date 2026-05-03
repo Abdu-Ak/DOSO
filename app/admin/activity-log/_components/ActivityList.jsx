@@ -42,7 +42,7 @@ const iconMap = {
   BadgeCheck,
 };
 
-const ActivityList = ({ activities, isLoading }) => {
+const ActivityList = ({ activities, isLoading, currentUser, onDelete }) => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-[400px]">
@@ -64,6 +64,8 @@ const ActivityList = ({ activities, isLoading }) => {
     <div className="divide-y divide-slate-100 dark:divide-slate-800">
       {activities.map((activity) => {
         const IconComponent = iconMap[activity.icon] || UserIcon;
+        const canDelete = currentUser?.role === "super_admin";
+
         return (
           <div
             key={activity._id}
@@ -80,9 +82,20 @@ const ActivityList = ({ activities, isLoading }) => {
                 <p className="text-sm md:text-base font-bold text-slate-800 dark:text-white truncate">
                   {activity.title}
                 </p>
-                <span className="text-[10px] md:text-xs text-slate-400 font-medium tracking-wider uppercase">
-                  {formatDateRelative(activity.createdAt)}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] md:text-xs text-slate-400 font-medium tracking-wider uppercase">
+                    {formatDateRelative(activity.createdAt)}
+                  </span>
+                  {canDelete && (
+                    <button
+                      onClick={() => onDelete(activity)}
+                      className="text-slate-400 hover:text-red-500 transition-colors p-1 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20"
+                      title="Delete activity"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                </div>
               </div>
               <p className="text-xs md:text-sm text-slate-600 dark:text-slate-300 line-clamp-2 md:line-clamp-none">
                 {activity.description}

@@ -17,6 +17,7 @@ import {
   Trash2,
   FileText,
 } from "lucide-react";
+import { formatDate } from "@/lib/utils";
 
 export const getWelfareColumns = ({ onApprove, onReject, onDelete }) => [
   {
@@ -87,7 +88,7 @@ export const getWelfareColumns = ({ onApprove, onReject, onDelete }) => [
       const record = info.row.original;
       return (
         <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
-          {new Date(record.createdAt).toLocaleDateString()}
+          {formatDate(record.createdAt)}
         </span>
       );
     },

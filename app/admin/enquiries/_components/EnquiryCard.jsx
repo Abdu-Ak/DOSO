@@ -20,6 +20,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import CustomTooltip from "@/components/admin/ui/CustomTooltip";
+import { formatDate } from "@/lib/utils";
 
 const statusColorMap = {
   Pending: "warning",
@@ -44,12 +45,7 @@ const EnquiryCard = ({ enquiry, onStatusChange, onDelete }) => {
           </h3>
           <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
             <Calendar size={12} />
-            {new Date(enquiry.createdAt).toLocaleDateString("en-IN", {
-              timeZone: "Asia/Kolkata",
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })}
+            {formatDate(enquiry.createdAt)}
           </p>
         </div>
 

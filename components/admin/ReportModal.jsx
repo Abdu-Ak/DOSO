@@ -20,6 +20,7 @@ import {
 import axios from "axios";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { formatDate } from "@/lib/utils";
 
 const ReportModal = ({
   isOpen,
@@ -83,19 +84,19 @@ const ReportModal = ({
         u.pincode || "",
         u.batch || "",
         u.education || "",
-        u.dob ? new Date(u.dob).toLocaleDateString() : "",
+        u.dob ? formatDate(u.dob) : "",
         u.current_job || "",
         u.custom_job || "",
         u.source || "",
-        new Date(u.createdAt).toLocaleDateString(),
+        formatDate(u.createdAt),
       ],
       getPDFRow: (u) => [
         `ID: ${u.userId || "-"}\nName: ${u.name || "-"}\nRole: ${u.role || "-"}`,
-        `Email: ${u.email || "-"}\nPhone: ${u.phone || "-"}\nFather: ${u.father_name || "-"}\nDOB: ${u.dob ? new Date(u.dob).toLocaleDateString() : "-"}`,
+        `Email: ${u.email || "-"}\nPhone: ${u.phone || "-"}\nFather: ${u.father_name || "-"}\nDOB: ${u.dob ? formatDate(u.dob) : "-"}`,
         `Batch: ${u.batch || "-"}\nEdu: ${u.education || "-"}\nJob: ${u.current_job || u.custom_job || "-"}`,
         `House: ${u.house_name || "-"}\nDist: ${u.district || u.custom_district || "-"}\nPO: ${u.post_office || "-"}\nAddr: ${u.address || "-"}\nPin: ${u.pincode || "-"}`,
         `Status: ${u.status || "-"}\nSource: ${u.source || "-"}`,
-        `${new Date(u.createdAt).toLocaleDateString()}`,
+        `${formatDate(u.createdAt)}`,
       ],
       columnStyles: {
         0: {
@@ -153,10 +154,8 @@ const ReportModal = ({
         u.guardian_phone || "",
         u.address || "",
         u.district || "",
-        u.date_of_admission
-          ? new Date(u.date_of_admission).toLocaleDateString()
-          : "",
-        new Date(u.createdAt).toLocaleDateString(),
+        u.date_of_admission ? formatDate(u.date_of_admission) : "",
+        formatDate(u.createdAt),
       ],
       getPDFRow: (u) => [
         `ID: ${u.studentId || "-"}\nName: ${u.name || "-"}\nStatus: ${u.status || "-"}`,
@@ -164,7 +163,7 @@ const ReportModal = ({
         `Madrasa: ${u.current_madrasa_class || "-"}\nSchool: ${u.current_school_class || "-"}`,
         `Guardian: ${u.guardian_name || "-"}\nPhone: ${u.guardian_phone || "-"}\nRelation: ${u.guardian_relation || "-"}`,
         `House: ${u.house_name || "-"}\nDist: ${u.district || "-"}\nAddr: ${u.address || "-"}`,
-        `${new Date(u.createdAt).toLocaleDateString()}`,
+        `${formatDate(u.createdAt)}`,
       ],
       columnStyles: {
         0: {
@@ -202,7 +201,7 @@ const ReportModal = ({
         r.status || "",
         r.receipt_number || "",
         r.rejection_reason || "",
-        new Date(r.createdAt).toLocaleDateString(),
+        formatDate(r.createdAt),
       ],
       getPDFRow: (r) => [
         `ID: ${r.alumni?.userId || "-"}\nName: ${r.alumni?.name || "-"}`,
@@ -213,7 +212,7 @@ const ReportModal = ({
             : "-",
         `Box: ${r.box_number || "-"}\nYear: ${r.year || "-"}`,
         `${r.status || "-"}`,
-        `${new Date(r.createdAt).toLocaleDateString()}`,
+        `${formatDate(r.createdAt)}`,
       ],
       columnStyles: {
         0: {
@@ -258,7 +257,7 @@ const ReportModal = ({
         r.status || "",
         r.receipt_number || "",
         r.rejection_reason || "",
-        new Date(r.createdAt).toLocaleDateString(),
+        formatDate(r.createdAt),
       ],
       getPDFRow: (r) => [
         `ID: ${r.alumni?.userId || "-"}\nName: ${r.alumni?.name || "-"}`,
@@ -270,7 +269,7 @@ const ReportModal = ({
             : "-",
         `${r.amount || "-"}`,
         `${r.status || "-"}`,
-        `${new Date(r.createdAt).toLocaleDateString()}`,
+        `${formatDate(r.createdAt)}`,
       ],
       columnStyles: {
         0: {
@@ -345,7 +344,7 @@ const ReportModal = ({
         r.status || "",
         r.receipt_no || "",
         r.reason || "",
-        new Date(r.createdAt).toLocaleString(),
+        formatDate(r.createdAt),
       ],
       getPDFRow: (r) => [
         `ID: ${r.requester?.userId || "-"}\nName: ${r.requester?.name || "-"}`,
@@ -353,7 +352,7 @@ const ReportModal = ({
         `ID: ${r.witness2?.userId || "-"}\nName: ${r.witness2?.name || "-"}\nStatus: ${r.witness2_status || "-"}`,
         `Amt: ₹${r.amount?.toLocaleString() || "0"}\nType: ${r.payment_type || "-"}\nDur: ${r.duration_months || "-"} mo`,
         `Status: ${r.status || "-"}${r.receipt_no ? `\nReceipt: ${r.receipt_no}` : ""}${r.reason ? `\nReason: ${r.reason}` : ""}`,
-        `${new Date(r.createdAt).toLocaleString()}`,
+        `${formatDate(r.createdAt)}`,
       ],
       columnStyles: {
         0: { cellWidth: 32 },
@@ -498,7 +497,11 @@ const ReportModal = ({
 
       doc.setFontSize(10);
       doc.setTextColor(100, 116, 139); // slate-500
-      doc.text(`Generated on: ${new Date().toLocaleString()}`, textX, 29);
+      doc.text(
+        `Generated on: ${formatDate(new Date())} ${new Date().toLocaleTimeString()}`,
+        textX,
+        29,
+      );
       doc.text(`Generated by: ${currentUser?.name || "Admin"}`, textX, 35);
 
       // Filters info

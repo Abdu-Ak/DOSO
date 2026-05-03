@@ -15,6 +15,7 @@ import { Chip } from "@heroui/chip";
 import { CheckCircle2, AlertCircle } from "lucide-react";
 import WelfareMobileList from "./WelfareMobileList";
 import WelfareFilters from "./WelfareFilters";
+import { formatDate } from "@/lib/utils";
 
 export default function WelfareTable({
   records,
@@ -89,7 +90,7 @@ export default function WelfareTable({
                       className="border-b border-slate-50 dark:border-slate-900/50"
                     >
                       <TableCell className="font-bold">
-                        {new Date(record.createdAt).toLocaleDateString()}
+                        {formatDate(record.createdAt)}
                       </TableCell>
                       <TableCell className="font-bold text-slate-500 dark:text-slate-400">
                         {record.description}

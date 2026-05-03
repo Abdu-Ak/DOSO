@@ -211,6 +211,7 @@ export default function DebtRequestForm({ isOpen, onOpenChange }) {
                       isLoading={alumniLoading}
                       isInvalid={!!errors.witness1}
                       errorMessage={errors.witness1?.message}
+                      isVirtualized={false}
                     >
                       {alumniList.map((u) => (
                         <AutocompleteItem
@@ -218,8 +219,10 @@ export default function DebtRequestForm({ isOpen, onOpenChange }) {
                           textValue={`${u.name} (${u.userId})`}
                         >
                           <div className="flex flex-col">
-                            <span className="font-bold">{u.name}</span>
-                            <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
+                            <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                              {u.name}
+                            </span>
+                            <span className="text-xs text-slate-500">
                               {u.userId}
                             </span>
                           </div>
@@ -244,6 +247,7 @@ export default function DebtRequestForm({ isOpen, onOpenChange }) {
                       isLoading={alumniLoading}
                       isInvalid={!!errors.witness2}
                       errorMessage={errors.witness2?.message}
+                      isVirtualized={false}
                     >
                       {alumniList.map((u) => (
                         <AutocompleteItem
@@ -251,8 +255,10 @@ export default function DebtRequestForm({ isOpen, onOpenChange }) {
                           textValue={`${u.name} (${u.userId})`}
                         >
                           <div className="flex flex-col">
-                            <span className="font-bold">{u.name}</span>
-                            <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
+                            <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                              {u.name}
+                            </span>
+                            <span className="text-xs text-slate-500">
                               {u.userId}
                             </span>
                           </div>

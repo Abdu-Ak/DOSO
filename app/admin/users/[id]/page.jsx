@@ -44,7 +44,7 @@ import { useDisclosure } from "@heroui/modal";
 import DeactivateConfirmModal from "@/components/admin/DeactivateConfirmModal";
 import { useSession, signOut } from "next-auth/react";
 import { canManageUser } from "@/lib/permissions";
-import { calculateAge } from "@/lib/utils";
+import { calculateAge, formatDate } from "@/lib/utils";
 
 const DetailItem = ({ icon: Icon, label, value, color = "primary" }) => (
   <div className="space-y-1.5 group">
@@ -220,16 +220,6 @@ export default function UserDetailPage() {
     Active: "success",
     Pending: "warning",
     Inactive: "danger",
-  };
-
-  const formatDate = (date) => {
-    if (!date) return null;
-    return new Date(date).toLocaleDateString("en-IN", {
-      timeZone: "Asia/Kolkata",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
   };
 
   return (

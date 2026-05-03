@@ -25,6 +25,7 @@ import { Calendar } from "@heroui/calendar";
 import { TimeInput } from "@heroui/date-input";
 import { parseDate, parseTime } from "@internationalized/date";
 import { createEventSchema } from "@/lib/validations/eventSchema";
+import { formatDate } from "@/lib/utils";
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
 const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
@@ -267,7 +268,7 @@ export default function EventForm({
                             }
                           >
                             {field.value
-                              ? new Date(field.value).toLocaleDateString()
+                              ? formatDate(field.value)
                               : "Select date"}
                           </Button>
                         </PopoverTrigger>
