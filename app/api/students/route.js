@@ -22,10 +22,8 @@ const DISTRICT_CODES = {
   Other: "OTH",
 };
 
-async function generateStudentId(district, yearDate) {
-  const districtCode = DISTRICT_CODES[district] || "OTH";
-  const year = new Date(yearDate).getFullYear();
-  const prefix = `S-${districtCode}-${year}`;
+async function generateStudentId() {
+  const prefix = `DOSO-ST`;
 
   const lastStudent = await Student.findOne({
     studentId: new RegExp(`^${prefix}-`),
@@ -36,7 +34,7 @@ async function generateStudentId(district, yearDate) {
   let sequence = 1;
   if (lastStudent && lastStudent.studentId) {
     const parts = lastStudent.studentId.split("-");
-    const lastSeq = parseInt(parts[3]); // S-MLP-2024-001 -> index 3
+    const lastSeq = parseInt(parts[2]); // DOSO-ST-001 -> index 2
     if (!isNaN(lastSeq)) {
       sequence = lastSeq + 1;
     }
@@ -123,7 +121,7 @@ export async function POST(request) {
       }
     }
 
-    const studentId = await generateStudentId(district, dob);
+    const studentId = await generateStudentId();
 
     let imageUrl = "";
     let imagePublicId = "";

@@ -110,12 +110,10 @@ const DISTRICT_CODES = {
   Other: "OTH",
 };
 
-async function generateUserId(role, district, yearDate) {
+async function generateUserId(role) {
   if (role === "admin") return null;
 
-  const districtCode = DISTRICT_CODES[district] || "OTH";
-  const year = new Date(yearDate).getFullYear();
-  const prefix = `${districtCode}-${year}`;
+  const prefix = `DOSO-AL`;
 
   // Find the highest sequence number for this prefix
   const lastUser = await User.findOne({ userId: new RegExp(`^${prefix}-`) })
@@ -190,14 +188,7 @@ export async function POST(request) {
       userFields.custom_job = data.get("custom_job");
       userFields.job_location = data.get("job_location");
 
-      const districtForId =
-        data.get("district") === "Other"
-          ? data.get("custom_district")
-          : data.get("district");
-      const batchYear = data.get("batch")
-        ? `${data.get("batch")}-01-01`
-        : new Date();
-      userFields.userId = await generateUserId(role, districtForId, batchYear);
+      userFields.userId = await generateUserId(role);
     }
 
     let imageData = { url: "", publicId: "" };

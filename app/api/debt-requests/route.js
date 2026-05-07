@@ -96,9 +96,9 @@ export async function GET(request) {
 
     const total = await DebtRequest.countDocuments(query);
     const records = await DebtRequest.find(query)
-      .populate("requester", "name email userId image")
-      .populate("witness1", "name email userId")
-      .populate("witness2", "name email userId")
+      .populate("requester", "name email userId image phone")
+      .populate("witness1", "name email userId phone")
+      .populate("witness2", "name email userId phone")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);

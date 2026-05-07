@@ -53,9 +53,9 @@ export async function GET(request, { params }) {
 
     const { id } = await params;
     const debtRequest = await DebtRequest.findById(id)
-      .populate("requester", "name email userId image")
-      .populate("witness1", "name userId image")
-      .populate("witness2", "name userId image");
+      .populate("requester", "name email userId image phone")
+      .populate("witness1", "name email userId image phone")
+      .populate("witness2", "name email userId image phone");
 
     if (!debtRequest) {
       return NextResponse.json({ error: "Request not found" }, { status: 404 });
