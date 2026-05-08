@@ -64,6 +64,22 @@ const DebtRequestSchema = new mongoose.Schema(
       ],
       default: "pending_witness",
     },
+    approvedAt: Date,
+    dueDate: Date,
+    lastReminderSent: Date,
+    installments: [
+      {
+        installmentNumber: Number,
+        amount: Number,
+        dueDate: Date,
+        status: {
+          type: String,
+          enum: ["pending", "paid"],
+          default: "pending",
+        },
+        paidAt: Date,
+      },
+    ],
   },
   {
     timestamps: true,

@@ -19,6 +19,8 @@ import {
   X,
   BadgeCheck,
   Download,
+  Bell,
+  Wallet,
 } from "lucide-react";
 import { generateDebtNoticePdf } from "@/lib/pdf/generateDebtNoticePdf";
 import { formatDate } from "@/lib/utils";
@@ -30,6 +32,7 @@ export default function MobileDebtList({
   onReject,
   onDelete,
   onRepaid,
+  onManageRepayments,
 }) {
   const statusColors = {
     pending_witness: "warning",
@@ -228,23 +231,88 @@ export default function MobileDebtList({
             )}
             {(record.status === "approved" || record.status === "repaid") && (
               <div className="flex gap-2 w-full">
+                {record.status === "approved" &&
+                  record.payment_type === "single" && (
+                    <Button
+                      size="sm"
+                      className="flex-1 font-bold bg-primary/10 text-primary"
+                      startContent={<BadgeCheck size={16} />}
+                      onPress={() => onRepaid(record)}
+                    >
+                      Repaid
+                    </Button>
+                  )}
+                {record.status === "approved" &&
+                  record.payment_type === "emi" && (
+                    <Button
+                      size="sm"
+                      className="flex-1 font-bold bg-primary/10 text-primary"
+                      startContent={<Wallet size={16} />}
+                      onPress={() => onManageRepayments(record)}
+                    >
+                      Payments
+                    </Button>
+                  )}
                 {record.status === "approved" && (
                   <Button
+                    isIconOnly
                     size="sm"
-                    className="flex-1 font-bold bg-primary/10 text-primary"
-                    startContent={<BadgeCheck size={16} />}
-                    onPress={() => onRepaid(record)}
+                    className="font-bold bg-warning/10 text-warning"
+                    onPress={() => {
+                      const name = record.requester?.name;
+                      const phone = record.requester?.phone;
+                      const id = record.requester?.userId || record._id;
+
+                      // Find target due date (next pending installment or main due date)
+                      let targetDate;
+                      if (
+                        record.payment_type === "emi" &&
+                        record.installments?.length > 0
+                      ) {
+                        const nextInstallment = record.installments.find(
+                          (i) => i.status === "pending",
+                        );
+                        targetDate = nextInstallment
+                          ? new Date(nextInstallment.dueDate)
+                          : new Date(record.dueDate);
+                      } else {
+                        targetDate = new Date(record.dueDate);
+                      }
+
+                      const isValidDate =
+                        targetDate instanceof Date && !isNaN(targetDate);
+                      const dateStr = isValidDate
+                        ? targetDate.toLocaleDateString("en-IN")
+                        : "the specified date";
+                      const daysLeft = isValidDate
+                        ? Math.ceil(
+                            (targetDate - new Date()) / (1000 * 60 * 60 * 24),
+                          )
+                        : null;
+
+                      let message;
+                      if (daysLeft !== null && daysLeft < 0) {
+                        message = `Hello ${name}, your debt repayment for DOSO (ID: ${id}) is OVERDUE since ${dateStr}. Please ensure immediate repayment to avoid any issues. Thank you.`;
+                      } else if (daysLeft !== null && daysLeft <= 7) {
+                        message = `Hello ${name}, your debt repayment for DOSO (ID: ${id}) is reaching its due date on ${dateStr}. Only ${daysLeft} days left. Please ensure timely repayment. Thank you.`;
+                      } else {
+                        message = `Hello ${name}, this is a friendly reminder regarding your debt repayment for DOSO (ID: ${id}) due on ${dateStr}. Please ensure timely repayment. Thank you.`;
+                      }
+
+                      const whatsappUrl = `https://wa.me/${phone?.replace(/\+/g, "")}?text=${encodeURIComponent(message)}`;
+                      window.open(whatsappUrl, "_blank");
+                    }}
                   >
-                    Repaid
+                    <Bell size={16} />
                   </Button>
                 )}
                 <Button
+                  isIconOnly
                   size="sm"
-                  className="flex-1 font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
-                  startContent={<Download size={16} />}
+                  className="font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
                   onPress={() => generateDebtNoticePdf(record)}
                 >
-                  PDF
+                  <Download size={16} />
                 </Button>
               </div>
             )}

@@ -53,6 +53,33 @@ export async function PATCH(request, { params }) {
     debtRequest.receipt_no = receipt_no;
     debtRequest.status = status;
 
+    if (status === "approved") {
+      const now = new Date();
+      debtRequest.approvedAt = now;
+
+      if (debtRequest.payment_type === "single") {
+        const dueDate = new Date(now);
+        dueDate.setMonth(dueDate.getMonth() + debtRequest.duration_months);
+        debtRequest.dueDate = dueDate;
+      } else if (debtRequest.payment_type === "emi") {
+        const installments = [];
+        const perMonthAmount = debtRequest.amount / debtRequest.duration_months;
+
+        for (let i = 1; i <= debtRequest.duration_months; i++) {
+          const installmentDueDate = new Date(now);
+          installmentDueDate.setMonth(installmentDueDate.getMonth() + i);
+          installments.push({
+            installmentNumber: i,
+            amount: Math.round(perMonthAmount),
+            dueDate: installmentDueDate,
+            status: "pending",
+          });
+        }
+        debtRequest.installments = installments;
+        debtRequest.dueDate = installments[installments.length - 1].dueDate;
+      }
+    }
+
     await debtRequest.save();
 
     const actionTypeMap = {

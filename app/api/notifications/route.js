@@ -35,17 +35,42 @@ export async function GET() {
       .populate("requester", "name image userId")
       .sort({ createdAt: -1 });
 
+    const today = new Date();
+    const tenDaysFromNow = new Date();
+    tenDaysFromNow.setDate(today.getDate() + 10);
+
+    const upcomingDebts = await DebtRequest.find({
+      status: "approved",
+      $or: [
+        { payment_type: "single", dueDate: { $lte: tenDaysFromNow } },
+        {
+          payment_type: "emi",
+          "installments.dueDate": { $lte: tenDaysFromNow },
+          "installments.status": "pending",
+        },
+      ],
+    })
+      .populate("requester", "name image userId phone")
+      .sort({ dueDate: 1 });
+
     return NextResponse.json({
       notifications: pendingUsers,
       count: pendingUsers.length,
       pendingSundooks: pendingSundooks.length,
       pendingWelfare: pendingWelfare.length,
       pendingStudents: pendingStudents.length,
-      pendingDebt: pendingDebtActions.length,
+      pendingDebt: pendingDebtActions.length + upcomingDebts.length,
       sundookNotifications: pendingSundooks,
       welfareNotifications: pendingWelfare,
       studentNotifications: pendingStudents,
-      debtNotifications: pendingDebtActions,
+      debtNotifications: [
+        ...pendingDebtActions.map((d) => ({
+          ...d.toObject(),
+          type: "pending_approval",
+        })),
+        ...upcomingDebts.map((d) => ({ ...d.toObject(), type: "due_soon" })),
+      ],
+      upcomingDebts,
     });
   } catch (error) {
     console.error("Notifications Error:", error);
