@@ -63,14 +63,23 @@ export async function PATCH(request, { params }) {
         debtRequest.dueDate = dueDate;
       } else if (debtRequest.payment_type === "emi") {
         const installments = [];
-        const perMonthAmount = debtRequest.amount / debtRequest.duration_months;
+        const baseAmount = Math.floor(debtRequest.amount / debtRequest.duration_months);
+        let totalAssigned = 0;
 
         for (let i = 1; i <= debtRequest.duration_months; i++) {
           const installmentDueDate = new Date(now);
           installmentDueDate.setMonth(installmentDueDate.getMonth() + i);
+          
+          let amount = baseAmount;
+          // Add remainder to the last installment
+          if (i === debtRequest.duration_months) {
+            amount = debtRequest.amount - totalAssigned;
+          }
+          totalAssigned += amount;
+
           installments.push({
             installmentNumber: i,
-            amount: Math.round(perMonthAmount),
+            amount: amount,
             dueDate: installmentDueDate,
             status: "pending",
           });
