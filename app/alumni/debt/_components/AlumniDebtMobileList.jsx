@@ -173,19 +173,32 @@ export default function AlumniDebtMobileList({
             ) : (
               <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
                 {(item.status === "approved" || item.status === "repaid") && (
-                  <div
-                    className={`flex items-center gap-2 text-xs font-bold ${item.status === "repaid" ? "text-primary bg-primary/10" : "text-success bg-success/10"} px-3 py-2 rounded-xl`}
-                  >
-                    {item.status === "repaid" ? (
-                      <BadgeCheck size={14} />
-                    ) : (
-                      <FileText size={14} />
-                    )}
-                    {item.receipt_no
-                      ? `Receipt: ${item.receipt_no}`
-                      : item.status === "repaid"
-                        ? "Settled by Admin"
-                        : "Approved by Admin"}
+                  <div className="space-y-2">
+                    <div
+                      className={`flex items-center gap-2 text-xs font-bold ${item.status === "repaid" ? "text-primary bg-primary/10" : "text-success bg-success/10"} px-3 py-2 rounded-xl`}
+                    >
+                      {item.status === "repaid" ? (
+                        <BadgeCheck size={14} />
+                      ) : (
+                        <FileText size={14} />
+                      )}
+                      {item.receipt_no
+                        ? `Receipt: ${item.receipt_no}`
+                        : item.status === "repaid"
+                          ? "Settled by Admin"
+                          : "Approved by Admin"}
+                    </div>
+                    {item.payment_type === "emi" &&
+                      item.status === "approved" && (
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/5 border border-primary/10 rounded-xl w-fit">
+                          <span className="text-[10px] font-black text-primary uppercase tracking-widest">
+                            {item.installments?.filter(
+                              (i) => i.status === "paid",
+                            ).length || 0}{" "}
+                            / {item.installments?.length || 0} Repaid
+                          </span>
+                        </div>
+                      )}
                   </div>
                 )}
                 {(item.status === "rejected" ||

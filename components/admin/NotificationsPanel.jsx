@@ -745,46 +745,7 @@ const NotificationsPanel = ({ onClose }) => {
                   </div>
                 </div>
 
-                {approvingDebtId === debt._id ? (
-                  <div className="mt-3 space-y-2 p-3 bg-white dark:bg-slate-800 rounded-xl border border-success/20 shadow-inner">
-                    <Input
-                      size="sm"
-                      variant="bordered"
-                      placeholder="Enter Receipt Number"
-                      label="Receipt Number"
-                      labelPlacement="outside"
-                      value={debtReceiptNumber}
-                      onChange={(e) => setDebtReceiptNumber(e.target.value)}
-                      radius="md"
-                    />
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        color="success"
-                        className="font-bold flex-1 text-white"
-                        isLoading={debtStatusMutation.isPending}
-                        isDisabled={!debtReceiptNumber}
-                        onPress={() =>
-                          debtStatusMutation.mutate({
-                            id: debt._id,
-                            status: "approved",
-                            receipt_no: debtReceiptNumber,
-                          })
-                        }
-                      >
-                        Approve
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="light"
-                        className="font-bold"
-                        onPress={() => setApprovingDebtId(null)}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                ) : rejectingDebtId === debt._id ? (
+                {rejectingDebtId === debt._id ? (
                   <div className="mt-3 space-y-2 p-3 bg-white dark:bg-slate-800 rounded-xl border border-danger/20 shadow-inner">
                     <Input
                       size="sm"
@@ -830,7 +791,13 @@ const NotificationsPanel = ({ onClose }) => {
                       color="success"
                       variant="flat"
                       className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
-                      onPress={() => setApprovingDebtId(debt._id)}
+                      isLoading={debtStatusMutation.isPending}
+                      onPress={() =>
+                        debtStatusMutation.mutate({
+                          id: debt._id,
+                          status: "approved",
+                        })
+                      }
                       startContent={<Check size={14} />}
                     >
                       Approve

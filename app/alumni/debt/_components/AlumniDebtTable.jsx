@@ -157,21 +157,32 @@ export default function AlumniDebtTable({
           );
         }
         return (
-          <div className="flex items-center justify-end min-h-[32px] gap-2">
+          <div className="flex flex-col items-end gap-2">
             {(item.status === "approved" || item.status === "repaid") && (
-              <div
-                className={`flex items-center gap-1.5 text-xs font-bold ${item.status === "repaid" ? "text-primary bg-primary/10" : "text-success bg-success/10"} px-3 py-1 rounded-full whitespace-nowrap`}
-              >
-                {item.status === "repaid" ? (
-                  <CheckCircle2 size={13} />
-                ) : (
-                  <FileText size={13} />
+              <div className="flex flex-col items-end gap-1.5">
+                <div
+                  className={`flex items-center gap-1.5 text-xs font-bold ${item.status === "repaid" ? "text-primary bg-primary/10" : "text-success bg-success/10"} px-3 py-1 rounded-full whitespace-nowrap`}
+                >
+                  {item.status === "repaid" ? (
+                    <CheckCircle2 size={13} />
+                  ) : (
+                    <FileText size={13} />
+                  )}
+                  {item.receipt_no
+                    ? `Receipt: ${item.receipt_no}`
+                    : item.status === "repaid"
+                      ? "Settled by Admin"
+                      : "Approved by Admin"}
+                </div>
+                {item.payment_type === "emi" && item.status === "approved" && (
+                  <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-primary/5 border border-primary/10 rounded-md">
+                    <span className="text-[10px] font-black text-primary uppercase tracking-tighter">
+                      {item.installments?.filter((i) => i.status === "paid")
+                        .length || 0}{" "}
+                      / {item.installments?.length || 0} Repaid
+                    </span>
+                  </div>
                 )}
-                {item.receipt_no
-                  ? `Receipt: ${item.receipt_no}`
-                  : item.status === "repaid"
-                    ? "Settled by Admin"
-                    : "Approved by Admin"}
               </div>
             )}
             {(item.status === "rejected" ||

@@ -56,7 +56,8 @@ const Topbar = ({ onMenuClick }) => {
     (notifData?.count || 0) +
     (notifData?.pendingSundooks || 0) +
     (notifData?.pendingWelfare || 0) +
-    (notifData?.pendingStudents || 0);
+    (notifData?.pendingStudents || 0) +
+    (notifData?.pendingDebt || 0);
 
   // Close notifications panel on outside click
   useEffect(() => {

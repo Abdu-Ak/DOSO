@@ -19,6 +19,7 @@ import MobileDebtList from "./_components/MobileDebtList";
 import ApproveDebtModal from "./_components/ApproveDebtModal";
 import RejectDebtModal from "./_components/RejectDebtModal";
 import CreateDebtRecordModal from "./_components/CreateDebtRecordModal";
+import ManageRepaymentsModal from "./_components/ManageRepaymentsModal";
 
 export default function AdminDebtPage() {
   const queryClient = useQueryClient();
@@ -42,6 +43,8 @@ export default function AdminDebtPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isRepaidOpen, setIsRepaidOpen] = useState(false);
   const [recordForRepaid, setRecordForRepaid] = useState(null);
+  const [isManageRepaymentsOpen, setIsManageRepaymentsOpen] = useState(false);
+  const [recordForRepayments, setRecordForRepayments] = useState(null);
 
   const {
     isOpen: isApproveOpen,
@@ -145,6 +148,37 @@ export default function AdminDebtPage() {
     },
   });
 
+  const repaymentMutation = useMutation({
+    mutationFn: async ({ id, installmentNumber }) => {
+      const response = await axios.patch(
+        `/api/debt-requests/${id}/repayments`,
+        {
+          installmentNumber,
+        },
+      );
+      return response.data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-debt-requests"] });
+      addToast({
+        title: "Success",
+        description: "Repayment recorded successfully",
+        color: "success",
+      });
+      if (data.debtRequest) {
+        setRecordForRepayments(data.debtRequest);
+      }
+    },
+    onError: (error) => {
+      addToast({
+        title: "Error",
+        description:
+          error.response?.data?.error || "Failed to record repayment",
+        color: "danger",
+      });
+    },
+  });
+
   const createRecordMutation = useMutation({
     mutationFn: async (formData) => {
       const response = await axios.post("/api/debt-requests", formData);
@@ -191,6 +225,11 @@ export default function AdminDebtPage() {
     setIsRepaidOpen(true);
   };
 
+  const handleManageRepayments = (record) => {
+    setRecordForRepayments(record);
+    setIsManageRepaymentsOpen(true);
+  };
+
   const confirmRepaid = () => {
     statusMutation.mutate({
       id: recordForRepaid._id,
@@ -217,8 +256,9 @@ export default function AdminDebtPage() {
           setIsDeleteOpen(true);
         },
         onRepaid: handleRepaid,
+        onManageRepayments: handleManageRepayments,
       }),
-    [onApproveOpen, onRejectOpen, handleRepaid],
+    [onApproveOpen, onRejectOpen, handleRepaid, handleManageRepayments],
   );
 
   const records = data?.records || [];
@@ -305,6 +345,8 @@ export default function AdminDebtPage() {
             setRecordToDelete(r);
             setIsDeleteOpen(true);
           }}
+          onRepaid={handleRepaid}
+          onManageRepayments={handleManageRepayments}
         />
         {totalPages > 1 && (
           <div className="flex justify-center mt-6">
@@ -403,6 +445,16 @@ export default function AdminDebtPage() {
         alumniList={alumniList}
         onSubmit={(data) => createRecordMutation.mutate(data)}
         isLoading={createRecordMutation.isPending}
+      />
+
+      <ManageRepaymentsModal
+        isOpen={isManageRepaymentsOpen}
+        onOpenChange={setIsManageRepaymentsOpen}
+        record={recordForRepayments}
+        isLoading={repaymentMutation.isPending}
+        onMarkAsPaid={(id, installmentNumber) => {
+          repaymentMutation.mutate({ id, installmentNumber });
+        }}
       />
     </div>
   );
