@@ -7,6 +7,7 @@ import { useDisclosure } from "@heroui/modal";
 import { useSession } from "next-auth/react";
 import { addToast } from "@heroui/toast";
 import { useDebounce } from "@/lib/hooks";
+import { hasPermission } from "@/lib/permissions";
 
 import DataTable from "@/components/admin/ui/DataTable";
 import ConfirmModal from "@/components/admin/ui/ConfirmModal";
@@ -25,6 +26,7 @@ export default function AdminDebtPage() {
   const queryClient = useQueryClient();
   const { data: session } = useSession();
   const currentUser = session?.user;
+  const canManage = currentUser?.role === "super_admin" || hasPermission(currentUser, "debt_requests", "manage");
 
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
@@ -257,8 +259,9 @@ export default function AdminDebtPage() {
         },
         onRepaid: handleRepaid,
         onManageRepayments: handleManageRepayments,
+        canManage,
       }),
-    [onApproveOpen, onRejectOpen, handleRepaid, handleManageRepayments],
+    [onApproveOpen, onRejectOpen, handleRepaid, handleManageRepayments, canManage],
   );
 
   const records = data?.records || [];
@@ -273,6 +276,7 @@ export default function AdminDebtPage() {
         }
         onReportClick={() => setIsReportModalOpen(true)}
         onCreateClick={() => setIsCreateModalOpen(true)}
+        canManage={canManage}
       />
 
       <div className="lg:hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
@@ -292,6 +296,7 @@ export default function AdminDebtPage() {
           showFilters={showFilters}
           setShowFilters={setShowFilters}
           onCreateClick={() => setIsCreateModalOpen(true)}
+          canManage={canManage}
         />
       </div>
 
@@ -324,6 +329,7 @@ export default function AdminDebtPage() {
               showFilters={showFilters}
               setShowFilters={setShowFilters}
               onCreateClick={() => setIsCreateModalOpen(true)}
+              canManage={canManage}
             />
           }
         />
@@ -347,6 +353,7 @@ export default function AdminDebtPage() {
           }}
           onRepaid={handleRepaid}
           onManageRepayments={handleManageRepayments}
+          canManage={canManage}
         />
         {totalPages > 1 && (
           <div className="flex justify-center mt-6">

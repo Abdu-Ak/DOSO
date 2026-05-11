@@ -43,7 +43,7 @@ import {
 import { useDisclosure } from "@heroui/modal";
 import DeactivateConfirmModal from "@/components/admin/DeactivateConfirmModal";
 import { useSession, signOut } from "next-auth/react";
-import { canManageUser } from "@/lib/permissions";
+import { canManageUser, hasPermission } from "@/lib/permissions";
 import { calculateAge, formatDate } from "@/lib/utils";
 
 const DetailItem = ({ icon: Icon, label, value, color = "primary" }) => (
@@ -98,6 +98,10 @@ export default function UserDetailPage() {
   const isOwnProfile =
     (currentUser?._id || currentUser?.id)?.toString() === id?.toString();
 
+  const canManageAlumni = hasPermission(currentUser, "alumni", "manage");
+  const canManageStudents = hasPermission(currentUser, "students", "manage");
+
+
   const { data: user, isLoading } = useQuery({
     queryKey: ["user", id],
     queryFn: async () => {
@@ -105,6 +109,13 @@ export default function UserDetailPage() {
       return response.data;
     },
   });
+
+  const canManageTarget = React.useMemo(() => {
+    if (!user) return false;
+    if (user.role === "student") return canManageStudents;
+    if (user.role === "alumni" || user.role === "admin") return canManageAlumni;
+    return false;
+  }, [user, canManageStudents, canManageAlumni]);
 
   const handleStatusChange = (newStatus) => {
     if (isOwnProfile && newStatus === "Inactive") {
@@ -253,7 +264,7 @@ export default function UserDetailPage() {
               PDF
             </Button>
           )}
-          {canManageUser(currentUser, user, "edit") && (
+          {canManageUser(currentUser, user, "edit") && (isOwnProfile || canManageTarget) && (
             <Button
               as={Link}
               href={`/admin/users/${id}/edit`}
@@ -314,7 +325,7 @@ export default function UserDetailPage() {
                   <span className="text-xs font-black uppercase tracking-wider text-slate-400">
                     Status
                   </span>
-                  {canManageUser(currentUser, user, "status") ? (
+                  {canManageUser(currentUser, user, "status") && (isOwnProfile || canManageTarget) ? (
                     <Dropdown>
                       <DropdownTrigger>
                         <Chip
@@ -381,6 +392,7 @@ export default function UserDetailPage() {
                   icon={ScrollText}
                   action={
                     canManageUser(currentUser, user, "edit") &&
+                    (isOwnProfile || canManageTarget) &&
                     !user.membership_renewals?.some(
                       (r) => r.year === new Date().getFullYear(),
                     ) && (

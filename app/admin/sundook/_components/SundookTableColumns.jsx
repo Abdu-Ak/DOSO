@@ -18,7 +18,7 @@ import {
   Trash2,
 } from "lucide-react";
 
-export const getSundookColumns = ({ onApprove, onReject, onDelete }) => [
+export const getSundookColumns = ({ onApprove, onReject, onDelete, canManage }) => [
   {
     header: "Alumni",
     accessorKey: "alumni.name",
@@ -35,46 +35,50 @@ export const getSundookColumns = ({ onApprove, onReject, onDelete }) => [
             description={record.alumni?.userId}
             name={record.alumni?.name || "Unknown Alumni"}
           />
-          <Dropdown placement="bottom-end">
-            <DropdownTrigger>
-              <Button isIconOnly size="sm" variant="light">
-                <MoreVertical size={18} className="text-slate-400" />
-              </Button>
-            </DropdownTrigger>
-            <DropdownMenu aria-label="Sundook actions" variant="flat">
-              {record.status === "pending" && (
+          {canManage ? (
+            <Dropdown placement="bottom-end">
+              <DropdownTrigger>
+                <Button isIconOnly size="sm" variant="light">
+                  <MoreVertical size={18} className="text-slate-400" />
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu aria-label="Sundook actions" variant="flat">
+                {record.status === "pending" && (
+                  <DropdownItem
+                    key="approve"
+                    color="success"
+                    startContent={<CheckCircle2 size={16} />}
+                    onPress={() => onApprove(record)}
+                    className="text-success font-bold"
+                  >
+                    Approve Record
+                  </DropdownItem>
+                )}
+                {record.status === "pending" && (
+                  <DropdownItem
+                    key="reject"
+                    color="danger"
+                    startContent={<XCircle size={16} />}
+                    onPress={() => onReject(record)}
+                    className="text-danger font-bold"
+                  >
+                    Reject Record
+                  </DropdownItem>
+                )}
                 <DropdownItem
-                  key="approve"
-                  color="success"
-                  startContent={<CheckCircle2 size={16} />}
-                  onPress={() => onApprove(record)}
-                  className="text-success font-bold"
-                >
-                  Approve Record
-                </DropdownItem>
-              )}
-              {record.status === "pending" && (
-                <DropdownItem
-                  key="reject"
+                  key="delete"
                   color="danger"
-                  startContent={<XCircle size={16} />}
-                  onPress={() => onReject(record)}
+                  startContent={<Trash2 size={16} />}
+                  onPress={() => onDelete(record)}
                   className="text-danger font-bold"
                 >
-                  Reject Record
+                  Delete Record
                 </DropdownItem>
-              )}
-              <DropdownItem
-                key="delete"
-                color="danger"
-                startContent={<Trash2 size={16} />}
-                onPress={() => onDelete(record)}
-                className="text-danger font-bold"
-              >
-                Delete Record
-              </DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
+              </DropdownMenu>
+            </Dropdown>
+          ) : (
+            <div className="w-8 h-8" /> 
+          )}
         </div>
       );
     },

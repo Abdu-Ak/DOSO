@@ -5,6 +5,7 @@ import User from "@/models/User";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { logActivity } from "@/lib/activityLogger";
+import { hasPermission } from "@/lib/permissions";
 import {
   createDebtRequestSchema,
   adminCreateDebtSchema,
@@ -40,7 +41,7 @@ export async function GET(request) {
       }
     }
 
-    if (session.user.role === "admin" || session.user.role === "super_admin") {
+    if (hasPermission(session.user, "debt_requests", "access")) {
       // Admins see everything
       const status = searchParams.get("status");
       const search = searchParams.get("search");
@@ -131,6 +132,9 @@ export async function POST(request) {
 
     // Admin Creation Flow
     if (session.user.role === "admin" || session.user.role === "super_admin") {
+      if (!hasPermission(session.user, "debt_requests", "manage")) {
+        return NextResponse.json({ error: "Permission denied" }, { status: 403 });
+      }
       const validatedData = adminCreateDebtSchema.parse(body);
 
       const newRequest = await DebtRequest.create({

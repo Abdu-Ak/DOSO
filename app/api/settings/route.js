@@ -4,6 +4,9 @@ import dbConnect from "@/lib/mongodb";
 import Setting from "@/models/Setting";
 import cloudinary from "@/lib/cloudinary";
 import { logActivity } from "@/lib/activityLogger";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { hasPermission } from "@/lib/permissions";
 
 // Helper for Cloudinary Uploads
 const uploadToCloudinary = async (file, folder) => {
@@ -42,6 +45,15 @@ export async function GET() {
 export async function PUT(request) {
   try {
     await dbConnect();
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+    if (!hasPermission(session.user, "settings", "manage")) {
+      return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 });
+    }
+
     const data = await request.formData();
 
     // Parse leadership data

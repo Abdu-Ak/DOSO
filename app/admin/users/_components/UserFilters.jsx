@@ -21,6 +21,7 @@ const UserFilters = ({
   setShowFilters,
   searchTerm,
   onSearchChange,
+  canManageAlumni = false,
 }) => {
   const districts = [
     "Thiruvananthapuram",
@@ -64,16 +65,18 @@ const UserFilters = ({
         >
           <Filter size={18} />
         </Button>
-        <Button
-          as={Link}
-          href="/admin/users/create"
-          isIconOnly
-          color="primary"
-          className="lg:hidden shadow-lg shadow-primary/20"
-          radius="lg"
-        >
-          <UserPlus size={18} />
-        </Button>
+        {canManageAlumni && (
+          <Button
+            as={Link}
+            href="/admin/users/create"
+            isIconOnly
+            color="primary"
+            className="lg:hidden shadow-lg shadow-primary/20"
+            radius="lg"
+          >
+            <UserPlus size={18} />
+          </Button>
+        )}
       </div>
 
       {/* Filters (Collapsible on mobile) */}
@@ -172,16 +175,18 @@ const UserFilters = ({
           ))}
         </Select>
 
-        <Button
-          as={Link}
-          href="/admin/users/create"
-          color="primary"
-          startContent={<UserPlus size={18} />}
-          className="hidden lg:flex font-bold shadow-lg shadow-primary/20 w-auto"
-          radius="lg"
-        >
-          Add User
-        </Button>
+        {canManageAlumni && (
+          <Button
+            as={Link}
+            href="/admin/users/create"
+            color="primary"
+            startContent={<UserPlus size={18} />}
+            className="hidden lg:flex font-bold shadow-lg shadow-primary/20 w-auto"
+            radius="lg"
+          >
+            Add User
+          </Button>
+        )}
       </div>
     </div>
   );

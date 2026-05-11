@@ -17,8 +17,12 @@ import {
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Input } from "@heroui/input";
+import { hasPermission } from "@/lib/permissions";
+import { useSession } from "next-auth/react";
 
 const NotificationsPanel = ({ onClose }) => {
+  const { data: session } = useSession();
+  const currentUser = session?.user;
   const queryClient = useQueryClient();
   const [rejectingId, setRejectingId] = useState(null);
   const [rejectReason, setRejectReason] = useState("");
@@ -40,6 +44,12 @@ const NotificationsPanel = ({ onClose }) => {
   const [debtReceiptNumber, setDebtReceiptNumber] = useState("");
   const [rejectingDebtId, setRejectingDebtId] = useState(null);
   const [debtRejectReason, setDebtRejectReason] = useState("");
+
+  const canManageAlumni = currentUser?.role === "super_admin" || hasPermission(currentUser, "alumni", "manage");
+  const canManageStudents = currentUser?.role === "super_admin" || hasPermission(currentUser, "students", "manage");
+  const canManageSundook = currentUser?.role === "super_admin" || hasPermission(currentUser, "sundook", "manage");
+  const canManageWelfare = currentUser?.role === "super_admin" || hasPermission(currentUser, "welfare", "manage");
+  const canManageDebt = currentUser?.role === "super_admin" || hasPermission(currentUser, "debt_requests", "manage");
 
   const { data, isLoading } = useQuery({
     queryKey: ["notifications"],
@@ -417,28 +427,30 @@ const NotificationsPanel = ({ onClose }) => {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex gap-2 mt-3">
-                    <Button
-                      size="sm"
-                      color="success"
-                      variant="flat"
-                      className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
-                      onPress={() => setApprovingSundookId(sundook._id)}
-                      startContent={<CheckCircle2 size={14} />}
-                    >
-                      Approve
-                    </Button>
-                    <Button
-                      size="sm"
-                      color="danger"
-                      variant="flat"
-                      className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
-                      onPress={() => setRejectingSundookId(sundook._id)}
-                      startContent={<CircleX size={14} />}
-                    >
-                      Reject
-                    </Button>
-                  </div>
+                  canManageSundook && (
+                    <div className="flex gap-2 mt-3">
+                      <Button
+                        size="sm"
+                        color="success"
+                        variant="flat"
+                        className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
+                        onPress={() => setApprovingSundookId(sundook._id)}
+                        startContent={<CheckCircle2 size={14} />}
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        size="sm"
+                        color="danger"
+                        variant="flat"
+                        className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
+                        onPress={() => setRejectingSundookId(sundook._id)}
+                        startContent={<CircleX size={14} />}
+                      >
+                        Reject
+                      </Button>
+                    </div>
+                  )
                 )}
               </div>
             ))}
@@ -567,28 +579,30 @@ const NotificationsPanel = ({ onClose }) => {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex gap-2 mt-3">
-                    <Button
-                      size="sm"
-                      color="success"
-                      variant="flat"
-                      className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
-                      onPress={() => setApprovingWelfareId(welfare._id)}
-                      startContent={<CheckCircle2 size={14} />}
-                    >
-                      Approve
-                    </Button>
-                    <Button
-                      size="sm"
-                      color="danger"
-                      variant="flat"
-                      className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
-                      onPress={() => setRejectingWelfareId(welfare._id)}
-                      startContent={<CircleX size={14} />}
-                    >
-                      Reject
-                    </Button>
-                  </div>
+                  canManageWelfare && (
+                    <div className="flex gap-2 mt-3">
+                      <Button
+                        size="sm"
+                        color="success"
+                        variant="flat"
+                        className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
+                        onPress={() => setApprovingWelfareId(welfare._id)}
+                        startContent={<CheckCircle2 size={14} />}
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        size="sm"
+                        color="danger"
+                        variant="flat"
+                        className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
+                        onPress={() => setRejectingWelfareId(welfare._id)}
+                        startContent={<CircleX size={14} />}
+                      >
+                        Reject
+                      </Button>
+                    </div>
+                  )
                 )}
               </div>
             ))}
@@ -676,29 +690,31 @@ const NotificationsPanel = ({ onClose }) => {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex gap-2 mt-3">
-                    <Button
-                      size="sm"
-                      color="success"
-                      variant="flat"
-                      className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
-                      isLoading={studentApproveMutation.isPending}
-                      onPress={() => studentApproveMutation.mutate(student._id)}
-                      startContent={<UserCheck size={14} />}
-                    >
-                      Approve
-                    </Button>
-                    <Button
-                      size="sm"
-                      color="danger"
-                      variant="flat"
-                      className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
-                      onPress={() => setRejectingId(student._id)}
-                      startContent={<UserX size={14} />}
-                    >
-                      Reject
-                    </Button>
-                  </div>
+                  canManageStudents && (
+                    <div className="flex gap-2 mt-3">
+                      <Button
+                        size="sm"
+                        color="success"
+                        variant="flat"
+                        className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
+                        isLoading={studentApproveMutation.isPending}
+                        onPress={() => studentApproveMutation.mutate(student._id)}
+                        startContent={<UserCheck size={14} />}
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        size="sm"
+                        color="danger"
+                        variant="flat"
+                        className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
+                        onPress={() => setRejectingId(student._id)}
+                        startContent={<UserX size={14} />}
+                      >
+                        Reject
+                      </Button>
+                    </div>
+                  )
                 )}
               </div>
             ))}
@@ -785,34 +801,36 @@ const NotificationsPanel = ({ onClose }) => {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex gap-2 mt-3">
-                    <Button
-                      size="sm"
-                      color="success"
-                      variant="flat"
-                      className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
-                      isLoading={debtStatusMutation.isPending}
-                      onPress={() =>
-                        debtStatusMutation.mutate({
-                          id: debt._id,
-                          status: "approved",
-                        })
-                      }
-                      startContent={<Check size={14} />}
-                    >
-                      Approve
-                    </Button>
-                    <Button
-                      size="sm"
-                      color="danger"
-                      variant="flat"
-                      className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
-                      onPress={() => setRejectingDebtId(debt._id)}
-                      startContent={<X size={14} />}
-                    >
-                      Reject
-                    </Button>
-                  </div>
+                  canManageDebt && (
+                    <div className="flex gap-2 mt-3">
+                      <Button
+                        size="sm"
+                        color="success"
+                        variant="flat"
+                        className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
+                        isLoading={debtStatusMutation.isPending}
+                        onPress={() =>
+                          debtStatusMutation.mutate({
+                            id: debt._id,
+                            status: "approved",
+                          })
+                        }
+                        startContent={<Check size={14} />}
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        size="sm"
+                        color="danger"
+                        variant="flat"
+                        className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
+                        onPress={() => setRejectingDebtId(debt._id)}
+                        startContent={<X size={14} />}
+                      >
+                        Reject
+                      </Button>
+                    </div>
+                  )
                 )}
               </div>
             ))}
@@ -902,29 +920,31 @@ const NotificationsPanel = ({ onClose }) => {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex gap-2 mt-3">
-                    <Button
-                      size="sm"
-                      color="success"
-                      variant="flat"
-                      className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
-                      startContent={<UserCheck size={14} />}
-                      isLoading={approveMutation.isPending}
-                      onPress={() => approveMutation.mutate(user._id)}
-                    >
-                      Approve
-                    </Button>
-                    <Button
-                      size="sm"
-                      color="danger"
-                      variant="flat"
-                      className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
-                      startContent={<UserX size={14} />}
-                      onPress={() => setRejectingId(user._id)}
-                    >
-                      Reject
-                    </Button>
-                  </div>
+                  canManageAlumni && (
+                    <div className="flex gap-2 mt-3">
+                      <Button
+                        size="sm"
+                        color="success"
+                        variant="flat"
+                        className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
+                        startContent={<UserCheck size={14} />}
+                        isLoading={approveMutation.isPending}
+                        onPress={() => approveMutation.mutate(user._id)}
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        size="sm"
+                        color="danger"
+                        variant="flat"
+                        className="font-black text-[10px] uppercase tracking-widest flex-1 h-9"
+                        startContent={<UserX size={14} />}
+                        onPress={() => setRejectingId(user._id)}
+                      >
+                        Reject
+                      </Button>
+                    </div>
+                  )
                 )}
               </div>
             ))}

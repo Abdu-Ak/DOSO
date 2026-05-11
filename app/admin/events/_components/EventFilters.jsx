@@ -30,6 +30,7 @@ export default function EventFilters({
   showFilters = true,
   setShowFilters,
   onReset,
+  canManage,
 }) {
   const dateValue =
     startDate && endDate
@@ -63,16 +64,18 @@ export default function EventFilters({
         >
           <Filter size={18} />
         </Button>
-        <Button
-          as={Link}
-          href="/admin/events/create"
-          isIconOnly
-          color="primary"
-          className="lg:hidden shadow-lg shadow-primary/20"
-          radius="lg"
-        >
-          <Plus size={18} />
-        </Button>
+        {canManage && (
+          <Button
+            as={Link}
+            href="/admin/events/create"
+            isIconOnly
+            color="primary"
+            className="lg:hidden shadow-lg shadow-primary/20"
+            radius="lg"
+          >
+            <Plus size={18} />
+          </Button>
+        )}
       </div>
 
       {/* Filters (Collapsible on mobile) */}
@@ -127,16 +130,18 @@ export default function EventFilters({
           <RotateCcw size={18} />
         </Button>
 
-        <Button
-          as={Link}
-          href="/admin/events/create"
-          color="primary"
-          startContent={<Plus size={18} />}
-          className="hidden lg:flex font-bold shadow-lg shadow-primary/20 w-auto"
-          radius="lg"
-        >
-          Add Event
-        </Button>
+        {canManage && (
+          <Button
+            as={Link}
+            href="/admin/events/create"
+            color="primary"
+            startContent={<Plus size={18} />}
+            className="hidden lg:flex font-bold shadow-lg shadow-primary/20 w-auto"
+            radius="lg"
+          >
+            Add Event
+          </Button>
+        )}
       </div>
     </div>
   );

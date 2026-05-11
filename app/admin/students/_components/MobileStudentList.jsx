@@ -20,6 +20,7 @@ const MobileStudentList = ({
   onApprove,
   onReject,
   approvePending,
+  canManage,
 }) => {
   return (
     <div className="lg:hidden space-y-4">
@@ -52,6 +53,7 @@ const MobileStudentList = ({
               onApprove={onApprove}
               onReject={onReject}
               approvePending={approvePending}
+              canManage={canManage}
             />
           ))}
         </div>

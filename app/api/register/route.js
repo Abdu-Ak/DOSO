@@ -24,10 +24,8 @@ const DISTRICT_CODES = {
   Other: "OTH",
 };
 
-async function generateStudentId(district, yearDate) {
-  const districtCode = DISTRICT_CODES[district] || "OTH";
-  const year = new Date(yearDate).getFullYear();
-  const prefix = `S-${districtCode}-${year}`;
+async function generateStudentId() {
+  const prefix = `DOSO-ST`;
 
   const lastStudent = await Student.findOne({
     studentId: new RegExp(`^${prefix}-`),
@@ -38,7 +36,7 @@ async function generateStudentId(district, yearDate) {
   let sequence = 1;
   if (lastStudent && lastStudent.studentId) {
     const parts = lastStudent.studentId.split("-");
-    const lastSeq = parseInt(parts[3]);
+    const lastSeq = parseInt(parts[2]);
     if (!isNaN(lastSeq)) {
       sequence = lastSeq + 1;
     }
@@ -48,10 +46,8 @@ async function generateStudentId(district, yearDate) {
   return `${prefix}-${paddedSequence}`;
 }
 
-async function generateAlumniId(district, yearDate) {
-  const districtCode = DISTRICT_CODES[district] || "OTH";
-  const year = new Date(yearDate).getFullYear();
-  const prefix = `${districtCode}-${year}`;
+async function generateAlumniId() {
+  const prefix = `DOSO-AL`;
 
   const lastUser = await User.findOne({ userId: new RegExp(`^${prefix}-`) })
     .sort({ userId: -1 })
@@ -66,7 +62,8 @@ async function generateAlumniId(district, yearDate) {
     }
   }
 
-  return `${prefix}-${sequence.toString().padStart(3, "0")}`;
+  const paddedSequence = sequence.toString().padStart(3, "0");
+  return `${prefix}-${paddedSequence}`;
 }
 
 export async function POST(request) {
@@ -133,10 +130,7 @@ export async function POST(request) {
         data.get("district") === "Other"
           ? data.get("custom_district")
           : data.get("district");
-      studentData.studentId = await generateStudentId(
-        districtForId,
-        studentData.date_of_admission || new Date(),
-      );
+      studentData.studentId = await generateStudentId();
 
       // Handle image upload for student
       let imageData = { url: "", publicId: "" };
@@ -190,7 +184,7 @@ export async function POST(request) {
       const batchYear = data.get("batch")
         ? `${data.get("batch")}-01-01`
         : new Date();
-      userFields.userId = await generateAlumniId(districtForId, batchYear);
+      userFields.userId = await generateAlumniId();
     }
 
     let imageData = { url: "", publicId: "" };

@@ -12,17 +12,19 @@ import {
   sendWelfareRejectionEmail,
 } from "@/lib/email";
 import { logActivity } from "@/lib/activityLogger";
+import { hasPermission } from "@/lib/permissions";
 
 export async function PATCH(request, { params }) {
   try {
     await dbConnect();
     const session = await getServerSession(authOptions);
 
-    if (
-      !session ||
-      (session.user.role !== "admin" && session.user.role !== "super_admin")
-    ) {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!hasPermission(session.user, "welfare", "manage")) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const { id } = await params;

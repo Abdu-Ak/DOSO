@@ -21,6 +21,7 @@ const DebtFilters = ({
   searchTerm,
   onSearchChange,
   onCreateClick,
+  canManage,
 }) => {
   const dateValue =
     fromDate && toDate
@@ -53,15 +54,17 @@ const DebtFilters = ({
         >
           <Filter size={18} />
         </Button>
-        <Button
-          isIconOnly
-          color="primary"
-          onPress={onCreateClick}
-          className="lg:hidden shadow-lg shadow-primary/20 shrink-0"
-          radius="lg"
-        >
-          <Plus size={18} />
-        </Button>
+        {canManage && (
+          <Button
+            isIconOnly
+            color="primary"
+            onPress={onCreateClick}
+            className="lg:hidden shadow-lg shadow-primary/20 shrink-0"
+            radius="lg"
+          >
+            <Plus size={18} />
+          </Button>
+        )}
       </div>
 
       <div
@@ -140,15 +143,17 @@ const DebtFilters = ({
           </Button>
         )}
 
-        <Button
-          color="primary"
-          startContent={<Plus size={18} />}
-          onPress={onCreateClick}
-          className="hidden lg:flex font-bold shadow-lg shadow-primary/20 w-auto"
-          radius="lg"
-        >
-          Create Record
-        </Button>
+        {canManage && (
+          <Button
+            color="primary"
+            startContent={<Plus size={18} />}
+            onPress={onCreateClick}
+            className="hidden lg:flex font-bold shadow-lg shadow-primary/20 w-auto"
+            radius="lg"
+          >
+            Create Record
+          </Button>
+        )}
       </div>
     </div>
   );

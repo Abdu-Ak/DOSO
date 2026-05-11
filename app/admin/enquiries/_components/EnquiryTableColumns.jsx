@@ -31,7 +31,7 @@ const statusIconMap = {
   Cancelled: <XCircle size={16} />,
 };
 
-export const getEnquiryColumns = ({ onStatusChange, onDelete }) => [
+export const getEnquiryColumns = ({ onStatusChange, onDelete, canManage }) => [
   {
     header: "CONTACT INFO",
     accessorKey: "name",
@@ -80,6 +80,20 @@ export const getEnquiryColumns = ({ onStatusChange, onDelete }) => [
     cell: (info) => {
       const status = info.getValue();
       const enquiry = info.row.original;
+
+      if (!canManage) {
+        return (
+          <Chip
+            className="select-none font-bold text-[10px] tracking-wider uppercase h-6"
+            color={statusColorMap[status]}
+            size="sm"
+            variant="flat"
+            startContent={statusIconMap[status]}
+          >
+            {status}
+          </Chip>
+        );
+      }
 
       return (
         <Dropdown>
@@ -139,28 +153,32 @@ export const getEnquiryColumns = ({ onStatusChange, onDelete }) => [
       </span>
     ),
   },
-  {
-    header: "ACTIONS",
-    id: "actions",
-    cell: (info) => {
-      const enquiry = info.row.original;
-      return (
-        <div className="flex justify-end items-center px-2">
-          <CustomTooltip color="danger" content="Delete permanently">
-            <Button
-              isIconOnly
-              size="sm"
-              variant="light"
-              color="danger"
-              className="hover:bg-danger/10"
-              onPress={() => onDelete(enquiry)}
-            >
-              <Trash2 size={18} />
-            </Button>
-          </CustomTooltip>
-        </div>
-      );
-    },
-    meta: { align: "end" },
-  },
+  ...(canManage
+    ? [
+        {
+          header: "ACTIONS",
+          id: "actions",
+          cell: (info) => {
+            const enquiry = info.row.original;
+            return (
+              <div className="flex justify-end items-center px-2">
+                <CustomTooltip color="danger" content="Delete permanently">
+                  <Button
+                    isIconOnly
+                    size="sm"
+                    variant="light"
+                    color="danger"
+                    className="hover:bg-danger/10"
+                    onPress={() => onDelete(enquiry)}
+                  >
+                    <Trash2 size={18} />
+                  </Button>
+                </CustomTooltip>
+              </div>
+            );
+          },
+          meta: { align: "end" },
+        },
+      ]
+    : []),
 ];

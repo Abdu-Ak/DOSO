@@ -3,6 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { hasPermission } from "@/lib/permissions";
 import {
   LayoutDashboard,
   Users,
@@ -52,6 +54,7 @@ const SidebarItem = ({ icon: Icon, label, href, active, collapsed }) => {
 
 const Sidebar = ({ collapsed, setCollapsed }) => {
   const pathname = usePathname();
+  const { data: session } = useSession();
 
   const NAV_ITEMS = [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -59,19 +62,55 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       label: "User Management",
       href: "/admin/users",
       icon: Users,
+      module: "alumni",
     },
+
     {
       label: "Students List",
       href: "/admin/students",
       icon: Users,
+      module: "students",
     },
-    { label: "Events", href: "/admin/events", icon: Calendar },
-    { label: "Sundook", href: "/admin/sundook", icon: Box },
-    { label: "Welfare", href: "/admin/welfare", icon: HeartHandshake },
-    { label: "Debt", href: "/admin/debt", icon: Wallet },
-    { label: "Enquiries", href: "/admin/enquiries", icon: MessageSquareText },
-    { label: "Settings", href: "/admin/settings", icon: Settings },
+    {
+      label: "Events",
+      href: "/admin/events",
+      icon: Calendar,
+      module: "events",
+    },
+    { label: "Sundook", href: "/admin/sundook", icon: Box, module: "sundook" },
+    {
+      label: "Welfare",
+      href: "/admin/welfare",
+      icon: HeartHandshake,
+      module: "welfare",
+    },
+    {
+      label: "Debt",
+      href: "/admin/debt",
+      icon: Wallet,
+      module: "debt_requests",
+    },
+    {
+      label: "Enquiries",
+      href: "/admin/enquiries",
+      icon: MessageSquareText,
+      module: "enquiries",
+    },
+    {
+      label: "Settings",
+      href: "/admin/settings",
+      icon: Settings,
+      module: "settings",
+    },
   ];
+
+  const visibleNavItems = NAV_ITEMS.filter((item) => {
+    if (!item.module) return true;
+    if (session?.user) {
+      return hasPermission(session.user, item.module, "access");
+    }
+    return false;
+  });
 
   const isMenuItemActive = (href) => {
     if (href === "/admin") return pathname === "/admin";
@@ -102,7 +141,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
 
       {/* Navigation Links */}
       <nav className="flex-1 px-4 py-6 space-y-3 overflow-y-auto">
-        {NAV_ITEMS.map((item) => (
+        {visibleNavItems.map((item) => (
           <SidebarItem
             key={item.href}
             {...item}

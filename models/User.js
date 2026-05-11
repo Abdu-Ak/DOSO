@@ -81,6 +81,19 @@ const UserSchema = new mongoose.Schema(
     },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
+
+    // Module-wise admin permissions
+    permissions: {
+      alumni: { access: { type: Boolean, default: false }, manage: { type: Boolean, default: false } },
+      students: { access: { type: Boolean, default: false }, manage: { type: Boolean, default: false } },
+      events: { access: { type: Boolean, default: false }, manage: { type: Boolean, default: false } },
+      sundook: { access: { type: Boolean, default: false }, manage: { type: Boolean, default: false } },
+      debt_requests: { access: { type: Boolean, default: false }, manage: { type: Boolean, default: false } },
+      welfare: { access: { type: Boolean, default: false }, manage: { type: Boolean, default: false } },
+      enquiries: { access: { type: Boolean, default: false }, manage: { type: Boolean, default: false } },
+      settings: { access: { type: Boolean, default: false }, manage: { type: Boolean, default: false } },
+      permission_management: { access: { type: Boolean, default: false }, manage: { type: Boolean, default: false } },
+    },
   },
   {
     timestamps: true,

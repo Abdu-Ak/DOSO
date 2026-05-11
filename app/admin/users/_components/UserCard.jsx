@@ -44,9 +44,12 @@ const UserCard = ({
   onReject,
   approvePending,
   onRenew,
+  canManageAlumni,
+  canManagePermissions = false,
 }) => {
-  const showActions = canManageUser(currentUser, user);
-  const showStatus = canManageUser(currentUser, user, "status");
+  const showActions = canManageUser(currentUser, user) && canManageAlumni;
+  const showStatus =
+    canManageUser(currentUser, user, "status") && canManageAlumni;
   const isPendingPublic = user.status === "Pending" && user.source === "public";
 
   let availableStatuses = [];
@@ -209,11 +212,15 @@ const UserCard = ({
               ) : (
                 <Chip
                   as="button"
-                  onClick={() => onRenew && onRenew(user)}
+                  onClick={() => {
+                    if (canManageAlumni) {
+                      onRenew && onRenew(user);
+                    }
+                  }}
                   color="warning"
                   size="sm"
                   variant="flat"
-                  className="font-bold text-[10px] h-6 px-2 gap-1 cursor-pointer hover:opacity-80 transition-opacity rounded-md"
+                  className={`font-bold text-[10px] h-6 px-2 gap-1 rounded-md ${canManageAlumni ? "cursor-pointer hover:opacity-80 transition-opacity" : "cursor-default opacity-70"}`}
                   startContent={<Recycle size={10} />}
                 >
                   Renew ({new Date().getFullYear()})
@@ -227,64 +234,66 @@ const UserCard = ({
       </div>
 
       {/* Actions */}
-      {showActions && (
-        <div className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-          {isPendingPublic && (
-            <>
-              <Button
-                size="sm"
-                color="success"
-                variant="flat"
-                className="font-bold flex-1 text-xs"
-                startContent={<UserCheck size={14} />}
-                isLoading={approvePending}
-                onPress={() => onApprove(user._id)}
-              >
-                Approve
-              </Button>
-              <Button
-                size="sm"
-                color="danger"
-                variant="flat"
-                className="font-bold flex-1 text-xs"
-                startContent={<UserX size={14} />}
-                onPress={() => onReject(user)}
-              >
-                Reject
-              </Button>
-            </>
-          )}
-          <Button
-            isIconOnly
-            as={Link}
-            href={`/admin/users/${user._id}`}
-            size="sm"
-            variant="light"
-            className="text-slate-400 hover:text-primary"
-          >
-            <Eye size={16} />
-          </Button>
-          <Button
-            isIconOnly
-            as={Link}
-            href={`/admin/users/${user._id}/edit`}
-            size="sm"
-            variant="light"
-            className="text-slate-400 hover:text-primary"
-          >
-            <UserPen size={16} />
-          </Button>
-          <Button
-            isIconOnly
-            size="sm"
-            variant="light"
-            className="text-slate-400 hover:text-danger"
-            onPress={() => onDelete(user)}
-          >
-            <Trash2 size={16} />
-          </Button>
-        </div>
-      )}
+      <div className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+        <Button
+          isIconOnly
+          as={Link}
+          href={`/admin/users/${user._id}`}
+          size="sm"
+          variant="light"
+          className="text-slate-400 hover:text-primary"
+        >
+          <Eye size={16} />
+        </Button>
+        {showActions && (
+          <>
+            {isPendingPublic && (
+              <>
+                <Button
+                  size="sm"
+                  color="success"
+                  variant="flat"
+                  className="font-bold flex-1 text-xs"
+                  startContent={<UserCheck size={14} />}
+                  isLoading={approvePending}
+                  onPress={() => onApprove(user._id)}
+                >
+                  Approve
+                </Button>
+                <Button
+                  size="sm"
+                  color="danger"
+                  variant="flat"
+                  className="font-bold flex-1 text-xs"
+                  startContent={<UserX size={14} />}
+                  onPress={() => onReject(user)}
+                >
+                  Reject
+                </Button>
+              </>
+            )}
+            <Button
+              isIconOnly
+              as={Link}
+              href={`/admin/users/${user._id}/edit`}
+              size="sm"
+              variant="light"
+              className="text-slate-400 hover:text-primary"
+            >
+              <UserPen size={16} />
+            </Button>
+            <Button
+              isIconOnly
+              size="sm"
+              variant="light"
+              className="text-slate-400 hover:text-danger"
+              onPress={() => onDelete(user)}
+            >
+              <Trash2 size={16} />
+            </Button>
+          </>
+        )}
+      </div>
     </div>
   );
 };

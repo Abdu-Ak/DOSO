@@ -6,7 +6,7 @@ import { addToast } from "@heroui/toast";
 import axios from "axios";
 import { useDisclosure } from "@heroui/modal";
 import { useSession } from "next-auth/react";
-import { canManageUser } from "@/lib/permissions";
+import { canManageUser, hasPermission } from "@/lib/permissions";
 import { useDebounce } from "@/lib/hooks";
 
 import DeactivateConfirmModal from "@/components/admin/DeactivateConfirmModal";
@@ -23,6 +23,7 @@ export default function StudentManagement() {
   const { data: session } = useSession();
   const currentUser = session?.user;
   const queryClient = useQueryClient();
+  const canManage = currentUser?.role === "super_admin" || hasPermission(currentUser, "students", "manage");
 
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
@@ -199,8 +200,9 @@ export default function StudentManagement() {
         approveMutation,
         onReject: setRejectModalUser,
         onDelete: handleDelete,
+        canManage,
       }),
-    [currentUser, handleStatusChange, approveMutation],
+    [currentUser, handleStatusChange, approveMutation, canManage],
   );
 
   const students = data?.students || [];
@@ -221,6 +223,7 @@ export default function StudentManagement() {
     setShowFilters,
     searchTerm,
     onSearchChange: handleSearch,
+    canManage,
   };
 
   const paginationProps = {
@@ -265,6 +268,7 @@ export default function StudentManagement() {
         onApprove={(id) => approveMutation.mutate(id)}
         onReject={setRejectModalUser}
         approvePending={approveMutation.isPending}
+        canManage={canManage}
       />
 
       <ConfirmModal

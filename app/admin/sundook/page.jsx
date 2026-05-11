@@ -7,6 +7,7 @@ import { useDisclosure } from "@heroui/modal";
 import { useSession } from "next-auth/react";
 import { addToast } from "@heroui/toast";
 import { useDebounce } from "@/lib/hooks";
+import { hasPermission } from "@/lib/permissions";
 
 import DataTable from "@/components/admin/ui/DataTable";
 import SundookHeader from "./_components/SundookHeader";
@@ -38,6 +39,7 @@ export default function AdminSundookPage() {
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const { data: session } = useSession();
   const currentUser = session?.user;
+  const canManage = currentUser?.role === "super_admin" || hasPermission(currentUser, "sundook", "manage");
 
   const {
     isOpen: isApproveOpen,
@@ -241,8 +243,9 @@ export default function AdminSundookPage() {
           setRecordToDelete(r);
           setIsDeleteOpen(true);
         },
+        canManage,
       }),
-    [onApproveOpen, onRejectOpen],
+    [onApproveOpen, onRejectOpen, canManage],
   );
 
   const records = data?.records || [];
@@ -270,6 +273,7 @@ export default function AdminSundookPage() {
           showFilters={showFilters}
           setShowFilters={setShowFilters}
           onCreateOpen={onCreateOpen}
+          canManage={canManage}
         />
       </div>
 
@@ -298,6 +302,7 @@ export default function AdminSundookPage() {
               showFilters={showFilters}
               setShowFilters={setShowFilters}
               onCreateOpen={onCreateOpen}
+              canManage={canManage}
             />
           }
         />
@@ -320,6 +325,7 @@ export default function AdminSundookPage() {
             setRecordToDelete(r);
             setIsDeleteOpen(true);
           }}
+          canManage={canManage}
         />
         {totalPages > 1 && (
           <div className="flex justify-center mt-6">

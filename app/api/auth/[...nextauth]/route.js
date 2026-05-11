@@ -49,6 +49,7 @@ export const authOptions = {
           email: user.email,
           role: user.role,
           image: user.image,
+          permissions: user.permissions,
         };
       },
     }),
@@ -59,6 +60,7 @@ export const authOptions = {
         token.id = user.id;
         token.role = user.role;
         token.image = user.image;
+        token.permissions = user.permissions;
       }
       // Handle session update
       if (trigger === "update" && session?.image) {
@@ -72,15 +74,18 @@ export const authOptions = {
         session.user._id = token.id;
         session.user.role = token.role;
         session.user.image = token.image;
+        session.user.permissions = token.permissions;
 
         // Re-verify user existence and status
         try {
           await dbConnect();
-          const dbUser = await User.findById(token.id).select("status");
+          const dbUser = await User.findById(token.id).select("status permissions");
           if (!dbUser) {
             session.error = "ACCOUNT_DELETED";
           } else if (dbUser.status !== "Active") {
             session.error = "ACCOUNT_DEACTIVATED";
+          } else {
+            session.user.permissions = dbUser.permissions;
           }
         } catch (error) {
           console.error("Session verification error:", error);

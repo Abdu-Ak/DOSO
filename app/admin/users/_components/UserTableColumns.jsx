@@ -39,8 +39,8 @@ export function getUserColumns({
   onReject,
   onDelete,
   onRenew,
+  canManageAlumni,
   basePath = "/admin/users",
-  role,
   entityLabel = "User",
 }) {
   const columns = [
@@ -49,7 +49,7 @@ export function getUserColumns({
       accessorKey: "name",
       cell: (info) => {
         const user = info.row.original;
-        const showActions = canManageUser(currentUser, user);
+        const showActions = canManageUser(currentUser, user) && canManageAlumni;
         const isPendingPublic =
           user.status === "Pending" && user.source === "public";
 
@@ -66,7 +66,7 @@ export function getUserColumns({
             >
               {user.email}
             </UserComponent>
-            {showActions && (
+            <div className="flex items-center gap-1">
               <Dropdown placement="bottom-end">
                 <DropdownTrigger>
                   <Button isIconOnly size="sm" variant="light">
@@ -83,16 +83,20 @@ export function getUserColumns({
                   >
                     View Details
                   </DropdownItem>
-                  <DropdownItem
-                    key="edit"
-                    as={Link}
-                    href={`${basePath}/${user._id}/edit`}
-                    startContent={<UserPen size={16} />}
-                    className="text-slate-700 dark:text-slate-300"
-                  >
-                    Edit {entityLabel}
-                  </DropdownItem>
-                  {isPendingPublic && (
+
+                  {showActions && (
+                    <DropdownItem
+                      key="edit"
+                      as={Link}
+                      href={`${basePath}/${user._id}/edit`}
+                      startContent={<UserPen size={16} />}
+                      className="text-slate-700 dark:text-slate-300"
+                    >
+                      Edit {entityLabel}
+                    </DropdownItem>
+                  )}
+
+                  {showActions && isPendingPublic && (
                     <DropdownItem
                       key="approve"
                       color="success"
@@ -103,7 +107,8 @@ export function getUserColumns({
                       Approve {entityLabel}
                     </DropdownItem>
                   )}
-                  {isPendingPublic && (
+
+                  {showActions && isPendingPublic && (
                     <DropdownItem
                       key="reject"
                       color="danger"
@@ -114,18 +119,21 @@ export function getUserColumns({
                       Reject {entityLabel}
                     </DropdownItem>
                   )}
-                  <DropdownItem
-                    key="delete"
-                    color="danger"
-                    startContent={<Trash2 size={16} />}
-                    onPress={() => onDelete(user)}
-                    className="text-danger"
-                  >
-                    Delete {entityLabel}
-                  </DropdownItem>
+
+                  {showActions && (
+                    <DropdownItem
+                      key="delete"
+                      color="danger"
+                      startContent={<Trash2 size={16} />}
+                      onPress={() => onDelete(user)}
+                      className="text-danger"
+                    >
+                      Delete {entityLabel}
+                    </DropdownItem>
+                  )}
                 </DropdownMenu>
               </Dropdown>
-            )}
+            </div>
           </div>
         );
       },
@@ -195,11 +203,15 @@ export function getUserColumns({
         return (
           <Chip
             as="button"
-            onClick={() => onRenew && onRenew(user)}
+            onClick={() => {
+              if (canManageAlumni) {
+                onRenew && onRenew(user);
+              }
+            }}
             color="warning"
             size="sm"
             variant="flat"
-            className="text-xs rounded-md cursor-pointer hover:opacity-80 transition-opacity font-bold gap-1"
+            className={`text-xs rounded-md font-bold gap-1 ${canManageAlumni ? "cursor-pointer hover:opacity-80 transition-opacity" : "cursor-default opacity-70"}`}
             startContent={<Recycle size={12} />}
           >
             Renew ({currentYear})
@@ -213,9 +225,7 @@ export function getUserColumns({
       id: "dates",
       cell: (info) => {
         const user = info.row.original;
-        const joined = user.createdAt
-          ? formatDate(user.createdAt)
-          : "N/A";
+        const joined = user.createdAt ? formatDate(user.createdAt) : "N/A";
         const admission = user.date_of_admission
           ? formatDate(user.date_of_admission)
           : null;
@@ -259,7 +269,8 @@ export function getUserColumns({
       cell: (info) => {
         const user = info.row.original;
         const status = info.getValue();
-        const showActions = canManageUser(currentUser, user, "status");
+        const showActions =
+          canManageUser(currentUser, user, "status") && canManageAlumni;
 
         if (!showActions) {
           return (

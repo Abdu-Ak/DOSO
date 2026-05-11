@@ -10,11 +10,23 @@ import AdminSection from "@/app/admin/users/create/_components/AdminSection";
 import AlumniSection from "@/app/admin/users/create/_components/AlumniSection";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { PERMISSION_MODULES, hasPermission } from "@/lib/permissions";
 
 const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
   const router = useRouter();
   const { data: session } = useSession();
   const currentUser = session?.user;
+  const canManageAlumni = hasPermission(currentUser, "alumni", "manage");
+  const canManagePermissionModule =
+    currentUser?.role === "super_admin" ||
+    hasPermission(currentUser, "permission_management", "manage");
+  const canSeePermissionsTable = canManageAlumni || canManagePermissionModule;
+
+  // Default permissions: all selected except permission_management for non-super admins (handled in UI)
+  const defaultPermissions = PERMISSION_MODULES.reduce((acc, module) => {
+    acc[module.key] = { access: true, manage: true };
+    return acc;
+  }, {});
 
   const [imagePreview, setImagePreview] = useState(initialData?.image || null);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -42,6 +54,7 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
         ? new Date(initialData.date_of_admission).toISOString().split("T")[0]
         : "",
       password: "",
+      permissions: initialData?.permissions || (!isEdit ? defaultPermissions : {}),
     },
   });
 
@@ -69,6 +82,8 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
     Object.keys(data).forEach((key) => {
       if (key === "image") {
         if (selectedFile) formData.append("image", selectedFile);
+      } else if (key === "permissions") {
+        formData.append("permissions", JSON.stringify(data[key]));
       } else if (data[key] !== undefined && data[key] !== null) {
         formData.append(key, data[key]);
       }
@@ -182,8 +197,13 @@ const UserForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
                 register={register}
                 errors={errors}
                 control={control}
+                watch={watch}
+                setValue={setValue}
                 isEdit={isEdit}
                 isSelfEdit={isSelfEdit}
+                currentUserRole={currentUser?.role}
+                canSeePermissionsTable={canSeePermissionsTable}
+                canManagePermissionModule={canManagePermissionModule}
               />
             )}
 

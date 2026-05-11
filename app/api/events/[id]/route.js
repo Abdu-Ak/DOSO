@@ -3,6 +3,9 @@ import dbConnect from "@/lib/mongodb";
 import Event from "@/models/Event";
 import cloudinary from "@/lib/cloudinary";
 import { logActivity } from "@/lib/activityLogger";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { hasPermission } from "@/lib/permissions";
 
 const uploadToCloudinary = async (file, folder, resourceType = "auto") => {
   if (!file || file.size === 0 || typeof file === "string") return file;
@@ -46,8 +49,17 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   try {
-    const { id } = await params;
     await dbConnect();
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+    if (!hasPermission(session.user, "events", "manage")) {
+      return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 });
+    }
+
+    const { id } = await params;
     const data = await request.formData();
 
     const event = await Event.findById(id);
@@ -160,8 +172,17 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    const { id } = await params;
     await dbConnect();
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+    if (!hasPermission(session.user, "events", "manage")) {
+      return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 });
+    }
+
+    const { id } = await params;
     const event = await Event.findByIdAndDelete(id);
 
     if (!event) {

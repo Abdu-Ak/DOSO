@@ -4,12 +4,20 @@ import User from "@/models/User";
 import cloudinary from "@/lib/cloudinary";
 import bcrypt from "bcryptjs";
 import { logActivity } from "@/lib/activityLogger";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { hasPermission } from "@/lib/permissions";
 
 export async function GET(request, { params }) {
   try {
     await dbConnect();
-    const { id } = await params;
+    const session = await getServerSession(authOptions);
 
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await params;
     const user = await User.findById(id);
 
     if (!user) {
@@ -29,12 +37,27 @@ export async function GET(request, { params }) {
 export async function PUT(request, { params }) {
   try {
     await dbConnect();
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id } = await params;
     const data = await request.formData();
 
     const user = await User.findById(id).select("+password");
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    if (session.user.id !== id && session.user.role !== "super_admin") {
+      if (user.role === "admin" && !hasPermission(session.user, "permission_management", "manage")) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+      if (user.role === "alumni" && !hasPermission(session.user, "alumni", "manage")) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
     }
 
     const name = data.get("name");
@@ -97,6 +120,13 @@ export async function PUT(request, { params }) {
       job_location,
     };
 
+    if (session.user.role === "super_admin" || (session.user.id !== id && hasPermission(session.user, "permission_management", "manage"))) {
+      const permissionsStr = data.get("permissions");
+      if (permissionsStr) {
+        updateData.permissions = JSON.parse(permissionsStr);
+      }
+    }
+
     if (password) {
       updateData.password = await bcrypt.hash(password, 10);
     }
@@ -153,11 +183,26 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     await dbConnect();
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id } = await params;
 
     const user = await User.findById(id);
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    if (session.user.role !== "super_admin") {
+      if (user.role === "admin" && !hasPermission(session.user, "permission_management", "manage")) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+      if (user.role === "alumni" && !hasPermission(session.user, "alumni", "manage")) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
     }
 
     // Destroy image in Cloudinary

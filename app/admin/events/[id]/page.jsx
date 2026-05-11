@@ -5,6 +5,8 @@ import { useRouter, useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { format } from "date-fns";
+import { useSession } from "next-auth/react";
+import { hasPermission } from "@/lib/permissions";
 import {
   ArrowLeft,
   Calendar,
@@ -28,6 +30,11 @@ export default function EventDetailsPage() {
   const router = useRouter();
   const { id } = useParams();
   const { toggleVisibilityMutation } = useEventMutations();
+  const { data: session } = useSession();
+  const currentUser = session?.user;
+  const canManage =
+    currentUser?.role === "super_admin" ||
+    hasPermission(currentUser, "events", "manage");
 
   const { data: event, isLoading: isFetching } = useQuery({
     queryKey: ["event", id],
@@ -79,16 +86,18 @@ export default function EventDetailsPage() {
           Back to list
         </Button>
         <div className="flex items-center gap-3">
-          <Button
-            as={Link}
-            href={`/admin/events/${id}/edit`}
-            color="primary"
-            startContent={<CalendarCog size={18} />}
-            className="font-bold shadow-lg shadow-primary/20"
-            radius="xl"
-          >
-            Edit
-          </Button>
+          {canManage && (
+            <Button
+              as={Link}
+              href={`/admin/events/${id}/edit`}
+              color="primary"
+              startContent={<CalendarCog size={18} />}
+              className="font-bold shadow-lg shadow-primary/20"
+              radius="xl"
+            >
+              Edit
+            </Button>
+          )}
         </div>
       </div>
 
@@ -178,6 +187,7 @@ export default function EventDetailsPage() {
               <Switch
                 size="lg"
                 isSelected={event.isVisible}
+                isDisabled={!canManage}
                 onValueChange={(val) =>
                   toggleVisibilityMutation.mutate({ id, isVisible: val })
                 }

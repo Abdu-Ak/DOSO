@@ -39,9 +39,10 @@ const StudentCard = ({
   onApprove,
   onReject,
   approvePending,
+  canManage,
 }) => {
-  const showActions = canManageUser(currentUser, student);
-  const showStatus = canManageUser(currentUser, student, "status");
+  const showActions = canManageUser(currentUser, student) && canManage;
+  const showStatus = canManageUser(currentUser, student, "status") && canManage;
   const isPendingPublic =
     student.status === "Pending" && student.source === "public";
 
@@ -200,64 +201,66 @@ const StudentCard = ({
       </div>
 
       {/* Actions */}
-      {showActions && (
-        <div className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-          {isPendingPublic && (
-            <>
-              <Button
-                size="sm"
-                color="success"
-                variant="flat"
-                className="font-bold flex-1 text-xs"
-                startContent={<UserCheck size={14} />}
-                isLoading={approvePending}
-                onPress={() => onApprove(student._id)}
-              >
-                Approve
-              </Button>
-              <Button
-                size="sm"
-                color="danger"
-                variant="flat"
-                className="font-bold flex-1 text-xs"
-                startContent={<UserX size={14} />}
-                onPress={() => onReject(student)}
-              >
-                Reject
-              </Button>
-            </>
-          )}
-          <Button
-            isIconOnly
-            as={Link}
-            href={`/admin/students/${student._id}`}
-            size="sm"
-            variant="light"
-            className="text-slate-400 hover:text-primary"
-          >
-            <Eye size={16} />
-          </Button>
-          <Button
-            isIconOnly
-            as={Link}
-            href={`/admin/students/${student._id}/edit`}
-            size="sm"
-            variant="light"
-            className="text-slate-400 hover:text-primary"
-          >
-            <UserPen size={16} />
-          </Button>
-          <Button
-            isIconOnly
-            size="sm"
-            variant="light"
-            className="text-slate-400 hover:text-danger"
-            onPress={() => onDelete(student)}
-          >
-            <Trash2 size={16} />
-          </Button>
-        </div>
-      )}
+      <div className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+        <Button
+          isIconOnly
+          as={Link}
+          href={`/admin/students/${student._id}`}
+          size="sm"
+          variant="light"
+          className="text-slate-400 hover:text-primary"
+        >
+          <Eye size={16} />
+        </Button>
+        {showActions && (
+          <>
+            {isPendingPublic && (
+              <>
+                <Button
+                  size="sm"
+                  color="success"
+                  variant="flat"
+                  className="font-bold flex-1 text-xs"
+                  startContent={<UserCheck size={14} />}
+                  isLoading={approvePending}
+                  onPress={() => onApprove(student._id)}
+                >
+                  Approve
+                </Button>
+                <Button
+                  size="sm"
+                  color="danger"
+                  variant="flat"
+                  className="font-bold flex-1 text-xs"
+                  startContent={<UserX size={14} />}
+                  onPress={() => onReject(student)}
+                >
+                  Reject
+                </Button>
+              </>
+            )}
+            <Button
+              isIconOnly
+              as={Link}
+              href={`/admin/students/${student._id}/edit`}
+              size="sm"
+              variant="light"
+              className="text-slate-400 hover:text-primary"
+            >
+              <UserPen size={16} />
+            </Button>
+            <Button
+              isIconOnly
+              size="sm"
+              variant="light"
+              className="text-slate-400 hover:text-danger"
+              onPress={() => onDelete(student)}
+            >
+              <Trash2 size={16} />
+            </Button>
+          </>
+        )}
+      </div>
     </div>
   );
 };

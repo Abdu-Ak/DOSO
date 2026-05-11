@@ -36,6 +36,7 @@ export function getStudentColumns({
   approveMutation,
   onReject,
   onDelete,
+  canManage,
   basePath = "/admin/students",
 }) {
   return [
@@ -44,7 +45,7 @@ export function getStudentColumns({
       accessorKey: "name",
       cell: (info) => {
         const student = info.row.original;
-        const showActions = canManageUser(currentUser, student);
+        const showActions = canManageUser(currentUser, student) && canManage;
         const isPendingPublic =
           student.status === "Pending" && student.source === "public";
 
@@ -59,7 +60,7 @@ export function getStudentColumns({
               description={student.studentId || ""}
               name={info.getValue()}
             />
-            {showActions && (
+            <div className="flex items-center gap-1">
               <Dropdown placement="bottom-end">
                 <DropdownTrigger>
                   <Button isIconOnly size="sm" variant="light">
@@ -76,16 +77,20 @@ export function getStudentColumns({
                   >
                     View Details
                   </DropdownItem>
-                  <DropdownItem
-                    key="edit"
-                    as={Link}
-                    href={`${basePath}/${student._id}/edit`}
-                    startContent={<UserPen size={16} />}
-                    className="text-slate-700 dark:text-slate-300"
-                  >
-                    Edit Student
-                  </DropdownItem>
-                  {isPendingPublic && (
+
+                  {showActions && (
+                    <DropdownItem
+                      key="edit"
+                      as={Link}
+                      href={`${basePath}/${student._id}/edit`}
+                      startContent={<UserPen size={16} />}
+                      className="text-slate-700 dark:text-slate-300"
+                    >
+                      Edit Student
+                    </DropdownItem>
+                  )}
+
+                  {showActions && isPendingPublic && (
                     <DropdownItem
                       key="approve"
                       color="success"
@@ -96,7 +101,8 @@ export function getStudentColumns({
                       Approve Student
                     </DropdownItem>
                   )}
-                  {isPendingPublic && (
+
+                  {showActions && isPendingPublic && (
                     <DropdownItem
                       key="reject"
                       color="danger"
@@ -107,18 +113,21 @@ export function getStudentColumns({
                       Reject Student
                     </DropdownItem>
                   )}
-                  <DropdownItem
-                    key="delete"
-                    color="danger"
-                    startContent={<Trash2 size={16} />}
-                    onPress={() => onDelete(student)}
-                    className="text-danger"
-                  >
-                    Delete Student
-                  </DropdownItem>
+
+                  {showActions && (
+                    <DropdownItem
+                      key="delete"
+                      color="danger"
+                      startContent={<Trash2 size={16} />}
+                      onPress={() => onDelete(student)}
+                      className="text-danger"
+                    >
+                      Delete Student
+                    </DropdownItem>
+                  )}
                 </DropdownMenu>
               </Dropdown>
-            )}
+            </div>
           </div>
         );
       },
@@ -191,7 +200,7 @@ export function getStudentColumns({
       cell: (info) => {
         const student = info.row.original;
         const status = info.getValue();
-        const showActions = canManageUser(currentUser, student, "status");
+        const showActions = canManageUser(currentUser, student, "status") && canManage;
 
         if (!showActions) {
           return (

@@ -26,6 +26,7 @@ const MobileSundookList = ({
   onApprove,
   onReject,
   onDelete,
+  canManage,
 }) => {
   if (isLoading) {
     return (
@@ -130,48 +131,50 @@ const MobileSundookList = ({
             )}
           </div>
 
-          {record.status === "pending" ? (
-            <div className="flex gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
-              <Button
-                size="sm"
-                color="success"
-                className="flex-1 font-bold bg-success/10 text-success"
-                onPress={() => onApprove(record)}
-                startContent={<CheckCircle2 size={16} />}
-              >
-                Approve
-              </Button>
-              <Button
-                size="sm"
-                color="danger"
-                className="flex-1 font-bold bg-danger/10 text-danger"
-                onPress={() => onReject(record)}
-                startContent={<XCircle size={16} />}
-              >
-                Reject
-              </Button>
-              <Button
-                isIconOnly
-                size="sm"
-                variant="flat"
-                color="danger"
-                onPress={() => onDelete(record)}
-              >
-                <Trash2 size={16} />
-              </Button>
-            </div>
-          ) : (
-            <div className="flex items-center justify-end pt-4 border-t border-slate-100 dark:border-slate-800">
-              <Button
-                isIconOnly
-                size="sm"
-                variant="flat"
-                color="danger"
-                onPress={() => onDelete(record)}
-              >
-                <Trash2 size={14} />
-              </Button>
-            </div>
+          {canManage && (
+            record.status === "pending" ? (
+              <div className="flex gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <Button
+                  size="sm"
+                  color="success"
+                  className="flex-1 font-bold bg-success/10 text-success"
+                  onPress={() => onApprove(record)}
+                  startContent={<CheckCircle2 size={16} />}
+                >
+                  Approve
+                </Button>
+                <Button
+                  size="sm"
+                  color="danger"
+                  className="flex-1 font-bold bg-danger/10 text-danger"
+                  onPress={() => onReject(record)}
+                  startContent={<XCircle size={16} />}
+                >
+                  Reject
+                </Button>
+                <Button
+                  isIconOnly
+                  size="sm"
+                  variant="flat"
+                  color="danger"
+                  onPress={() => onDelete(record)}
+                >
+                  <Trash2 size={16} />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-end pt-4 border-t border-slate-100 dark:border-slate-800">
+                <Button
+                  isIconOnly
+                  size="sm"
+                  variant="flat"
+                  color="danger"
+                  onPress={() => onDelete(record)}
+                >
+                  <Trash2 size={14} />
+                </Button>
+              </div>
+            )
           )}
         </div>
       ))}

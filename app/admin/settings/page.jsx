@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { settingSchema } from "@/lib/validations/settingShema";
 import { useSettings } from "./_hooks/useSettings";
+import { useSession } from "next-auth/react";
+import { hasPermission } from "@/lib/permissions";
 import { Button } from "@heroui/button";
 import { Settings } from "lucide-react";
 
@@ -110,6 +112,9 @@ export default function SettingsPage() {
     });
   };
 
+  const { data: session } = useSession();
+  const canManage = hasPermission(session?.user, "settings", "manage");
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -124,7 +129,7 @@ export default function SettingsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <SettingsHeader />
 
-        {!isEditing && (
+        {!isEditing && canManage && (
           <Button
             onPress={() => setIsEditing(true)}
             color="primary"

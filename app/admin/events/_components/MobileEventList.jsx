@@ -13,6 +13,7 @@ const MobileEventList = ({
   paginationProps,
   onToggleVisibility,
   onDelete,
+  canManage,
 }) => {
   return (
     <div className="lg:hidden space-y-4">
@@ -40,6 +41,7 @@ const MobileEventList = ({
               event={event}
               onToggleVisibility={onToggleVisibility}
               onDelete={onDelete}
+              canManage={canManage}
             />
           ))}
         </div>
