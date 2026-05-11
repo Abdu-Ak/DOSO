@@ -59,7 +59,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
   const NAV_ITEMS = [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
     {
-      label: "Alumni/Users",
+      label: "User Management",
       href: "/admin/users",
       icon: Users,
       module: "alumni",
@@ -69,14 +69,39 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       label: "Students List",
       href: "/admin/students",
       icon: Users,
-      module: "students"
+      module: "students",
     },
-    { label: "Events", href: "/admin/events", icon: Calendar, module: "events" },
+    {
+      label: "Events",
+      href: "/admin/events",
+      icon: Calendar,
+      module: "events",
+    },
     { label: "Sundook", href: "/admin/sundook", icon: Box, module: "sundook" },
-    { label: "Welfare", href: "/admin/welfare", icon: HeartHandshake, module: "welfare" },
-    { label: "Debt", href: "/admin/debt", icon: Wallet, module: "debt_requests" },
-    { label: "Enquiries", href: "/admin/enquiries", icon: MessageSquareText, module: "enquiries" },
-    { label: "Settings", href: "/admin/settings", icon: Settings, module: "settings" },
+    {
+      label: "Welfare",
+      href: "/admin/welfare",
+      icon: HeartHandshake,
+      module: "welfare",
+    },
+    {
+      label: "Debt",
+      href: "/admin/debt",
+      icon: Wallet,
+      module: "debt_requests",
+    },
+    {
+      label: "Enquiries",
+      href: "/admin/enquiries",
+      icon: MessageSquareText,
+      module: "enquiries",
+    },
+    {
+      label: "Settings",
+      href: "/admin/settings",
+      icon: Settings,
+      module: "settings",
+    },
   ];
 
   const visibleNavItems = NAV_ITEMS.filter((item) => {

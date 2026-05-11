@@ -40,9 +40,7 @@ export function getUserColumns({
   onDelete,
   onRenew,
   canManageAlumni,
-  canManagePermissions = false,
   basePath = "/admin/users",
-  role,
   entityLabel = "User",
 }) {
   const columns = [
@@ -227,9 +225,7 @@ export function getUserColumns({
       id: "dates",
       cell: (info) => {
         const user = info.row.original;
-        const joined = user.createdAt
-          ? formatDate(user.createdAt)
-          : "N/A";
+        const joined = user.createdAt ? formatDate(user.createdAt) : "N/A";
         const admission = user.date_of_admission
           ? formatDate(user.date_of_admission)
           : null;
@@ -273,7 +269,8 @@ export function getUserColumns({
       cell: (info) => {
         const user = info.row.original;
         const status = info.getValue();
-        const showActions = canManageUser(currentUser, user, "status") && canManageAlumni;
+        const showActions =
+          canManageUser(currentUser, user, "status") && canManageAlumni;
 
         if (!showActions) {
           return (

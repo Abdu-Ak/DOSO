@@ -100,11 +100,7 @@ export default function UserDetailPage() {
 
   const canManageAlumni = hasPermission(currentUser, "alumni", "manage");
   const canManageStudents = hasPermission(currentUser, "students", "manage");
-  const canManagePermissions = hasPermission(
-    currentUser,
-    "permission_management",
-    "manage",
-  );
+
 
   const { data: user, isLoading } = useQuery({
     queryKey: ["user", id],

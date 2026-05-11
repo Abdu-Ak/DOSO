@@ -51,7 +51,9 @@ export const getDebtColumns = ({
               radius: "lg",
             }}
           />
-          {canManage && (
+          {(canManage ||
+            record.status === "approved" ||
+            record.status === "repaid") && (
             <Dropdown placement="bottom-end">
               <DropdownTrigger>
                 <Button isIconOnly variant="light" size="sm">
@@ -59,7 +61,7 @@ export const getDebtColumns = ({
                 </Button>
               </DropdownTrigger>
               <DropdownMenu aria-label="Debt actions" variant="flat">
-                {record.status === "pending_admin" && (
+                {canManage && record.status === "pending_admin" && (
                   <DropdownItem
                     key="approve"
                     startContent={<CheckCircle2 size={16} />}
@@ -70,7 +72,7 @@ export const getDebtColumns = ({
                     Approve Debt
                   </DropdownItem>
                 )}
-                {record.status === "pending_admin" && (
+                {canManage && record.status === "pending_admin" && (
                   <DropdownItem
                     key="reject"
                     startContent={<XCircle size={16} />}
@@ -81,7 +83,8 @@ export const getDebtColumns = ({
                     Reject Debt
                   </DropdownItem>
                 )}
-                {record.status === "approved" &&
+                {canManage &&
+                  record.status === "approved" &&
                   record.payment_type === "single" && (
                     <DropdownItem
                       key="repaid"
@@ -93,7 +96,8 @@ export const getDebtColumns = ({
                       Mark as Repaid
                     </DropdownItem>
                   )}
-                {record.status === "approved" &&
+                {canManage &&
+                  record.status === "approved" &&
                   record.payment_type === "emi" && (
                     <DropdownItem
                       key="manage_repayments"
@@ -105,7 +109,7 @@ export const getDebtColumns = ({
                       Manage Repayments
                     </DropdownItem>
                   )}
-                {record.status === "approved" && (
+                {canManage && record.status === "approved" && (
                   <DropdownItem
                     key="whatsapp_reminder"
                     startContent={<Bell size={16} />}
@@ -113,20 +117,32 @@ export const getDebtColumns = ({
                       const name = record.requester?.name;
                       const phone = record.requester?.phone;
                       const id = record.requester?.userId || record._id;
-                      
+
                       // Find target due date (next pending installment or main due date)
                       let targetDate;
-                      if (record.payment_type === "emi" && record.installments?.length > 0) {
-                        const nextInstallment = record.installments.find(i => i.status === "pending");
-                        targetDate = nextInstallment ? new Date(nextInstallment.dueDate) : new Date(record.dueDate);
+                      if (
+                        record.payment_type === "emi" &&
+                        record.installments?.length > 0
+                      ) {
+                        const nextInstallment = record.installments.find(
+                          (i) => i.status === "pending",
+                        );
+                        targetDate = nextInstallment
+                          ? new Date(nextInstallment.dueDate)
+                          : new Date(record.dueDate);
                       } else {
                         targetDate = new Date(record.dueDate);
                       }
 
-                      const isValidDate = targetDate instanceof Date && !isNaN(targetDate);
-                      const dateStr = isValidDate ? targetDate.toLocaleDateString("en-IN") : "the specified date";
-                      const daysLeft = isValidDate 
-                        ? Math.ceil((targetDate - new Date()) / (1000 * 60 * 60 * 24))
+                      const isValidDate =
+                        targetDate instanceof Date && !isNaN(targetDate);
+                      const dateStr = isValidDate
+                        ? targetDate.toLocaleDateString("en-IN")
+                        : "the specified date";
+                      const daysLeft = isValidDate
+                        ? Math.ceil(
+                            (targetDate - new Date()) / (1000 * 60 * 60 * 24),
+                          )
                         : null;
 
                       let message;
@@ -137,7 +153,7 @@ export const getDebtColumns = ({
                       } else {
                         message = `Hello ${name}, this is a friendly reminder regarding your debt repayment for DOSO (ID: ${id}) due on ${dateStr}. Please ensure timely repayment. Thank you.`;
                       }
-                      
+
                       const whatsappUrl = `https://wa.me/${phone?.replace(/\+/g, "")}?text=${encodeURIComponent(message)}`;
                       window.open(whatsappUrl, "_blank");
                     }}
@@ -147,7 +163,8 @@ export const getDebtColumns = ({
                     WhatsApp Reminder
                   </DropdownItem>
                 )}
-                {(record.status === "approved" || record.status === "repaid") && (
+                {(record.status === "approved" ||
+                  record.status === "repaid") && (
                   <DropdownItem
                     key="download"
                     startContent={<Download size={16} />}
@@ -157,15 +174,17 @@ export const getDebtColumns = ({
                     Download PDF
                   </DropdownItem>
                 )}
-                <DropdownItem
-                  key="delete"
-                  startContent={<Trash2 size={16} />}
-                  onPress={() => onDelete(record)}
-                  className="text-danger font-bold"
-                  color="danger"
-                >
-                  Delete Record
-                </DropdownItem>
+                {canManage && (
+                  <DropdownItem
+                    key="delete"
+                    startContent={<Trash2 size={16} />}
+                    onPress={() => onDelete(record)}
+                    className="text-danger font-bold"
+                    color="danger"
+                  >
+                    Delete Record
+                  </DropdownItem>
+                )}
               </DropdownMenu>
             </Dropdown>
           )}

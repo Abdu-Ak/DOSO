@@ -9,7 +9,7 @@ const UserHeader = ({ onReportClick, showReportButton, count }) => {
     <div className="px-1 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
         <h2 className="text-xl font-body! font-bold text-slate-900 dark:text-white">
-          Alumni/Users {count !== undefined && `(${count})`}
+          User Management {count !== undefined && `(${count})`}
         </h2>
         <p className="text-slate-600 text-sm dark:text-slate-400">
           Manage and monitor all users across the platform.
