@@ -3,6 +3,8 @@
 import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { useSession } from "next-auth/react";
+import { hasPermission } from "@/lib/permissions";
 import DataTable from "@/components/admin/ui/DataTable";
 import EventHeader from "./_components/EventHeader";
 import EventFilters from "./_components/EventFilters";
@@ -23,6 +25,9 @@ export default function EventsManagementPage() {
   // Modal states
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [eventToDelete, setEventToDelete] = useState(null);
+
+  const { data: session } = useSession();
+  const canManage = session?.user?.role === "super_admin" || hasPermission(session?.user, "events", "manage");
 
   // Queries & Mutations
   const { toggleVisibilityMutation, deleteMutation } = useEventMutations();
@@ -77,10 +82,11 @@ export default function EventsManagementPage() {
   const columns = useMemo(
     () =>
       getEventColumns({
+        canManage,
         onDelete: handleDeleteClick,
         onToggleVisibility: handleToggleVisibility,
       }),
-    [],
+    [canManage],
   );
 
   const filterProps = {
@@ -95,6 +101,7 @@ export default function EventsManagementPage() {
     showFilters,
     setShowFilters,
     onReset: handleReset,
+    canManage,
   };
 
   const paginationProps = {
@@ -128,6 +135,7 @@ export default function EventsManagementPage() {
         paginationProps={paginationProps}
         onToggleVisibility={handleToggleVisibility}
         onDelete={handleDeleteClick}
+        canManage={canManage}
       />
 
       <ConfirmModal

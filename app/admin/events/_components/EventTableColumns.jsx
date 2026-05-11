@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import Link from "next/link";
 
 export const getEventColumns = ({
+  canManage,
   onEdit,
   onDelete,
   onView,
@@ -50,24 +51,28 @@ export const getEventColumns = ({
               >
                 View Details
               </DropdownItem>
-              <DropdownItem
-                key="edit"
-                as={Link}
-                href={`/admin/events/${event._id}/edit`}
-                startContent={<CalendarCog size={16} />}
-                className="text-slate-700 dark:text-slate-300"
-              >
-                Edit Event
-              </DropdownItem>
-              <DropdownItem
-                key="delete"
-                color="danger"
-                startContent={<Trash2 size={16} />}
-                onPress={() => onDelete(event)}
-                className="text-danger"
-              >
-                Delete Event
-              </DropdownItem>
+              {canManage && (
+                <DropdownItem
+                  key="edit"
+                  as={Link}
+                  href={`/admin/events/${event._id}/edit`}
+                  startContent={<CalendarCog size={16} />}
+                  className="text-slate-700 dark:text-slate-300"
+                >
+                  Edit Event
+                </DropdownItem>
+              )}
+              {canManage && (
+                <DropdownItem
+                  key="delete"
+                  color="danger"
+                  startContent={<Trash2 size={16} />}
+                  onPress={() => onDelete(event)}
+                  className="text-danger"
+                >
+                  Delete Event
+                </DropdownItem>
+              )}
             </DropdownMenu>
           </Dropdown>
         </div>
@@ -113,6 +118,7 @@ export const getEventColumns = ({
       return (
         <Switch
           isSelected={event.isVisible}
+          isDisabled={!canManage}
           size="sm"
           color="success"
           onValueChange={(val) => onToggleVisibility(event._id, val)}

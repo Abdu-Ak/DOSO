@@ -9,6 +9,7 @@ const MobileEnquiryList = ({
   isLoading,
   onStatusChange,
   onDelete,
+  canManage,
 }) => {
   if (isLoading) {
     return (
@@ -40,6 +41,7 @@ const MobileEnquiryList = ({
           enquiry={enquiry}
           onStatusChange={onStatusChange}
           onDelete={onDelete}
+          canManage={canManage}
         />
       ))}
     </div>

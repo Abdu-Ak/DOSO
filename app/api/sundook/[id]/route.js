@@ -4,6 +4,7 @@ import Sundook from "@/models/Sundook";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { logActivity } from "@/lib/activityLogger";
+import { hasPermission } from "@/lib/permissions";
 
 export async function DELETE(request, { params }) {
   try {
@@ -14,7 +15,7 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (session.user.role !== "admin" && session.user.role !== "super_admin") {
+    if (!hasPermission(session.user, "sundook", "manage")) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

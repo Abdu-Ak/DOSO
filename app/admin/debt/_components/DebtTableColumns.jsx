@@ -32,6 +32,7 @@ export const getDebtColumns = ({
   onDelete,
   onRepaid,
   onManageRepayments,
+  canManage,
 }) => [
   {
     header: "Alumni",
@@ -50,122 +51,124 @@ export const getDebtColumns = ({
               radius: "lg",
             }}
           />
-          <Dropdown placement="bottom-end">
-            <DropdownTrigger>
-              <Button isIconOnly variant="light" size="sm">
-                <MoreVertical size={18} className="text-slate-400" />
-              </Button>
-            </DropdownTrigger>
-            <DropdownMenu aria-label="Debt actions" variant="flat">
-              {record.status === "pending_admin" && (
+          {canManage && (
+            <Dropdown placement="bottom-end">
+              <DropdownTrigger>
+                <Button isIconOnly variant="light" size="sm">
+                  <MoreVertical size={18} className="text-slate-400" />
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu aria-label="Debt actions" variant="flat">
+                {record.status === "pending_admin" && (
+                  <DropdownItem
+                    key="approve"
+                    startContent={<CheckCircle2 size={16} />}
+                    onPress={() => onApprove(record)}
+                    className="text-success font-bold"
+                    color="success"
+                  >
+                    Approve Debt
+                  </DropdownItem>
+                )}
+                {record.status === "pending_admin" && (
+                  <DropdownItem
+                    key="reject"
+                    startContent={<XCircle size={16} />}
+                    onPress={() => onReject(record)}
+                    className="text-danger font-bold"
+                    color="danger"
+                  >
+                    Reject Debt
+                  </DropdownItem>
+                )}
+                {record.status === "approved" &&
+                  record.payment_type === "single" && (
+                    <DropdownItem
+                      key="repaid"
+                      startContent={<BadgeCheck size={16} />}
+                      onPress={() => onRepaid(record)}
+                      className="text-primary font-bold"
+                      color="primary"
+                    >
+                      Mark as Repaid
+                    </DropdownItem>
+                  )}
+                {record.status === "approved" &&
+                  record.payment_type === "emi" && (
+                    <DropdownItem
+                      key="manage_repayments"
+                      startContent={<Wallet size={16} />}
+                      onPress={() => onManageRepayments(record)}
+                      className="text-primary font-bold"
+                      color="primary"
+                    >
+                      Manage Repayments
+                    </DropdownItem>
+                  )}
+                {record.status === "approved" && (
+                  <DropdownItem
+                    key="whatsapp_reminder"
+                    startContent={<Bell size={16} />}
+                    onPress={() => {
+                      const name = record.requester?.name;
+                      const phone = record.requester?.phone;
+                      const id = record.requester?.userId || record._id;
+                      
+                      // Find target due date (next pending installment or main due date)
+                      let targetDate;
+                      if (record.payment_type === "emi" && record.installments?.length > 0) {
+                        const nextInstallment = record.installments.find(i => i.status === "pending");
+                        targetDate = nextInstallment ? new Date(nextInstallment.dueDate) : new Date(record.dueDate);
+                      } else {
+                        targetDate = new Date(record.dueDate);
+                      }
+
+                      const isValidDate = targetDate instanceof Date && !isNaN(targetDate);
+                      const dateStr = isValidDate ? targetDate.toLocaleDateString("en-IN") : "the specified date";
+                      const daysLeft = isValidDate 
+                        ? Math.ceil((targetDate - new Date()) / (1000 * 60 * 60 * 24))
+                        : null;
+
+                      let message;
+                      if (daysLeft !== null && daysLeft < 0) {
+                        message = `Hello ${name}, your debt repayment for DOSO (ID: ${id}) is OVERDUE since ${dateStr}. Please ensure immediate repayment to avoid any issues. Thank you.`;
+                      } else if (daysLeft !== null && daysLeft <= 7) {
+                        message = `Hello ${name}, your debt repayment for DOSO (ID: ${id}) is reaching its due date on ${dateStr}. Only ${daysLeft} days left. Please ensure timely repayment. Thank you.`;
+                      } else {
+                        message = `Hello ${name}, this is a friendly reminder regarding your debt repayment for DOSO (ID: ${id}) due on ${dateStr}. Please ensure timely repayment. Thank you.`;
+                      }
+                      
+                      const whatsappUrl = `https://wa.me/${phone?.replace(/\+/g, "")}?text=${encodeURIComponent(message)}`;
+                      window.open(whatsappUrl, "_blank");
+                    }}
+                    className="text-warning font-bold"
+                    color="warning"
+                  >
+                    WhatsApp Reminder
+                  </DropdownItem>
+                )}
+                {(record.status === "approved" || record.status === "repaid") && (
+                  <DropdownItem
+                    key="download"
+                    startContent={<Download size={16} />}
+                    onPress={() => generateDebtNoticePdf(record)}
+                    className="text-slate-700 font-bold"
+                  >
+                    Download PDF
+                  </DropdownItem>
+                )}
                 <DropdownItem
-                  key="approve"
-                  startContent={<CheckCircle2 size={16} />}
-                  onPress={() => onApprove(record)}
-                  className="text-success font-bold"
-                  color="success"
-                >
-                  Approve Debt
-                </DropdownItem>
-              )}
-              {record.status === "pending_admin" && (
-                <DropdownItem
-                  key="reject"
-                  startContent={<XCircle size={16} />}
-                  onPress={() => onReject(record)}
+                  key="delete"
+                  startContent={<Trash2 size={16} />}
+                  onPress={() => onDelete(record)}
                   className="text-danger font-bold"
                   color="danger"
                 >
-                  Reject Debt
+                  Delete Record
                 </DropdownItem>
-              )}
-              {record.status === "approved" &&
-                record.payment_type === "single" && (
-                  <DropdownItem
-                    key="repaid"
-                    startContent={<BadgeCheck size={16} />}
-                    onPress={() => onRepaid(record)}
-                    className="text-primary font-bold"
-                    color="primary"
-                  >
-                    Mark as Repaid
-                  </DropdownItem>
-                )}
-              {record.status === "approved" &&
-                record.payment_type === "emi" && (
-                  <DropdownItem
-                    key="manage_repayments"
-                    startContent={<Wallet size={16} />}
-                    onPress={() => onManageRepayments(record)}
-                    className="text-primary font-bold"
-                    color="primary"
-                  >
-                    Manage Repayments
-                  </DropdownItem>
-                )}
-              {record.status === "approved" && (
-                <DropdownItem
-                  key="whatsapp_reminder"
-                  startContent={<Bell size={16} />}
-                onPress={() => {
-                    const name = record.requester?.name;
-                    const phone = record.requester?.phone;
-                    const id = record.requester?.userId || record._id;
-                    
-                    // Find target due date (next pending installment or main due date)
-                    let targetDate;
-                    if (record.payment_type === "emi" && record.installments?.length > 0) {
-                      const nextInstallment = record.installments.find(i => i.status === "pending");
-                      targetDate = nextInstallment ? new Date(nextInstallment.dueDate) : new Date(record.dueDate);
-                    } else {
-                      targetDate = new Date(record.dueDate);
-                    }
-
-                    const isValidDate = targetDate instanceof Date && !isNaN(targetDate);
-                    const dateStr = isValidDate ? targetDate.toLocaleDateString("en-IN") : "the specified date";
-                    const daysLeft = isValidDate 
-                      ? Math.ceil((targetDate - new Date()) / (1000 * 60 * 60 * 24))
-                      : null;
-
-                    let message;
-                    if (daysLeft !== null && daysLeft < 0) {
-                      message = `Hello ${name}, your debt repayment for DOSO (ID: ${id}) is OVERDUE since ${dateStr}. Please ensure immediate repayment to avoid any issues. Thank you.`;
-                    } else if (daysLeft !== null && daysLeft <= 7) {
-                      message = `Hello ${name}, your debt repayment for DOSO (ID: ${id}) is reaching its due date on ${dateStr}. Only ${daysLeft} days left. Please ensure timely repayment. Thank you.`;
-                    } else {
-                      message = `Hello ${name}, this is a friendly reminder regarding your debt repayment for DOSO (ID: ${id}) due on ${dateStr}. Please ensure timely repayment. Thank you.`;
-                    }
-                    
-                    const whatsappUrl = `https://wa.me/${phone?.replace(/\+/g, "")}?text=${encodeURIComponent(message)}`;
-                    window.open(whatsappUrl, "_blank");
-                  }}
-                  className="text-warning font-bold"
-                  color="warning"
-                >
-                  WhatsApp Reminder
-                </DropdownItem>
-              )}
-              {(record.status === "approved" || record.status === "repaid") && (
-                <DropdownItem
-                  key="download"
-                  startContent={<Download size={16} />}
-                  onPress={() => generateDebtNoticePdf(record)}
-                  className="text-slate-700 font-bold"
-                >
-                  Download PDF
-                </DropdownItem>
-              )}
-              <DropdownItem
-                key="delete"
-                startContent={<Trash2 size={16} />}
-                onPress={() => onDelete(record)}
-                className="text-danger font-bold"
-                color="danger"
-              >
-                Delete Record
-              </DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
+              </DropdownMenu>
+            </Dropdown>
+          )}
         </div>
       );
     },

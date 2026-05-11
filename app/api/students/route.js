@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Student from "@/models/Student";
 import cloudinary from "@/lib/cloudinary";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { logActivity } from "@/lib/activityLogger";
+import { hasPermission } from "@/lib/permissions";
 
 const DISTRICT_CODES = {
   Thiruvananthapuram: "TVM",
@@ -47,6 +50,15 @@ async function generateStudentId() {
 export async function GET(request) {
   try {
     await dbConnect();
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (!hasPermission(session.user, "students", "access")) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
 
     const page = parseInt(searchParams.get("page")) || 1;
@@ -102,6 +114,15 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     await dbConnect();
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (!hasPermission(session.user, "students", "manage")) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const data = await request.formData();
 
     const email = data.get("email");

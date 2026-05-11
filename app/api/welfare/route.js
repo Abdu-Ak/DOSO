@@ -5,6 +5,7 @@ import Welfare from "@/models/Welfare";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { logActivity } from "@/lib/activityLogger";
+import { hasPermission } from "@/lib/permissions";
 import {
   createWelfareSchema,
   adminCreateWelfareSchema,
@@ -27,7 +28,7 @@ export async function GET(request) {
 
     let query = {};
 
-    if (session.user.role === "admin" || session.user.role === "super_admin") {
+    if (hasPermission(session.user, "welfare", "access")) {
       const status = searchParams.get("status");
       const alumniId = searchParams.get("alumniId");
       const fromDate = searchParams.get("fromDate");
@@ -121,6 +122,9 @@ export async function POST(request) {
     const body = await request.json();
 
     if (session.user.role === "admin" || session.user.role === "super_admin") {
+      if (!hasPermission(session.user, "welfare", "manage")) {
+        return NextResponse.json({ error: "Permission denied" }, { status: 403 });
+      }
       // Admin creation
       const validatedData = adminCreateWelfareSchema.parse(body);
 

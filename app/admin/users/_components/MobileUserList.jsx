@@ -22,6 +22,8 @@ const MobileUserList = ({
   onReject,
   approvePending,
   onRenew,
+  canManageAlumni,
+  canManagePermissions = false,
 }) => {
   return (
     <div className="lg:hidden space-y-4">
@@ -57,6 +59,8 @@ const MobileUserList = ({
               onReject={onReject}
               approvePending={approvePending}
               onRenew={onRenew}
+              canManageAlumni={canManageAlumni}
+              canManagePermissions={canManagePermissions}
             />
           ))}
         </div>

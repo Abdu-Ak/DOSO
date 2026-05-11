@@ -5,6 +5,7 @@ import Sundook from "@/models/Sundook";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { logActivity } from "@/lib/activityLogger";
+import { hasPermission } from "@/lib/permissions";
 import {
   createSundookSchema,
   adminCreateSundookSchema,
@@ -27,7 +28,7 @@ export async function GET(request) {
 
     let query = {};
 
-    if (session.user.role === "admin" || session.user.role === "super_admin") {
+    if (hasPermission(session.user, "sundook", "access")) {
       const status = searchParams.get("status");
       const alumniId = searchParams.get("alumniId");
       const year = searchParams.get("year");
@@ -90,6 +91,9 @@ export async function POST(request) {
     const currentYear = new Date().getFullYear();
 
     if (session.user.role === "admin" || session.user.role === "super_admin") {
+      if (!hasPermission(session.user, "sundook", "manage")) {
+        return NextResponse.json({ error: "Permission denied" }, { status: 403 });
+      }
       // Admin creation
       const validatedData = adminCreateSundookSchema.parse(body);
 

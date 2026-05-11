@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Enquiry from "@/models/Enquiry";
 import { createEnquirySchema } from "@/lib/validations/enquiry.validation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { hasPermission } from "@/lib/permissions";
 
 export async function POST(request) {
   try {
@@ -46,6 +49,15 @@ export async function POST(request) {
 export async function GET() {
   try {
     await dbConnect();
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+    if (!hasPermission(session.user, "enquiries", "access")) {
+      return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 });
+    }
+
     // Fetch all enquiries, sorted by newest first
     const enquiries = await Enquiry.find({}).sort({ createdAt: -1 });
 

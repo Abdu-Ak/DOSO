@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
-export const getWelfareColumns = ({ onApprove, onReject, onDelete }) => [
+export const getWelfareColumns = ({ onApprove, onReject, onDelete, canManage }) => [
   {
     header: "Alumni",
     accessorKey: "alumni.name",
@@ -37,46 +37,50 @@ export const getWelfareColumns = ({ onApprove, onReject, onDelete }) => [
               radius: "lg",
             }}
           />
-          <Dropdown placement="bottom-end">
-            <DropdownTrigger>
-              <Button isIconOnly variant="light" size="sm">
-                <MoreVertical size={18} className="text-slate-400" />
-              </Button>
-            </DropdownTrigger>
-            <DropdownMenu aria-label="Welfare actions" variant="flat">
-              {record.status === "pending" && (
+          {canManage ? (
+            <Dropdown placement="bottom-end">
+              <DropdownTrigger>
+                <Button isIconOnly variant="light" size="sm">
+                  <MoreVertical size={18} className="text-slate-400" />
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu aria-label="Welfare actions" variant="flat">
+                {record.status === "pending" && (
+                  <DropdownItem
+                    key="approve"
+                    startContent={<CheckCircle2 size={16} />}
+                    onPress={() => onApprove(record)}
+                    className="text-success font-bold"
+                    color="success"
+                  >
+                    Approve Record
+                  </DropdownItem>
+                )}
+                {record.status === "pending" && (
+                  <DropdownItem
+                    key="reject"
+                    startContent={<XCircle size={16} />}
+                    onPress={() => onReject(record)}
+                    className="text-danger font-bold"
+                    color="danger"
+                  >
+                    Reject Record
+                  </DropdownItem>
+                )}
                 <DropdownItem
-                  key="approve"
-                  startContent={<CheckCircle2 size={16} />}
-                  onPress={() => onApprove(record)}
-                  className="text-success font-bold"
-                  color="success"
-                >
-                  Approve Record
-                </DropdownItem>
-              )}
-              {record.status === "pending" && (
-                <DropdownItem
-                  key="reject"
-                  startContent={<XCircle size={16} />}
-                  onPress={() => onReject(record)}
+                  key="delete"
+                  startContent={<Trash2 size={16} />}
+                  onPress={() => onDelete(record)}
                   className="text-danger font-bold"
                   color="danger"
                 >
-                  Reject Record
+                  Delete Record
                 </DropdownItem>
-              )}
-              <DropdownItem
-                key="delete"
-                startContent={<Trash2 size={16} />}
-                onPress={() => onDelete(record)}
-                className="text-danger font-bold"
-                color="danger"
-              >
-                Delete Record
-              </DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
+              </DropdownMenu>
+            </Dropdown>
+          ) : (
+            <div className="w-8 h-8" />
+          )}
         </div>
       );
     },

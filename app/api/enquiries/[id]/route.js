@@ -3,10 +3,22 @@ import dbConnect from "@/lib/mongodb";
 import Enquiry from "@/models/Enquiry";
 import { updateEnquiryStatusSchema } from "@/lib/validations/enquiry.validation";
 import { logActivity } from "@/lib/activityLogger";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { hasPermission } from "@/lib/permissions";
 
 export async function PATCH(request, { params }) {
   try {
     await dbConnect();
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+    if (!hasPermission(session.user, "enquiries", "manage")) {
+      return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 });
+    }
+
     const { id } = await params;
     const body = await request.json();
 
@@ -58,6 +70,15 @@ export async function PATCH(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     await dbConnect();
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+    if (!hasPermission(session.user, "enquiries", "manage")) {
+      return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 });
+    }
+
     const { id } = await params;
 
     const deletedEnquiry = await Enquiry.findByIdAndDelete(id);

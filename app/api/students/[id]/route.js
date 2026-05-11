@@ -2,12 +2,24 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Student from "@/models/Student";
 import cloudinary from "@/lib/cloudinary";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { logActivity } from "@/lib/activityLogger";
+import { hasPermission } from "@/lib/permissions";
 
 export async function GET(request, { params }) {
   try {
-    const { id } = await params;
     await dbConnect();
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (!hasPermission(session.user, "students", "access")) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const { id } = await params;
     const student = await Student.findById(id);
 
     if (!student) {
@@ -26,8 +38,17 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   try {
-    const { id } = await params;
     await dbConnect();
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (!hasPermission(session.user, "students", "manage")) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const { id } = await params;
     const data = await request.formData();
 
     const student = await Student.findById(id);
@@ -129,8 +150,17 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    const { id } = await params;
     await dbConnect();
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (!hasPermission(session.user, "students", "manage")) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const { id } = await params;
 
     const student = await Student.findById(id);
     if (!student) {

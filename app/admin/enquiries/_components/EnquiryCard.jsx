@@ -34,7 +34,7 @@ const statusIconMap = {
   Cancelled: <XCircle size={16} />,
 };
 
-const EnquiryCard = ({ enquiry, onStatusChange, onDelete }) => {
+const EnquiryCard = ({ enquiry, onStatusChange, onDelete, canManage }) => {
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
       {/* Header: Name and Status */}
@@ -49,46 +49,58 @@ const EnquiryCard = ({ enquiry, onStatusChange, onDelete }) => {
           </p>
         </div>
 
-        <Dropdown>
-          <DropdownTrigger>
-            <div className="cursor-pointer">
-              <Chip
-                className="capitalize select-none"
-                color={statusColorMap[enquiry.status]}
-                size="sm"
-                variant="flat"
-                startContent={statusIconMap[enquiry.status]}
-              >
-                {enquiry.status}
-              </Chip>
-            </div>
-          </DropdownTrigger>
-          <DropdownMenu
-            aria-label="Change Status"
-            onAction={(key) => onStatusChange(enquiry._id, key)}
-            selectionMode="single"
-            selectedKeys={[enquiry.status]}
+        {!canManage ? (
+          <Chip
+            className="capitalize select-none"
+            color={statusColorMap[enquiry.status]}
+            size="sm"
+            variant="flat"
+            startContent={statusIconMap[enquiry.status]}
           >
-            <DropdownItem
-              key="Completed"
-              startContent={<CheckCircle2 className="text-success" size={16} />}
+            {enquiry.status}
+          </Chip>
+        ) : (
+          <Dropdown>
+            <DropdownTrigger>
+              <div className="cursor-pointer">
+                <Chip
+                  className="capitalize select-none"
+                  color={statusColorMap[enquiry.status]}
+                  size="sm"
+                  variant="flat"
+                  startContent={statusIconMap[enquiry.status]}
+                >
+                  {enquiry.status}
+                </Chip>
+              </div>
+            </DropdownTrigger>
+            <DropdownMenu
+              aria-label="Change Status"
+              onAction={(key) => onStatusChange(enquiry._id, key)}
+              selectionMode="single"
+              selectedKeys={[enquiry.status]}
             >
-              Mark Completed
-            </DropdownItem>
-            <DropdownItem
-              key="Cancelled"
-              startContent={<XCircle className="text-danger" size={16} />}
-            >
-              Mark Cancelled
-            </DropdownItem>
-            <DropdownItem
-              key="Pending"
-              startContent={<Clock className="text-warning" size={16} />}
-            >
-              Mark Pending
-            </DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
+              <DropdownItem
+                key="Completed"
+                startContent={<CheckCircle2 className="text-success" size={16} />}
+              >
+                Mark Completed
+              </DropdownItem>
+              <DropdownItem
+                key="Cancelled"
+                startContent={<XCircle className="text-danger" size={16} />}
+              >
+                Mark Cancelled
+              </DropdownItem>
+              <DropdownItem
+                key="Pending"
+                startContent={<Clock className="text-warning" size={16} />}
+              >
+                Mark Pending
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+        )}
       </div>
 
       {/* Contact Info */}
@@ -109,18 +121,20 @@ const EnquiryCard = ({ enquiry, onStatusChange, onDelete }) => {
       </div>
 
       {/* Actions */}
-      <div className="flex justify-end pt-3 border-t border-slate-100 dark:border-slate-800">
-        <Button
-          isIconOnly
-          size="sm"
-          variant="light"
-          color="danger"
-          className="hover:bg-danger/10"
-          onPress={() => onDelete(enquiry)}
-        >
-          <Trash2 size={18} />
-        </Button>
-      </div>
+      {canManage && (
+        <div className="flex justify-end pt-3 border-t border-slate-100 dark:border-slate-800">
+          <Button
+            isIconOnly
+            size="sm"
+            variant="light"
+            color="danger"
+            className="hover:bg-danger/10"
+            onPress={() => onDelete(enquiry)}
+          >
+            <Trash2 size={18} />
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

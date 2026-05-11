@@ -42,7 +42,7 @@ import {
 import { useDisclosure } from "@heroui/modal";
 import DeactivateConfirmModal from "@/components/admin/DeactivateConfirmModal";
 import { useSession, signOut } from "next-auth/react";
-import { canManageUser } from "@/lib/permissions";
+import { canManageUser, hasPermission } from "@/lib/permissions";
 import { calculateAge, formatDate } from "@/lib/utils";
 
 const DetailItem = ({ icon: Icon, label, value, color = "primary" }) => (
@@ -85,6 +85,11 @@ export default function StudentDetailPage() {
 
   const { data: session } = useSession();
   const currentUser = session?.user;
+  const isOwnProfile =
+    (currentUser?._id || currentUser?.id)?.toString() === id?.toString();
+  const canManageStudents =
+    currentUser?.role === "super_admin" ||
+    hasPermission(currentUser, "students", "manage");
 
   const { data: user, isLoading } = useQuery({
     queryKey: ["student", id],
@@ -204,7 +209,7 @@ export default function StudentDetailPage() {
           >
             PDF
           </Button>
-          {canManageUser(currentUser, user, "edit") && (
+          {canManageUser(currentUser, user, "edit") && (isOwnProfile || canManageStudents) && (
             <Button
               as={Link}
               href={`/admin/students/${id}/edit`}
@@ -259,7 +264,7 @@ export default function StudentDetailPage() {
                   <span className="text-xs font-black uppercase tracking-wider text-slate-400">
                     Status
                   </span>
-                  {canManageUser(currentUser, user, "status") ? (
+                  {canManageUser(currentUser, user, "status") && (isOwnProfile || canManageStudents) ? (
                     <Dropdown>
                       <DropdownTrigger>
                         <Chip

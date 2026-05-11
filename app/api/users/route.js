@@ -4,16 +4,34 @@ import User from "@/models/User";
 import cloudinary from "@/lib/cloudinary";
 import bcrypt from "bcryptjs";
 import { logActivity } from "@/lib/activityLogger";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { hasPermission } from "@/lib/permissions";
 
 export async function GET(request) {
   try {
     await dbConnect();
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page")) || 1;
     const limit = parseInt(searchParams.get("limit")) || 10;
     const search = searchParams.get("search") || "";
     const role = searchParams.get("role") || "";
+
+    const isSuperAdmin = session.user?.role === "super_admin";
+
+    if (!isSuperAdmin) {
+      // Must have alumni:access to list any users (Alumni, Students, Admins)
+      if (!hasPermission(session.user, "alumni", "access") &&
+          !hasPermission(session.user, "alumni", "manage")) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    }
     const status = searchParams.get("status") || "";
     const district = searchParams.get("district") || "";
     const batch = searchParams.get("batch") || "";
@@ -136,9 +154,24 @@ async function generateUserId(role) {
 export async function POST(request) {
   try {
     await dbConnect();
-    const data = await request.formData();
+    const session = await getServerSession(authOptions);
 
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const data = await request.formData();
     const role = data.get("role");
+
+    if (role === "admin") {
+      if (!hasPermission(session.user, "permission_management", "manage")) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    } else {
+      if (!hasPermission(session.user, "alumni", "manage")) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    }
     const email = data.get("email");
     const password = data.get("password");
     const status = data.get("status");

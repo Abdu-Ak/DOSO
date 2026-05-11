@@ -8,10 +8,15 @@ import ConfirmModal from "@/components/admin/ui/ConfirmModal";
 import MobileEnquiryList from "./_components/MobileEnquiryList";
 import EnquiryFilters from "./_components/EnquiryFilters";
 import { getEnquiryColumns } from "./_components/EnquiryTableColumns";
+import { useSession } from "next-auth/react";
+import { hasPermission } from "@/lib/permissions";
 
 export default function EnquiriesPage() {
   const { enquiries, isLoading, updateStatusMutation, deleteMutation } =
     useEnquiries();
+  const { data: session } = useSession();
+  const currentUser = session?.user;
+  const canManage = currentUser?.role === "super_admin" || hasPermission(currentUser, "enquiries", "manage");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -53,8 +58,9 @@ export default function EnquiriesPage() {
           setEnquiryToDelete(enquiry);
           setIsDeleteModalOpen(true);
         },
+        canManage,
       }),
-    [updateStatusMutation],
+    [updateStatusMutation, canManage],
   );
 
   const handleClearFilters = () => {
@@ -134,6 +140,7 @@ export default function EnquiriesPage() {
             setEnquiryToDelete(enquiry);
             setIsDeleteModalOpen(true);
           }}
+          canManage={canManage}
         />
       </div>
 

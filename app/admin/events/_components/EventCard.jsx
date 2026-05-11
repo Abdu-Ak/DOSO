@@ -23,7 +23,7 @@ import {
 } from "@heroui/dropdown";
 import { format } from "date-fns";
 
-const EventCard = ({ event, onToggleVisibility, onDelete }) => {
+const EventCard = ({ event, onToggleVisibility, onDelete, canManage }) => {
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-3 shadow-sm">
       <div className="flex items-start gap-4">
@@ -64,22 +64,26 @@ const EventCard = ({ event, onToggleVisibility, onDelete }) => {
                 >
                   View details
                 </DropdownItem>
-                <DropdownItem
-                  as={Link}
-                  href={`/admin/events/${event._id}/edit`}
-                  startContent={<CalendarCog size={16} />}
-                >
-                  Edit event
-                </DropdownItem>
-                <DropdownItem
-                  key="delete"
-                  className="text-danger"
-                  color="danger"
-                  startContent={<Trash2 size={16} />}
-                  onPress={() => onDelete(event)}
-                >
-                  Delete event
-                </DropdownItem>
+                {canManage && (
+                  <DropdownItem
+                    as={Link}
+                    href={`/admin/events/${event._id}/edit`}
+                    startContent={<CalendarCog size={16} />}
+                  >
+                    Edit event
+                  </DropdownItem>
+                )}
+                {canManage && (
+                  <DropdownItem
+                    key="delete"
+                    className="text-danger"
+                    color="danger"
+                    startContent={<Trash2 size={16} />}
+                    onPress={() => onDelete(event)}
+                  >
+                    Delete event
+                  </DropdownItem>
+                )}
               </DropdownMenu>
             </Dropdown>
           </div>
@@ -117,6 +121,7 @@ const EventCard = ({ event, onToggleVisibility, onDelete }) => {
         </span>
         <Switch
           isSelected={event.isVisible}
+          isDisabled={!canManage}
           size="sm"
           color="success"
           onValueChange={(val) => onToggleVisibility(event._id, val)}

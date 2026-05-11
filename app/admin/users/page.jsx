@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useDisclosure } from "@heroui/modal";
 import { useSession } from "next-auth/react";
-import { canManageUser } from "@/lib/permissions";
+import { canManageUser, hasPermission } from "@/lib/permissions";
 import { useDebounce } from "@/lib/hooks";
 
 import DeactivateConfirmModal from "@/components/admin/DeactivateConfirmModal";
@@ -23,6 +23,12 @@ import { useUserMutations } from "./_hooks/useUserMutations";
 export default function UserManagement() {
   const { data: session } = useSession();
   const currentUser = session?.user;
+  const canManageAlumni =
+    currentUser?.role === "super_admin" ||
+    hasPermission(currentUser, "alumni", "manage");
+  const canManagePermissions =
+    currentUser?.role === "super_admin" ||
+    hasPermission(currentUser, "permission_management", "manage");
 
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
@@ -122,8 +128,10 @@ export default function UserManagement() {
         onReject: setRejectModalUser,
         onDelete: handleDelete,
         onRenew: setRenewModalUser,
+        canManageAlumni,
+        canManagePermissions,
       }),
-    [currentUser, handleStatusChange, approveMutation],
+    [currentUser, handleStatusChange, approveMutation, canManageAlumni],
   );
 
   const users = data?.users || [];
@@ -144,6 +152,7 @@ export default function UserManagement() {
     setShowFilters,
     searchTerm,
     onSearchChange: handleSearch,
+    canManageAlumni,
   };
 
   const paginationProps = {
@@ -192,6 +201,8 @@ export default function UserManagement() {
         onReject={setRejectModalUser}
         approvePending={approveMutation.isPending}
         onRenew={setRenewModalUser}
+        canManageAlumni={canManageAlumni}
+        canManagePermissions={canManagePermissions}
       />
 
       <ConfirmModal

@@ -17,6 +17,7 @@ const SundookFilters = ({
   searchTerm,
   onSearchChange,
   onCreateOpen,
+  canManage,
 }) => {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 10 }, (_, i) =>
@@ -47,15 +48,17 @@ const SundookFilters = ({
         >
           <Filter size={18} />
         </Button>
-        <Button
-          isIconOnly
-          color="primary"
-          onPress={onCreateOpen}
-          className="lg:hidden shadow-lg shadow-primary/20"
-          radius="lg"
-        >
-          <Plus size={18} />
-        </Button>
+        {canManage && (
+          <Button
+            isIconOnly
+            color="primary"
+            onPress={onCreateOpen}
+            className="lg:hidden shadow-lg shadow-primary/20"
+            radius="lg"
+          >
+            <Plus size={18} />
+          </Button>
+        )}
       </div>
 
       {/* Filters (Collapsible on mobile) */}
@@ -102,15 +105,17 @@ const SundookFilters = ({
           ))}
         </Select>
 
-        <Button
-          color="primary"
-          startContent={<Plus size={18} />}
-          onPress={onCreateOpen}
-          className="hidden lg:flex font-bold shadow-lg shadow-primary/20 w-auto"
-          radius="lg"
-        >
-          Create Record
-        </Button>
+        {canManage && (
+          <Button
+            color="primary"
+            startContent={<Plus size={18} />}
+            onPress={onCreateOpen}
+            className="hidden lg:flex font-bold shadow-lg shadow-primary/20 w-auto"
+            radius="lg"
+          >
+            Create Record
+          </Button>
+        )}
       </div>
     </div>
   );
