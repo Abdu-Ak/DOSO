@@ -4,6 +4,11 @@ import ContactInfo from "./_components/ContactInfo";
 import LeadershipSection from "./_components/LeadershipSection";
 import CampusMap from "./_components/CampusMap";
 
+export const metadata = {
+  title: "Contact Us",
+  description: "Get in touch with Darul Hidaya Dars. Find our location, campus map, leadership contacts, or submit an enquiry.",
+};
+
 export default function ContactPage() {
   return (
     <main className="min-h-screen">

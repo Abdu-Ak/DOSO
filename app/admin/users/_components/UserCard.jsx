@@ -45,7 +45,6 @@ const UserCard = ({
   approvePending,
   onRenew,
   canManageAlumni,
-  canManagePermissions = false,
 }) => {
   const showActions = canManageUser(currentUser, user) && canManageAlumni;
   const showStatus =

@@ -24,14 +24,25 @@ export async function GET(request) {
     const role = searchParams.get("role") || "";
 
     const isSuperAdmin = session.user?.role === "super_admin";
+    const isAdmin = session.user?.role === "admin";
 
     if (!isSuperAdmin) {
-      // Must have alumni:access to list any users (Alumni, Students, Admins)
-      if (!hasPermission(session.user, "alumni", "access") &&
-          !hasPermission(session.user, "alumni", "manage")) {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      if (!isAdmin) {
+        // Standard users (alumni/students) can only list/search alumni
+        if (role.toLowerCase() !== "alumni") {
+          return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+      } else {
+        // Admins must have alumni:access or alumni:manage permission
+        if (
+          !hasPermission(session.user, "alumni", "access") &&
+          !hasPermission(session.user, "alumni", "manage")
+        ) {
+          return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
       }
     }
+
     const status = searchParams.get("status") || "";
     const district = searchParams.get("district") || "";
     const batch = searchParams.get("batch") || "";
@@ -109,24 +120,6 @@ export async function GET(request) {
     );
   }
 }
-
-const DISTRICT_CODES = {
-  Thiruvananthapuram: "TVM",
-  Kollam: "KLM",
-  Pathanamthitta: "PTA",
-  Alappuzha: "ALP",
-  Kottayam: "KTM",
-  Idukki: "IDK",
-  Ernakulam: "EKM",
-  Thrissur: "TSR",
-  Palakkad: "PKD",
-  Malappuram: "MLP",
-  Kozhikode: "KKD",
-  Wayanad: "WYD",
-  Kannur: "KNR",
-  Kasaragod: "KSD",
-  Other: "OTH",
-};
 
 async function generateUserId(role) {
   if (role === "admin") return null;
