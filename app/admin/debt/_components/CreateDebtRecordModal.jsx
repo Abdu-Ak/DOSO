@@ -50,13 +50,14 @@ export default function CreateDebtRecordModal({
   const paymentType = watch("payment_type");
   const durationMonths = watch("duration_months");
 
+  // Reset duration to a sensible default only when payment TYPE changes
   useEffect(() => {
     if (paymentType === "single") {
       setValue("duration_months", 1, { shouldValidate: true });
-    } else if (paymentType === "emi" && durationMonths === 1) {
+    } else if (paymentType === "emi") {
       setValue("duration_months", 2, { shouldValidate: true });
     }
-  }, [paymentType, setValue, durationMonths]);
+  }, [paymentType, setValue]);
 
   useEffect(() => {
     if (isOpen) {

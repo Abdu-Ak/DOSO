@@ -45,14 +45,14 @@ export default function DebtRequestForm({ isOpen, onOpenChange }) {
   const paymentType = watch("payment_type");
   const durationMonths = watch("duration_months");
 
-  // Handle duration logic based on payment type
+  // Reset duration to a sensible default only when payment TYPE changes
   useEffect(() => {
     if (paymentType === "single") {
       setValue("duration_months", 1);
-    } else if (paymentType === "emi" && durationMonths === 1) {
+    } else if (paymentType === "emi") {
       setValue("duration_months", 2);
     }
-  }, [paymentType, setValue, durationMonths]);
+  }, [paymentType, setValue]);
 
   const { data: alumniData, isLoading: alumniLoading } = useQuery({
     queryKey: ["users", "alumni-list"],
