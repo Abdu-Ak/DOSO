@@ -45,7 +45,7 @@ export default function AlumniList() {
       }
       if (district !== "All Districts") params.district = district;
 
-      const response = await axios.get("/api/users", { params });
+      const response = await axios.get("/api/alumni", { params });
       return response.data;
     },
     placeholderData: (prev) => prev,
