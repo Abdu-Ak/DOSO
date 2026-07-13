@@ -87,7 +87,7 @@ const PublicRegistrationForm = ({ role }) => {
 
   if (submitted) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center px-4">
+      <div className="min-h-screen flex items-center justify-center px-4">
         <Card className="max-w-md w-full">
           <CardBody className="p-8 text-center space-y-4">
             <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto">

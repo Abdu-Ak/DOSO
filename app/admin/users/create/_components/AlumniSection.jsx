@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Textarea } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
 import { Controller } from "react-hook-form";
@@ -52,14 +52,20 @@ const AlumniSection = ({
   isSelfEdit,
 }) => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [batchYears, setBatchYears] = useState([]);
   const selectedDistrict = watch("district");
   const selectedJob = watch("current_job");
-  const currentYear = new Date().getFullYear();
-  const startYear = 1980;
-  const batchYears = Array.from(
-    { length: currentYear - startYear + 1 },
-    (_, i) => (currentYear - i).toString(),
-  );
+
+  useEffect(() => {
+    const currentYear = new Date().getFullYear();
+    const startYear = 1980;
+    setBatchYears(
+      Array.from(
+        { length: currentYear - startYear + 1 },
+        (_, i) => (currentYear - i).toString(),
+      ),
+    );
+  }, []);
 
   return (
     <>
