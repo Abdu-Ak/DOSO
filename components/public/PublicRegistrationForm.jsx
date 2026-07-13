@@ -15,6 +15,54 @@ import AlumniSection from "@/app/admin/users/create/_components/AlumniSection";
 import axios from "axios";
 import { addToast } from "@heroui/toast";
 
+const compressImage = (file, maxWidth = 1000, quality = 0.8) =>
+  new Promise((resolve, reject) => {
+    // Skip compression for small files (< 1MB)
+    if (file.size < 1 * 1024 * 1024) {
+      resolve(file);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onerror = () => resolve(file); // fallback to original on read error
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onerror = () => resolve(file); // fallback to original on decode error
+      img.onload = () => {
+        try {
+          let { width, height } = img;
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) {
+                resolve(file); // fallback if toBlob returns null
+                return;
+              }
+              resolve(
+                new File([blob], file.name, {
+                  type: "image/jpeg",
+                  lastModified: Date.now(),
+                }),
+              );
+            },
+            "image/jpeg",
+            quality,
+          );
+        } catch {
+          resolve(file); // fallback on any canvas error
+        }
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
 const PublicRegistrationForm = ({ role }) => {
   const [imagePreview, setImagePreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -41,14 +89,15 @@ const PublicRegistrationForm = ({ role }) => {
     },
   });
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      setSelectedFile(file);
+      const compressed = await compressImage(file);
+      setSelectedFile(compressed);
       const reader = new FileReader();
       reader.onloadend = () => setImagePreview(reader.result);
-      reader.readAsDataURL(file);
-      setValue("image", file, { shouldValidate: true });
+      reader.readAsDataURL(compressed);
+      setValue("image", compressed, { shouldValidate: true });
     }
   };
 
