@@ -23,9 +23,9 @@ export default function EditEventPage() {
     enabled: !!id,
   });
 
-  const handleSubmit = async (formData) => {
+  const handleSubmit = async (data) => {
     try {
-      await updateMutation.mutateAsync({ id, formData });
+      await updateMutation.mutateAsync({ id, data });
       router.push("/admin/events");
     } catch (error) {
       console.error("Failed to update event:", error);

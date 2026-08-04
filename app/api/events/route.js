@@ -1,29 +1,10 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Event from "@/models/Event";
-import cloudinary from "@/lib/cloudinary";
 import { logActivity } from "@/lib/activityLogger";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { hasPermission } from "@/lib/permissions";
-
-// Helper for Cloudinary Uploads
-const uploadToCloudinary = async (file, folder, resourceType = "auto") => {
-  if (!file || file.size === 0 || typeof file === "string") return file; // if already URL string
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-  return new Promise((resolve, reject) => {
-    cloudinary.uploader
-      .upload_stream(
-        { folder, resource_type: resourceType },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result.secure_url);
-        },
-      )
-      .end(buffer);
-  });
-};
 
 export async function GET(request) {
   try {
@@ -36,7 +17,7 @@ export async function GET(request) {
     const type = searchParams.get("type") || "";
     const startDate = searchParams.get("startDate") || "";
     const endDate = searchParams.get("endDate") || "";
-    const isVisible = searchParams.get("isVisible"); // Optional filter for public side
+    const isVisible = searchParams.get("isVisible");
 
     const skip = (page - 1) * limit;
 
@@ -64,9 +45,6 @@ export async function GET(request) {
     }
 
     const total = await Event.countDocuments(query);
-    // Sort upcoming events first on public side? The query asks "upcoming need to be on top like that".
-    // We can just sort by date ascending if upcoming implies future ones first, or -1 for newest first.
-    // Assuming standard date descending (newest on top).
     const sortOrder =
       searchParams.get("sort") === "asc" ? { date: 1 } : { date: -1 };
 
@@ -103,56 +81,20 @@ export async function POST(request) {
       return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 });
     }
 
-    const data = await request.formData();
+    const data = await request.json();
 
-    const title = data.get("title");
-    const description = data.get("description");
-    const type = data.get("type");
-    const date = data.get("date");
-    const time = data.get("time");
-    const heldingPlace = data.get("heldingPlace");
-    const isVisible = data.get("isVisible") === "true";
-
-    // Files
-    const mainImageFile = data.get("mainImage");
-    const galleryImageFiles = data.getAll("galleryImages");
-    const galleryVideoFiles = data.getAll("galleryVideos");
-
-    // Upload Main Image
-    const mainImageUrl =
-      mainImageFile && mainImageFile.size > 0
-        ? await uploadToCloudinary(mainImageFile, "doso_events/main", "image")
-        : "";
-
-    // Upload Gallery Images
-    const uploadedGalleryImages = [];
-    for (const img of galleryImageFiles) {
-      if (img && img.size > 0 && typeof img !== "string") {
-        const url = await uploadToCloudinary(
-          img,
-          "doso_events/gallery_images",
-          "image",
-        );
-        if (url) uploadedGalleryImages.push(url);
-      } else if (typeof img === "string" && img.startsWith("http")) {
-        uploadedGalleryImages.push(img);
-      }
-    }
-
-    // Upload Gallery Videos
-    const uploadedGalleryVideos = [];
-    for (const vid of galleryVideoFiles) {
-      if (vid && vid.size > 0 && typeof vid !== "string") {
-        const url = await uploadToCloudinary(
-          vid,
-          "doso_events/gallery_videos",
-          "video",
-        );
-        if (url) uploadedGalleryVideos.push(url);
-      } else if (typeof vid === "string" && vid.startsWith("http")) {
-        uploadedGalleryVideos.push(vid);
-      }
-    }
+    const {
+      title,
+      description,
+      type,
+      date,
+      time,
+      heldingPlace,
+      isVisible,
+      mainImageUrl,
+      galleryImages = [],
+      galleryVideos = [],
+    } = data;
 
     const newEvent = await Event.create({
       title,
@@ -163,8 +105,8 @@ export async function POST(request) {
       heldingPlace,
       isVisible,
       mainImage: mainImageUrl,
-      galleryImages: uploadedGalleryImages,
-      galleryVideos: uploadedGalleryVideos,
+      galleryImages,
+      galleryVideos,
     });
 
     await logActivity({

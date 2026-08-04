@@ -49,14 +49,14 @@ export async function PUT(request, { params }) {
     }
 
     const { id } = await params;
-    const data = await request.formData();
+    const data = await request.json();
 
     const student = await Student.findById(id);
     if (!student) {
       return NextResponse.json({ error: "Student not found" }, { status: 404 });
     }
 
-    const email = data.get("email");
+    const email = data.email;
     if (email && email.toLowerCase() !== student.email) {
       const existingStudent = await Student.findOne({
         email: email.toLowerCase(),
@@ -71,58 +71,41 @@ export async function PUT(request, { params }) {
 
     let imageUrl = student.image;
     let imagePublicId = student.imagePublicId;
-    const imageFile = data.get("image");
 
-    if (imageFile && imageFile.size > 0 && typeof imageFile !== "string") {
-      // Delete old image if exists
+    // If the frontend uploaded a new image, it sends new imageUrl + imagePublicId
+    if (data.imageUrl && data.imageUrl !== student.image) {
+      // Destroy old image from Cloudinary
       if (student.imagePublicId) {
         await cloudinary.uploader.destroy(student.imagePublicId);
       }
-
-      const bytes = await imageFile.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-
-      const uploadPromise = new Promise((resolve, reject) => {
-        cloudinary.uploader
-          .upload_stream({ folder: "students" }, (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          })
-          .end(buffer);
-      });
-
-      const result = await uploadPromise;
-      imageUrl = result.secure_url;
-      imagePublicId = result.public_id;
+      imageUrl = data.imageUrl;
+      imagePublicId = data.imagePublicId || "";
     }
 
-    const dob = data.get("dob");
-    const admissionDate = data.get("date_of_admission");
-
     const updateData = {
-      name: data.get("name"),
+      name: data.name,
       email: email ? email.toLowerCase() : student.email,
-      phone: data.get("phone"),
-      dob: dob ? new Date(dob) : student.dob,
-      status: data.get("status") || student.status,
-      current_madrasa_class: data.get("current_madrasa_class"),
-      current_school_class: data.get("current_school_class"),
-      house_name: data.get("house_name"),
-      address: data.get("address"),
-      district: data.get("district"),
-      custom_district: data.get("custom_district"),
-      father_name: data.get("father_name"),
-      guardian_name: data.get("guardian_name"),
-      guardian_phone: data.get("guardian_phone"),
-      guardian_relation: data.get("guardian_relation"),
-      guardian_occupation: data.get("guardian_occupation"),
-      date_of_admission: admissionDate
-        ? new Date(admissionDate)
+      phone: data.phone,
+      dob: data.dob ? new Date(data.dob) : student.dob,
+      status: data.status || student.status,
+      current_madrasa_class: data.current_madrasa_class,
+      current_school_class: data.current_school_class,
+      house_name: data.house_name,
+      address: data.address,
+      district: data.district,
+      custom_district: data.custom_district,
+      father_name: data.father_name,
+      guardian_name: data.guardian_name,
+      guardian_phone: data.guardian_phone,
+      guardian_relation: data.guardian_relation,
+      guardian_occupation: data.guardian_occupation,
+      date_of_admission: data.date_of_admission
+        ? new Date(data.date_of_admission)
         : student.date_of_admission,
       image: imageUrl,
       imagePublicId,
-      aadhar_number: data.get("aadhar_number"),
-      identification_mark: data.get("identification_mark"),
+      aadhar_number: data.aadhar_number,
+      identification_mark: data.identification_mark,
     };
 
     const updatedStudent = await Student.findByIdAndUpdate(id, updateData, {

@@ -6,10 +6,8 @@ export const useEventMutations = () => {
   const queryClient = useQueryClient();
 
   const createMutation = useMutation({
-    mutationFn: async (formData) => {
-      const response = await axios.post("/api/events", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+    mutationFn: async (data) => {
+      const response = await axios.post("/api/events", data);
       return response.data;
     },
     onSuccess: () => {
@@ -30,10 +28,8 @@ export const useEventMutations = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, formData }) => {
-      const response = await axios.put(`/api/events/${id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+    mutationFn: async ({ id, data }) => {
+      const response = await axios.put(`/api/events/${id}`, data);
       return response.data;
     },
     onSuccess: (data, variables) => {
@@ -78,11 +74,7 @@ export const useEventMutations = () => {
 
   const toggleVisibilityMutation = useMutation({
     mutationFn: async ({ id, isVisible }) => {
-      const formData = new FormData();
-      formData.append("isVisible", isVisible);
-      const response = await axios.put(`/api/events/${id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await axios.put(`/api/events/${id}`, { isVisible });
       return response.data;
     },
     onSuccess: (data, variables) => {

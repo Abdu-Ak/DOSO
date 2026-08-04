@@ -14,60 +14,13 @@ import StudentSection from "@/app/admin/students/_components/StudentSection";
 import AlumniSection from "@/app/admin/users/create/_components/AlumniSection";
 import axios from "axios";
 import { addToast } from "@heroui/toast";
-
-const compressImage = (file, maxWidth = 1000, quality = 0.8) =>
-  new Promise((resolve, reject) => {
-    // Skip compression for small files (< 1MB)
-    if (file.size < 1 * 1024 * 1024) {
-      resolve(file);
-      return;
-    }
-    const reader = new FileReader();
-    reader.onerror = () => resolve(file); // fallback to original on read error
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onerror = () => resolve(file); // fallback to original on decode error
-      img.onload = () => {
-        try {
-          let { width, height } = img;
-          if (width > maxWidth) {
-            height = Math.round((height * maxWidth) / width);
-            width = maxWidth;
-          }
-          const canvas = document.createElement("canvas");
-          canvas.width = width;
-          canvas.height = height;
-          canvas.getContext("2d").drawImage(img, 0, 0, width, height);
-          canvas.toBlob(
-            (blob) => {
-              if (!blob) {
-                resolve(file); // fallback if toBlob returns null
-                return;
-              }
-              resolve(
-                new File([blob], file.name, {
-                  type: "image/jpeg",
-                  lastModified: Date.now(),
-                }),
-              );
-            },
-            "image/jpeg",
-            quality,
-          );
-        } catch {
-          resolve(file); // fallback on any canvas error
-        }
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
+import { useCloudinaryUpload } from "@/lib/hooks/useCloudinaryUpload";
 
 const PublicRegistrationForm = ({ role }) => {
   const [imagePreview, setImagePreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const { uploadImage, isUploading } = useCloudinaryUpload();
 
   const schema = role === "student" ? publicStudentSchema : publicAlumniSchema;
 
@@ -89,15 +42,14 @@ const PublicRegistrationForm = ({ role }) => {
     },
   });
 
-  const handleImageChange = async (e) => {
+  const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const compressed = await compressImage(file);
-      setSelectedFile(compressed);
+      setSelectedFile(file);
       const reader = new FileReader();
       reader.onloadend = () => setImagePreview(reader.result);
-      reader.readAsDataURL(compressed);
-      setValue("image", compressed, { shouldValidate: true });
+      reader.readAsDataURL(file);
+      setValue("image", file, { shouldValidate: true });
     }
   };
 
@@ -108,18 +60,19 @@ const PublicRegistrationForm = ({ role }) => {
   };
 
   const onFormSubmit = async (data) => {
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      Object.keys(data).forEach((key) => {
-        if (key === "image") {
-          if (selectedFile) formData.append("image", selectedFile);
-        } else if (data[key] !== undefined && data[key] !== null) {
-          formData.append(key, data[key]);
-        }
-      });
+    let imageUrl = "";
+    let imagePublicId = "";
 
-      await axios.post("/api/register", formData);
+    if (selectedFile) {
+      const result = await uploadImage(selectedFile);
+      if (!result) return;
+      imageUrl = result.url;
+      imagePublicId = result.publicId;
+    }
+
+    try {
+      const { image, ...rest } = data;
+      await axios.post("/api/register", { ...rest, imageUrl, imagePublicId });
       setSubmitted(true);
     } catch (error) {
       addToast({
@@ -129,8 +82,6 @@ const PublicRegistrationForm = ({ role }) => {
           "Registration failed. Please try again.",
         color: "danger",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -258,8 +209,8 @@ const PublicRegistrationForm = ({ role }) => {
                 <Button
                   type="submit"
                   color="primary"
-                  isLoading={loading}
-                  startContent={!loading && <Send size={18} />}
+                  isLoading={isUploading}
+                  startContent={!isUploading && <Send size={18} />}
                   className="w-full sm:w-auto px-12 font-bold shadow-lg h-12"
                   radius="lg"
                   size="lg"

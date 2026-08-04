@@ -8,6 +8,7 @@ import { Switch } from "@heroui/switch";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { EVENT_TYPES } from "./EventFilters";
+import { useCloudinaryUpload } from "@/lib/hooks/useCloudinaryUpload";
 import {
   Image as ImageIcon,
   Video as VideoIcon,
@@ -27,18 +28,22 @@ import { parseDate, parseTime } from "@internationalized/date";
 import { createEventSchema } from "@/lib/validations/eventSchema";
 import { formatDate } from "@/lib/utils";
 
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
-const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
-
 export default function EventForm({
   initialData,
   onSubmit,
   isLoading,
   onCancel,
 }) {
+  const { uploadImage, uploadVideo, isUploading } = useCloudinaryUpload();
+
+  // State stores either an existing URL string or a new File object for pending uploads
   const [mainImagePreview, setMainImagePreview] = useState(null);
+  const [mainImageFile, setMainImageFile] = useState(null);
+
+  // Each item is either a URL string (existing) or a File object (new)
   const [galleryImages, setGalleryImages] = useState([]);
   const [galleryVideos, setGalleryVideos] = useState([]);
+
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const {
@@ -59,7 +64,7 @@ export default function EventForm({
       time: "",
       heldingPlace: "",
       isVisible: true,
-      mainImage: "",
+      mainImageUrl: "",
       galleryImages: [],
       galleryVideos: [],
     },
@@ -74,6 +79,9 @@ export default function EventForm({
         ...initialData,
         date: formattedDate,
         time: initialData.time || "",
+        mainImageUrl: initialData.mainImage || "",
+        galleryImages: initialData.galleryImages || [],
+        galleryVideos: initialData.galleryVideos || [],
       });
       setMainImagePreview(initialData.mainImage);
       setGalleryImages(initialData.galleryImages || []);
@@ -83,69 +91,40 @@ export default function EventForm({
 
   const handleMainImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      if (file.size > MAX_IMAGE_SIZE) {
-        return addToast({
-          title: "Error",
-          description: "Image size exceeds 10MB limit",
-          color: "danger",
-        });
-      }
-      setValue("mainImage", file, { shouldValidate: true });
-      const reader = new FileReader();
-      reader.onloadend = () => setMainImagePreview(reader.result);
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    setMainImageFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setMainImagePreview(reader.result);
+    reader.readAsDataURL(file);
+    setValue("mainImageUrl", file.name, { shouldValidate: true });
   };
 
   const handleGalleryImagesChange = (e) => {
     const files = Array.from(e.target.files);
-    const validFiles = files.filter((file) => {
-      if (file.size > MAX_IMAGE_SIZE) {
-        addToast({
-          title: "Error",
-          description: `${file.name} exceeds 10MB limit`,
-          color: "danger",
-        });
-        return false;
-      }
-      return true;
-    });
 
-    if (galleryImages.length + validFiles.length > 10) {
+    if (galleryImages.length + files.length > 10) {
       return addToast({
-        title: "Error",
+        title: "Limit Reached",
         description: "Maximum 10 gallery images allowed",
         color: "danger",
       });
     }
 
-    setGalleryImages([...galleryImages, ...validFiles]);
+    setGalleryImages((prev) => [...prev, ...files]);
   };
 
   const handleGalleryVideosChange = (e) => {
     const files = Array.from(e.target.files);
-    const validFiles = files.filter((file) => {
-      if (file.size > MAX_VIDEO_SIZE) {
-        addToast({
-          title: "Error",
-          description: `${file.name} exceeds 50MB limit`,
-          color: "danger",
-        });
-        return false;
-      }
-      return true;
-    });
 
-    if (galleryVideos.length + validFiles.length > 10) {
+    if (galleryVideos.length + files.length > 10) {
       return addToast({
-        title: "Error",
+        title: "Limit Reached",
         description: "Maximum 10 gallery videos allowed",
         color: "danger",
       });
     }
 
-    setGalleryVideos([...galleryVideos, ...validFiles]);
+    setGalleryVideos((prev) => [...prev, ...files]);
   };
 
   const removeGalleryItem = (index, type) => {
@@ -156,21 +135,57 @@ export default function EventForm({
     }
   };
 
-  const onFormSubmit = (data) => {
-    const formData = new FormData();
-    Object.keys(data).forEach((key) => {
-      if (key !== "galleryImages" && key !== "galleryVideos") {
-        formData.append(key, data[key]);
-      }
+  const onFormSubmit = async (data) => {
+    // Upload main image if a new file was selected
+    let mainImageUrl = data.mainImageUrl;
+    if (mainImageFile) {
+      const result = await uploadImage(mainImageFile);
+      if (!result) return;
+      mainImageUrl = result.url;
+    }
+
+    let hasUploadError = false;
+
+    // Upload any new gallery images (File objects); pass through existing URL strings
+    const uploadedGalleryImages = await Promise.all(
+      galleryImages.map(async (item) => {
+        if (typeof item === "string") return item;
+        const result = await uploadImage(item);
+        if (!result) {
+          hasUploadError = true;
+          return null;
+        }
+        return result.url;
+      }),
+    );
+
+    if (hasUploadError) return;
+
+    // Upload any new gallery videos (File objects); pass through existing URL strings
+    const uploadedGalleryVideos = await Promise.all(
+      galleryVideos.map(async (item) => {
+        if (typeof item === "string") return item;
+        const result = await uploadVideo(item);
+        if (!result) {
+          hasUploadError = true;
+          return null;
+        }
+        return result.url;
+      }),
+    );
+
+    if (hasUploadError) return;
+
+    onSubmit({
+      ...data,
+      mainImageUrl,
+      galleryImages: uploadedGalleryImages.filter(Boolean),
+      galleryVideos: uploadedGalleryVideos.filter(Boolean),
     });
-
-    galleryImages.forEach((img) => formData.append("galleryImages", img));
-    galleryVideos.forEach((vid) => formData.append("galleryVideos", vid));
-
-    onSubmit(formData);
   };
 
   const isVisibleValue = watch("isVisible");
+  const isSubmitting = isLoading || isUploading;
 
   const requiredLabel = (text) => (
     <span>
@@ -364,11 +379,11 @@ export default function EventForm({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Images */}
+              {/* Gallery Images */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                    Images (Max 10)
+                    Images (Max 10) · max 10MB each
                   </span>
                   <Button
                     size="sm"
@@ -391,9 +406,11 @@ export default function EventForm({
                   onChange={handleGalleryImagesChange}
                 />
                 <div className="grid grid-cols-4 gap-2">
-                  {galleryImages.map((img, index) => {
+                  {galleryImages.map((item, index) => {
                     const preview =
-                      typeof img === "string" ? img : URL.createObjectURL(img);
+                      typeof item === "string"
+                        ? item
+                        : URL.createObjectURL(item);
                     return (
                       <div
                         key={index}
@@ -417,11 +434,11 @@ export default function EventForm({
                 </div>
               </div>
 
-              {/* Videos */}
+              {/* Gallery Videos */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                    Videos (Max 10)
+                    Videos (Max 10) · max 20MB each
                   </span>
                   <Button
                     size="sm"
@@ -444,7 +461,7 @@ export default function EventForm({
                   onChange={handleGalleryVideosChange}
                 />
                 <div className="space-y-2">
-                  {galleryVideos.map((vid, index) => (
+                  {galleryVideos.map((item, index) => (
                     <div
                       key={index}
                       className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800"
@@ -452,7 +469,7 @@ export default function EventForm({
                       <div className="flex items-center gap-2 overflow-hidden text-xs">
                         <VideoIcon size={14} className="text-primary" />
                         <span className="truncate">
-                          {typeof vid === "string" ? "Video" : vid.name}
+                          {typeof item === "string" ? "Video" : item.name}
                         </span>
                       </div>
                       <button
@@ -479,6 +496,7 @@ export default function EventForm({
                 {requiredLabel("Main Banner")}
               </h3>
             </div>
+            <p className="text-xs text-slate-400">Max 10MB · JPG, PNG, WEBP</p>
 
             <div
               className="relative border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl aspect-square flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-900/50 group hover:border-primary cursor-pointer"
@@ -509,9 +527,9 @@ export default function EventForm({
                 onChange={handleMainImageChange}
               />
             </div>
-            {errors.mainImage && (
+            {errors.mainImageUrl && (
               <p className="text-xs text-danger font-medium">
-                {errors.mainImage.message}
+                {errors.mainImageUrl.message}
               </p>
             )}
           </div>
@@ -521,12 +539,16 @@ export default function EventForm({
             <Button
               color="primary"
               type="submit"
-              isLoading={isLoading}
+              isLoading={isSubmitting}
               className="w-full font-bold h-12 shadow-lg shadow-primary/20"
               radius="lg"
-              startContent={!isLoading && <Save size={18} />}
+              startContent={!isSubmitting && <Save size={18} />}
             >
-              {initialData ? "Update Event" : "Create Event"}
+              {isSubmitting
+                ? "Uploading..."
+                : initialData
+                  ? "Update Event"
+                  : "Create Event"}
             </Button>
             <Button
               variant="flat"

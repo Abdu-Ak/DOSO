@@ -2,34 +2,16 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import dbConnect from "@/lib/mongodb";
 import Setting from "@/models/Setting";
-import cloudinary from "@/lib/cloudinary";
 import { logActivity } from "@/lib/activityLogger";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { hasPermission } from "@/lib/permissions";
-
-// Helper for Cloudinary Uploads
-const uploadToCloudinary = async (file, folder) => {
-  if (!file || typeof file === "string") return file;
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-  return new Promise((resolve, reject) => {
-    cloudinary.uploader
-      .upload_stream({ folder }, (error, result) => {
-        if (error) reject(error);
-        else resolve(result.secure_url);
-      })
-      .end(buffer);
-  });
-};
 
 export async function GET() {
   try {
     await dbConnect();
     let settings = await Setting.findOne();
     if (!settings) {
-      // Return empty structure or defaults if needed,
-      // but usually the frontend handles the absence.
       return NextResponse.json({ success: true, settings: {} });
     }
     return NextResponse.json({ success: true, settings });
@@ -54,72 +36,9 @@ export async function PUT(request) {
       return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 });
     }
 
-    const data = await request.formData();
+    const data = await request.json();
 
-    // Parse leadership data
-    const leadership = {
-      president: {
-        name: data.get("leadership.president.name"),
-        title: data.get("leadership.president.title"),
-        email: data.get("leadership.president.email"),
-        phone: data.get("leadership.president.phone"),
-      },
-      secretary: {
-        name: data.get("leadership.secretary.name"),
-        title: data.get("leadership.secretary.title"),
-        email: data.get("leadership.secretary.email"),
-        phone: data.get("leadership.secretary.phone"),
-      },
-      treasurer: {
-        name: data.get("leadership.treasurer.name"),
-        title: data.get("leadership.treasurer.title"),
-        email: data.get("leadership.treasurer.email"),
-        phone: data.get("leadership.treasurer.phone"),
-      },
-    };
-
-    // Handle Images
-    const presidentImage = data.get("leadership.president.image");
-    const secretaryImage = data.get("leadership.secretary.image");
-    const treasurerImage = data.get("leadership.treasurer.image");
-
-    if (presidentImage && typeof presidentImage !== "string") {
-      leadership.president.image = await uploadToCloudinary(
-        presidentImage,
-        "doso_settings/leadership",
-      );
-    } else {
-      leadership.president.image =
-        data.get("leadership.president.currentImage") || "";
-    }
-
-    if (secretaryImage && typeof secretaryImage !== "string") {
-      leadership.secretary.image = await uploadToCloudinary(
-        secretaryImage,
-        "doso_settings/leadership",
-      );
-    } else {
-      leadership.secretary.image =
-        data.get("leadership.secretary.currentImage") || "";
-    }
-
-    if (treasurerImage && typeof treasurerImage !== "string") {
-      leadership.treasurer.image = await uploadToCloudinary(
-        treasurerImage,
-        "doso_settings/leadership",
-      );
-    } else {
-      leadership.treasurer.image =
-        data.get("leadership.treasurer.currentImage") || "";
-    }
-
-    // Parse contact data
-    const contact = {
-      email: data.get("contact.email"),
-      phone: data.get("contact.phone"),
-      address: data.get("contact.address"),
-      mapLink: data.get("contact.mapLink"),
-    };
+    const { leadership, contact } = data;
 
     const updatedSettings = await Setting.findOneAndUpdate(
       {},

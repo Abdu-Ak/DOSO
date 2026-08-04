@@ -2,27 +2,8 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import Student from "@/models/Student";
-import cloudinary from "@/lib/cloudinary";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-
-const DISTRICT_CODES = {
-  Thiruvananthapuram: "TVM",
-  Kollam: "KLM",
-  Pathanamthitta: "PTA",
-  Alappuzha: "ALP",
-  Kottayam: "KTM",
-  Idukki: "IDK",
-  Ernakulam: "EKM",
-  Thrissur: "TSR",
-  Palakkad: "PKD",
-  Malappuram: "MLP",
-  Kozhikode: "KKD",
-  Wayanad: "WYD",
-  Kannur: "KNR",
-  Kasaragod: "KSD",
-  Other: "OTH",
-};
 
 async function generateStudentId() {
   const prefix = `DOSO-ST`;
@@ -69,11 +50,9 @@ async function generateAlumniId() {
 export async function POST(request) {
   try {
     await dbConnect();
-    const data = await request.formData();
+    const data = await request.json();
 
-    const role = data.get("role");
-    const email = data.get("email");
-    const imageFile = data.get("image");
+    const { role, email, imageUrl = "", imagePublicId = "" } = data;
 
     if (!["student", "alumni"].includes(role)) {
       return NextResponse.json(
@@ -97,123 +76,72 @@ export async function POST(request) {
       }
     }
 
-    let userFields = {
-      role,
-      email: email ? email.toLowerCase() : undefined,
-      phone: data.get("phone"),
-      status: "Pending",
-      source: "public",
-    };
-
     if (role === "student") {
-      const studentData = {
-        name: data.get("name"),
-        phone: data.get("phone"),
-        dob: new Date(data.get("dob")),
-        status: "Pending",
-        current_madrasa_class: data.get("current_madrasa_class"),
-        current_school_class: data.get("current_school_class"),
-        house_name: data.get("house_name"),
-        address: data.get("address"),
-        district: data.get("district"),
-        custom_district: data.get("custom_district"),
-        father_name: data.get("father_name"),
-        guardian_name: data.get("guardian_name"),
-        guardian_phone: data.get("guardian_phone"),
-        guardian_relation: data.get("guardian_relation"),
-        guardian_occupation: data.get("guardian_occupation"),
-        date_of_admission: new Date(data.get("date_of_admission")),
-        source: "public",
-      };
-
-      const districtForId =
-        data.get("district") === "Other"
-          ? data.get("custom_district")
-          : data.get("district");
-      studentData.studentId = await generateStudentId();
-
-      // Handle image upload for student
-      let imageData = { url: "", publicId: "" };
-      if (imageFile && imageFile.size > 0) {
-        const arrayBuffer = await imageFile.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        const uploadResult = await new Promise((resolve, reject) => {
-          cloudinary.uploader
-            .upload_stream({ folder: "students" }, (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            })
-            .end(buffer);
-        });
-        imageData = {
-          url: uploadResult.secure_url,
-          publicId: uploadResult.public_id,
-        };
-      }
+      const studentId = await generateStudentId();
 
       await Student.create({
-        ...studentData,
-        image: imageData.url,
-        imagePublicId: imageData.publicId,
+        name: data.name,
+        phone: data.phone,
+        email: email ? email.toLowerCase() : undefined,
+        dob: new Date(data.dob),
+        status: "Pending",
+        current_madrasa_class: data.current_madrasa_class,
+        current_school_class: data.current_school_class,
+        house_name: data.house_name,
+        address: data.address,
+        district: data.district,
+        custom_district: data.custom_district,
+        father_name: data.father_name,
+        guardian_name: data.guardian_name,
+        guardian_phone: data.guardian_phone,
+        guardian_relation: data.guardian_relation,
+        guardian_occupation: data.guardian_occupation,
+        date_of_admission: new Date(data.date_of_admission),
+        source: "public",
+        studentId,
+        image: imageUrl,
+        imagePublicId,
       });
 
       return NextResponse.json(
         { message: "Registration submitted successfully" },
         { status: 201 },
       );
-    } else if (role === "alumni") {
-      userFields.name = data.get("name");
-      userFields.house_name = data.get("house_name");
-      userFields.father_name = data.get("father_name");
-      userFields.address = data.get("address");
-      userFields.post_office = data.get("post_office");
-      userFields.district = data.get("district");
-      userFields.custom_district = data.get("custom_district");
-      userFields.pincode = data.get("pincode");
-      userFields.batch = data.get("batch");
-      userFields.education = data.get("education");
-      userFields.dob = data.get("dob") ? new Date(data.get("dob")) : undefined;
-      userFields.current_job = data.get("current_job");
-      userFields.custom_job = data.get("custom_job");
-      userFields.job_location = data.get("job_location");
-
-      const districtForId =
-        data.get("district") === "Other"
-          ? data.get("custom_district")
-          : data.get("district");
-      const batchYear = data.get("batch")
-        ? `${data.get("batch")}-01-01`
-        : new Date();
-      userFields.userId = await generateAlumniId();
     }
 
-    let imageData = { url: "", publicId: "" };
-    if (imageFile && imageFile.size > 0) {
-      const arrayBuffer = await imageFile.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      const uploadResult = await new Promise((resolve, reject) => {
-        cloudinary.uploader
-          .upload_stream({ folder: "doso_users" }, (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          })
-          .end(buffer);
-      });
-      imageData = {
-        url: uploadResult.secure_url,
-        publicId: uploadResult.public_id,
-      };
-    }
+    // Alumni registration
+    const userFields = {
+      role,
+      email: email ? email.toLowerCase() : undefined,
+      phone: data.phone,
+      name: data.name,
+      house_name: data.house_name,
+      father_name: data.father_name,
+      address: data.address,
+      post_office: data.post_office,
+      district: data.district,
+      custom_district: data.custom_district,
+      pincode: data.pincode,
+      batch: data.batch,
+      education: data.education,
+      dob: data.dob ? new Date(data.dob) : undefined,
+      current_job: data.current_job,
+      custom_job: data.custom_job,
+      job_location: data.job_location,
+      status: "Pending",
+      source: "public",
+      userId: await generateAlumniId(),
+    };
 
     // Set a placeholder password (user can't log in until approved)
     const placeholder = crypto.randomBytes(32).toString("hex");
     const hashedPassword = await bcrypt.hash(placeholder, 10);
 
-    const newUser = await User.create({
+    await User.create({
       ...userFields,
       password: hashedPassword,
-      image: imageData.url,
-      imagePublicId: imageData.publicId,
+      image: imageUrl,
+      imagePublicId,
     });
 
     return NextResponse.json(

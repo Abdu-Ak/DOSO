@@ -13,12 +13,8 @@ export default function CreateStudentPage() {
   const queryClient = useQueryClient();
 
   const { mutate, isPending } = useMutation({
-    mutationFn: async (formData) => {
-      const response = await axios.post("/api/students", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+    mutationFn: async (data) => {
+      const response = await axios.post("/api/students", data);
       return response.data;
     },
     onSuccess: () => {

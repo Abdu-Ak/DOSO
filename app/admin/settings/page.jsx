@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { settingSchema } from "@/lib/validations/settingShema";
+import { useCloudinaryUpload } from "@/lib/hooks/useCloudinaryUpload";
 import { useSettings } from "./_hooks/useSettings";
 import { useSession } from "next-auth/react";
 import { hasPermission } from "@/lib/permissions";
@@ -21,11 +22,17 @@ import EditForm from "./_components/EditForm";
  */
 export default function SettingsPage() {
   const { settings, isLoading, updateMutation } = useSettings();
+  const { uploadImage, isUploading } = useCloudinaryUpload();
   const [isEditing, setIsEditing] = useState(false);
   const [previews, setPreviews] = useState({
     president: "",
     secretary: "",
     treasurer: "",
+  });
+  const [imageFiles, setImageFiles] = useState({
+    president: null,
+    secretary: null,
+    treasurer: null,
   });
 
   const {
@@ -60,7 +67,7 @@ export default function SettingsPage() {
   const handleImageChange = (role, e) => {
     const file = e.target.files[0];
     if (file) {
-      setValue(`leadership.${role}.image`, file);
+      setImageFiles((prev) => ({ ...prev, [role]: file }));
       const reader = new FileReader();
       reader.onloadend = () =>
         setPreviews((prev) => ({ ...prev, [role]: reader.result }));
@@ -70,6 +77,7 @@ export default function SettingsPage() {
 
   const handleCancel = () => {
     reset(settings);
+    setImageFiles({ president: null, secretary: null, treasurer: null });
     setPreviews({
       president: settings?.leadership?.president?.image || "",
       secretary: settings?.leadership?.secretary?.image || "",
@@ -78,38 +86,30 @@ export default function SettingsPage() {
     setIsEditing(false);
   };
 
-  const onSubmit = (data) => {
-    const formData = new FormData();
-    formData.append("contact.email", data.contact.email);
-    formData.append("contact.phone", data.contact.phone);
-    formData.append("contact.address", data.contact.address);
-    formData.append("contact.mapLink", data.contact.mapLink);
-
-    ["president", "secretary", "treasurer"].forEach((role) => {
-      formData.append(`leadership.${role}.name`, data.leadership[role].name);
-      formData.append(`leadership.${role}.title`, data.leadership[role].title);
-      formData.append(
-        `leadership.${role}.email`,
-        data.leadership[role].email || "",
-      );
-      formData.append(
-        `leadership.${role}.phone`,
-        data.leadership[role].phone || "",
-      );
-      const imageFile = data.leadership[role].image;
-      if (imageFile && typeof imageFile !== "string") {
-        formData.append(`leadership.${role}.image`, imageFile);
+  const onSubmit = async (data) => {
+    // Upload any new image files, fall back to existing URL
+    const uploadedImages = {};
+    for (const role of ["president", "secretary", "treasurer"]) {
+      if (imageFiles[role]) {
+        const result = await uploadImage(imageFiles[role]);
+        if (!result) return; // Abort if upload failed
+        uploadedImages[role] = result.url;
       } else {
-        formData.append(
-          `leadership.${role}.currentImage`,
-          settings?.leadership?.[role]?.image || "",
-        );
+        uploadedImages[role] = settings?.leadership?.[role]?.image || "";
       }
-    });
+    }
 
-    updateMutation.mutate(formData, {
-      onSuccess: () => setIsEditing(false),
-    });
+    updateMutation.mutate(
+      {
+        leadership: {
+          president: { ...data.leadership.president, image: uploadedImages.president },
+          secretary: { ...data.leadership.secretary, image: uploadedImages.secretary },
+          treasurer: { ...data.leadership.treasurer, image: uploadedImages.treasurer },
+        },
+        contact: data.contact,
+      },
+      { onSuccess: () => setIsEditing(false) },
+    );
   };
 
   const { data: session } = useSession();

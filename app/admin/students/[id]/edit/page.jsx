@@ -22,12 +22,8 @@ export default function EditStudentPage() {
   });
 
   const { mutate, isPending } = useMutation({
-    mutationFn: async (formData) => {
-      const response = await axios.put(`/api/students/${id}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+    mutationFn: async (data) => {
+      const response = await axios.put(`/api/students/${id}`, data);
       return response.data;
     },
     onSuccess: () => {
