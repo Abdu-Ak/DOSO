@@ -46,6 +46,10 @@ export async function GET(request) {
     const district = searchParams.get("district") || "";
     const batch = searchParams.get("batch") || "";
     const industry = searchParams.get("industry") || "";
+    const membershipStatus =
+      searchParams.get("membershipStatus") ||
+      searchParams.get("membership") ||
+      "";
     const all = searchParams.get("all") === "true";
 
     const skip = (page - 1) * limit;
@@ -75,6 +79,15 @@ export async function GET(request) {
 
     if (district) {
       query.district = district;
+    }
+
+    const currentYear = new Date().getFullYear();
+    if (membershipStatus === "renewed" || membershipStatus === "valid") {
+      query.role = "alumni";
+      query["membership_renewals.year"] = currentYear;
+    } else if (membershipStatus === "expired" || membershipStatus === "pending") {
+      query.role = "alumni";
+      query["membership_renewals.year"] = { $ne: currentYear };
     }
 
     if (batch) {
