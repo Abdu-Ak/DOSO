@@ -19,6 +19,7 @@ import MobileSundookList from "./_components/MobileSundookList";
 import ApproveModal from "./_components/ApproveModal";
 import RejectModal from "./_components/RejectModal";
 import CreateRecordModal from "./_components/CreateRecordModal";
+import EditReceiptModal from "./_components/EditReceiptModal";
 import ReportModal from "@/components/admin/ReportModal";
 import ConfirmModal from "@/components/admin/ui/ConfirmModal";
 
@@ -182,13 +183,47 @@ export default function AdminSundookPage() {
     },
   });
 
-  const handleApprove = () => {
-    statusMutation.mutate({
-      id: selectedRecord._id,
-      status: "approved",
-      receipt_number: receiptNumber,
-    });
-    onApproveOpenChange(false);
+  const {
+    isOpen: isEditReceiptOpen,
+    onOpen: onEditReceiptOpen,
+    onOpenChange: onEditReceiptOpenChange,
+  } = useDisclosure();
+
+  const [selectedRecordForReceipt, setSelectedRecordForReceipt] = useState(null);
+  const [approveErrorMsg, setApproveErrorMsg] = useState("");
+  const [createReceiptError, setCreateReceiptError] = useState("");
+
+  const updateReceiptMutation = useMutation({
+    mutationFn: async ({ id, receipt_number }) => {
+      const res = await axios.patch(`/api/sundook/${id}/receipt`, {
+        receipt_number,
+      });
+      return res.data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["sundook"] });
+      addToast({
+        title: "Success",
+        description: data.message || "Receipt number updated successfully",
+        color: "success",
+      });
+      onEditReceiptOpenChange(false);
+    },
+  });
+
+  const handleApprove = async () => {
+    setApproveErrorMsg("");
+    try {
+      await statusMutation.mutateAsync({
+        id: selectedRecord._id,
+        status: "approved",
+        receipt_number: receiptNumber,
+      });
+      onApproveOpenChange(false);
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message;
+      setApproveErrorMsg(msg);
+    }
   };
 
   const handleReject = () => {
@@ -200,19 +235,26 @@ export default function AdminSundookPage() {
     onRejectOpenChange(false);
   };
 
-  const onSubmitCreate = () => {
-    createMutation.mutate({
-      alumni: newRecordData.alumni,
-      amount: parseFloat(newRecordData.amount),
-      box_number: parseInt(newRecordData.box_number),
-      year: parseInt(newRecordData.year),
-      receipt_number: newRecordData.receipt_number,
-    });
+  const onSubmitCreate = async () => {
+    setCreateReceiptError("");
+    try {
+      await createMutation.mutateAsync({
+        alumni: newRecordData.alumni,
+        amount: parseFloat(newRecordData.amount),
+        box_number: parseInt(newRecordData.box_number),
+        year: parseInt(newRecordData.year),
+        receipt_number: newRecordData.receipt_number,
+      });
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message;
+      setCreateReceiptError(msg);
+    }
   };
 
   const handleCreateOpenChange = (isOpen) => {
     onCreateOpenChange(isOpen);
     if (!isOpen) {
+      setCreateReceiptError("");
       setNewRecordData({
         alumni: "",
         amount: "",
@@ -233,6 +275,7 @@ export default function AdminSundookPage() {
       getSundookColumns({
         onApprove: (r) => {
           setSelectedRecord(r);
+          setApproveErrorMsg("");
           onApproveOpen();
         },
         onReject: (r) => {
@@ -243,9 +286,13 @@ export default function AdminSundookPage() {
           setRecordToDelete(r);
           setIsDeleteOpen(true);
         },
+        onEditReceipt: (r) => {
+          setSelectedRecordForReceipt(r);
+          onEditReceiptOpen();
+        },
         canManage,
       }),
-    [onApproveOpen, onRejectOpen, canManage],
+    [onApproveOpen, onRejectOpen, onEditReceiptOpen, canManage],
   );
 
   const records = data?.records || [];
@@ -315,6 +362,7 @@ export default function AdminSundookPage() {
           isLoading={isLoading}
           onApprove={(r) => {
             setSelectedRecord(r);
+            setApproveErrorMsg("");
             onApproveOpen();
           }}
           onReject={(r) => {
@@ -324,6 +372,10 @@ export default function AdminSundookPage() {
           onDelete={(r) => {
             setRecordToDelete(r);
             setIsDeleteOpen(true);
+          }}
+          onEditReceipt={(r) => {
+            setSelectedRecordForReceipt(r);
+            onEditReceiptOpen();
           }}
           canManage={canManage}
         />
@@ -347,6 +399,8 @@ export default function AdminSundookPage() {
         setReceiptNumber={setReceiptNumber}
         onApprove={handleApprove}
         isLoading={statusMutation.isPending}
+        errorMsg={approveErrorMsg}
+        setErrorMsg={setApproveErrorMsg}
       />
 
       <RejectModal
@@ -367,6 +421,21 @@ export default function AdminSundookPage() {
         setFormData={setNewRecordData}
         onSubmit={onSubmitCreate}
         isLoading={createMutation.isPending}
+        receiptError={createReceiptError}
+        setReceiptError={setCreateReceiptError}
+      />
+
+      <EditReceiptModal
+        isOpen={isEditReceiptOpen}
+        onOpenChange={onEditReceiptOpenChange}
+        record={selectedRecordForReceipt}
+        onSave={async (newReceipt) => {
+          await updateReceiptMutation.mutateAsync({
+            id: selectedRecordForReceipt._id,
+            receipt_number: newReceipt,
+          });
+        }}
+        isLoading={updateReceiptMutation.isPending}
       />
 
       <ConfirmModal

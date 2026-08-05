@@ -23,6 +23,7 @@ import {
   Download,
   Bell,
   Wallet,
+  Pencil,
 } from "lucide-react";
 import { generateDebtNoticePdf } from "@/lib/pdf/generateDebtNoticePdf";
 
@@ -32,6 +33,7 @@ export const getDebtColumns = ({
   onDelete,
   onRepaid,
   onManageRepayments,
+  onEditReceipt,
   canManage,
 }) => [
   {
@@ -174,6 +176,20 @@ export const getDebtColumns = ({
                     Download PDF
                   </DropdownItem>
                 )}
+                {canManage &&
+                  (record.status === "approved" ||
+                    record.status === "repaid") &&
+                  onEditReceipt && (
+                    <DropdownItem
+                      key="editReceipt"
+                      startContent={<Pencil size={16} />}
+                      onPress={() => onEditReceipt(record)}
+                      className="text-primary font-bold"
+                      color="primary"
+                    >
+                      Edit Receipt Number
+                    </DropdownItem>
+                  )}
                 {canManage && (
                   <DropdownItem
                     key="delete"
@@ -313,10 +329,14 @@ export const getDebtColumns = ({
               <span
                 className={`text-[10px] font-bold ${isRepaid ? "text-primary" : "text-success"} uppercase tracking-wider flex items-center gap-1`}
               >
-                {isRepaid ? <BadgeCheck size={10} /> : <CheckCircle2 size={10} />}{" "}
+                {isRepaid ? (
+                  <BadgeCheck size={10} />
+                ) : (
+                  <CheckCircle2 size={10} />
+                )}{" "}
                 {isRepaid ? "Settled" : "Approved"}
               </span>
-              <span className="text-xs text-slate-700 dark:text-slate-300 font-bold truncate max-w-[120px]">
+              <span className="text-xs text-slate-700 dark:text-slate-300 font-bold truncate max-w-30">
                 {record.receipt_no
                   ? `Receipt: ${record.receipt_no}`
                   : isRepaid
@@ -351,7 +371,7 @@ export const getDebtColumns = ({
               {isWitnessRejected ? "Witness Rejected" : "Rejected"}
             </span>
             <span
-              className="text-xs text-slate-500 font-medium truncate max-w-[120px]"
+              className="text-xs text-slate-500 font-medium truncate max-w-30"
               title={reason}
             >
               {reason || "No reason provided"}

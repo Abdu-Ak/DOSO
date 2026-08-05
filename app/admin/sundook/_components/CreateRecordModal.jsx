@@ -16,11 +16,13 @@ import { CircleX } from "lucide-react";
 const CreateRecordModal = ({
   isOpen,
   onOpenChange,
-  alumniList,
+  alumniList = [],
   formData,
   setFormData,
   onSubmit,
   isLoading,
+  receiptError,
+  setReceiptError,
 }) => {
   return (
     <Modal
@@ -124,9 +126,12 @@ const CreateRecordModal = ({
                   variant="bordered"
                   radius="sm"
                   value={formData.receipt_number}
-                  onChange={(e) =>
-                    setFormData({ ...formData, receipt_number: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setFormData({ ...formData, receipt_number: e.target.value });
+                    if (setReceiptError) setReceiptError("");
+                  }}
+                  isInvalid={!!receiptError}
+                  errorMessage={receiptError}
                 />
               </div>
             </ModalBody>

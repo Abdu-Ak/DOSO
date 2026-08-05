@@ -38,6 +38,11 @@ export async function PATCH(request, { params }) {
 
     if (status === "approved") {
       const { receipt_number } = approveWelfareSchema.parse(body);
+      const { checkReceiptUniqueness } = await import("@/lib/receiptUtils");
+      const check = await checkReceiptUniqueness("welfare", receipt_number, id);
+      if (!check.isUnique) {
+        return NextResponse.json({ error: check.message }, { status: 400 });
+      }
       record.status = "approved";
       record.receipt_number = receipt_number;
     } else if (status === "rejected") {

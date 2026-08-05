@@ -20,6 +20,7 @@ import MobileDebtList from "./_components/MobileDebtList";
 import ApproveDebtModal from "./_components/ApproveDebtModal";
 import RejectDebtModal from "./_components/RejectDebtModal";
 import CreateDebtRecordModal from "./_components/CreateDebtRecordModal";
+import EditReceiptModal from "../sundook/_components/EditReceiptModal";
 import ManageRepaymentsModal from "./_components/ManageRepaymentsModal";
 
 export default function AdminDebtPage() {
@@ -204,13 +205,46 @@ export default function AdminDebtPage() {
     },
   });
 
-  const handleApprove = () => {
-    statusMutation.mutate({
-      id: selectedRecord._id,
-      status: "approved",
-      receipt_no: receiptNumber,
-    });
-    onApproveOpenChange(false);
+  const {
+    isOpen: isEditReceiptOpen,
+    onOpen: onEditReceiptOpen,
+    onOpenChange: onEditReceiptOpenChange,
+  } = useDisclosure();
+
+  const [selectedRecordForReceipt, setSelectedRecordForReceipt] = useState(null);
+  const [approveErrorMsg, setApproveErrorMsg] = useState("");
+
+  const updateReceiptMutation = useMutation({
+    mutationFn: async ({ id, receipt_no }) => {
+      const res = await axios.patch(`/api/debt-requests/${id}/receipt`, {
+        receipt_no,
+      });
+      return res.data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-debt-requests"] });
+      addToast({
+        title: "Success",
+        description: data.message || "Receipt number updated successfully",
+        color: "success",
+      });
+      onEditReceiptOpenChange(false);
+    },
+  });
+
+  const handleApprove = async () => {
+    setApproveErrorMsg("");
+    try {
+      await statusMutation.mutateAsync({
+        id: selectedRecord._id,
+        status: "approved",
+        receipt_no: receiptNumber,
+      });
+      onApproveOpenChange(false);
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message;
+      setApproveErrorMsg(msg);
+    }
   };
 
   const handleReject = () => {
@@ -247,6 +281,7 @@ export default function AdminDebtPage() {
       getDebtColumns({
         onApprove: (r) => {
           setSelectedRecord(r);
+          setApproveErrorMsg("");
           onApproveOpen();
         },
         onReject: (r) => {
@@ -259,9 +294,13 @@ export default function AdminDebtPage() {
         },
         onRepaid: handleRepaid,
         onManageRepayments: handleManageRepayments,
+        onEditReceipt: (r) => {
+          setSelectedRecordForReceipt(r);
+          onEditReceiptOpen();
+        },
         canManage,
       }),
-    [onApproveOpen, onRejectOpen, handleRepaid, handleManageRepayments, canManage],
+    [onApproveOpen, onRejectOpen, onEditReceiptOpen, canManage],
   );
 
   const records = data?.records || [];
@@ -341,6 +380,7 @@ export default function AdminDebtPage() {
           isLoading={isLoading}
           onApprove={(r) => {
             setSelectedRecord(r);
+            setApproveErrorMsg("");
             onApproveOpen();
           }}
           onReject={(r) => {
@@ -353,6 +393,10 @@ export default function AdminDebtPage() {
           }}
           onRepaid={handleRepaid}
           onManageRepayments={handleManageRepayments}
+          onEditReceipt={(r) => {
+            setSelectedRecordForReceipt(r);
+            onEditReceiptOpen();
+          }}
           canManage={canManage}
         />
         {totalPages > 1 && (
@@ -374,6 +418,8 @@ export default function AdminDebtPage() {
         setReceiptNumber={setReceiptNumber}
         onApprove={handleApprove}
         isLoading={statusMutation.isPending}
+        errorMsg={approveErrorMsg}
+        setErrorMsg={setApproveErrorMsg}
       />
 
       <RejectDebtModal
@@ -462,6 +508,19 @@ export default function AdminDebtPage() {
         onMarkAsPaid={(id, installmentNumber) => {
           repaymentMutation.mutate({ id, installmentNumber });
         }}
+      />
+
+      <EditReceiptModal
+        isOpen={isEditReceiptOpen}
+        onOpenChange={onEditReceiptOpenChange}
+        record={selectedRecordForReceipt}
+        onSave={async (newReceipt) => {
+          await updateReceiptMutation.mutateAsync({
+            id: selectedRecordForReceipt._id,
+            receipt_no: newReceipt,
+          });
+        }}
+        isLoading={updateReceiptMutation.isPending}
       />
     </div>
   );

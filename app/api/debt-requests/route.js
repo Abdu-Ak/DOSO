@@ -137,6 +137,17 @@ export async function POST(request) {
       }
       const validatedData = adminCreateDebtSchema.parse(body);
 
+      if (validatedData.receipt_no) {
+        const { checkReceiptUniqueness } = await import("@/lib/receiptUtils");
+        const check = await checkReceiptUniqueness(
+          "debt",
+          validatedData.receipt_no,
+        );
+        if (!check.isUnique) {
+          return NextResponse.json({ error: check.message }, { status: 400 });
+        }
+      }
+
       const newRequest = await DebtRequest.create({
         requester: validatedData.alumni,
         amount: validatedData.amount,

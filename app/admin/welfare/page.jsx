@@ -19,6 +19,7 @@ import MobileWelfareList from "./_components/MobileWelfareList";
 import ApproveModal from "./_components/ApproveModal";
 import RejectModal from "./_components/RejectModal";
 import CreateRecordModal from "./_components/CreateRecordModal";
+import EditReceiptModal from "../sundook/_components/EditReceiptModal";
 import ReportModal from "@/components/admin/ReportModal";
 import ConfirmModal from "@/components/admin/ui/ConfirmModal";
 
@@ -183,13 +184,47 @@ export default function AdminWelfarePage() {
     },
   });
 
-  const handleApprove = () => {
-    statusMutation.mutate({
-      id: selectedRecord._id,
-      status: "approved",
-      receipt_number: receiptNumber,
-    });
-    onApproveOpenChange(false);
+  const {
+    isOpen: isEditReceiptOpen,
+    onOpen: onEditReceiptOpen,
+    onOpenChange: onEditReceiptOpenChange,
+  } = useDisclosure();
+
+  const [selectedRecordForReceipt, setSelectedRecordForReceipt] = useState(null);
+  const [approveErrorMsg, setApproveErrorMsg] = useState("");
+  const [createReceiptError, setCreateReceiptError] = useState("");
+
+  const updateReceiptMutation = useMutation({
+    mutationFn: async ({ id, receipt_number }) => {
+      const res = await axios.patch(`/api/welfare/${id}/receipt`, {
+        receipt_number,
+      });
+      return res.data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["welfare"] });
+      addToast({
+        title: "Success",
+        description: data.message || "Receipt number updated successfully",
+        color: "success",
+      });
+      onEditReceiptOpenChange(false);
+    },
+  });
+
+  const handleApprove = async () => {
+    setApproveErrorMsg("");
+    try {
+      await statusMutation.mutateAsync({
+        id: selectedRecord._id,
+        status: "approved",
+        receipt_number: receiptNumber,
+      });
+      onApproveOpenChange(false);
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message;
+      setApproveErrorMsg(msg);
+    }
   };
 
   const handleReject = () => {
@@ -201,18 +236,25 @@ export default function AdminWelfarePage() {
     onRejectOpenChange(false);
   };
 
-  const onSubmitCreate = () => {
-    createMutation.mutate({
-      alumni: newRecordData.alumni,
-      amount: parseFloat(newRecordData.amount),
-      description: newRecordData.description,
-      receipt_number: newRecordData.receipt_number,
-    });
+  const onSubmitCreate = async () => {
+    setCreateReceiptError("");
+    try {
+      await createMutation.mutateAsync({
+        alumni: newRecordData.alumni,
+        amount: parseFloat(newRecordData.amount),
+        description: newRecordData.description,
+        receipt_number: newRecordData.receipt_number,
+      });
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message;
+      setCreateReceiptError(msg);
+    }
   };
 
   const handleCreateOpenChange = (isOpen) => {
     onCreateOpenChange(isOpen);
     if (!isOpen) {
+      setCreateReceiptError("");
       setNewRecordData({
         alumni: "",
         amount: "",
@@ -232,6 +274,7 @@ export default function AdminWelfarePage() {
       getWelfareColumns({
         onApprove: (r) => {
           setSelectedRecord(r);
+          setApproveErrorMsg("");
           onApproveOpen();
         },
         onReject: (r) => {
@@ -242,9 +285,13 @@ export default function AdminWelfarePage() {
           setRecordToDelete(r);
           setIsDeleteOpen(true);
         },
+        onEditReceipt: (r) => {
+          setSelectedRecordForReceipt(r);
+          onEditReceiptOpen();
+        },
         canManage,
       }),
-    [onApproveOpen, onRejectOpen, canManage],
+    [onApproveOpen, onRejectOpen, onEditReceiptOpen, canManage],
   );
 
   const records = data?.records || [];
@@ -318,6 +365,7 @@ export default function AdminWelfarePage() {
           isLoading={isLoading}
           onApprove={(r) => {
             setSelectedRecord(r);
+            setApproveErrorMsg("");
             onApproveOpen();
           }}
           onReject={(r) => {
@@ -327,6 +375,10 @@ export default function AdminWelfarePage() {
           onDelete={(r) => {
             setRecordToDelete(r);
             setIsDeleteOpen(true);
+          }}
+          onEditReceipt={(r) => {
+            setSelectedRecordForReceipt(r);
+            onEditReceiptOpen();
           }}
           canManage={canManage}
         />
@@ -350,6 +402,8 @@ export default function AdminWelfarePage() {
         setReceiptNumber={setReceiptNumber}
         onApprove={handleApprove}
         isLoading={statusMutation.isPending}
+        errorMsg={approveErrorMsg}
+        setErrorMsg={setApproveErrorMsg}
       />
 
       <RejectModal
@@ -370,6 +424,21 @@ export default function AdminWelfarePage() {
         setFormData={setNewRecordData}
         onSubmit={onSubmitCreate}
         isLoading={createMutation.isPending}
+        receiptError={createReceiptError}
+        setReceiptError={setCreateReceiptError}
+      />
+
+      <EditReceiptModal
+        isOpen={isEditReceiptOpen}
+        onOpenChange={onEditReceiptOpenChange}
+        record={selectedRecordForReceipt}
+        onSave={async (newReceipt) => {
+          await updateReceiptMutation.mutateAsync({
+            id: selectedRecordForReceipt._id,
+            receipt_number: newReceipt,
+          });
+        }}
+        isLoading={updateReceiptMutation.isPending}
       />
 
       <ConfirmModal

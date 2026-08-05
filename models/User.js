@@ -100,4 +100,9 @@ const UserSchema = new mongoose.Schema(
   },
 );
 
+UserSchema.index(
+  { "membership_renewals.receipt_number": 1 },
+  { sparse: true },
+);
+
 export default mongoose.models.User || mongoose.model("User", UserSchema);

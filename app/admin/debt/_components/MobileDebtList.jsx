@@ -21,6 +21,7 @@ import {
   Download,
   Bell,
   Wallet,
+  Pencil,
 } from "lucide-react";
 import { generateDebtNoticePdf } from "@/lib/pdf/generateDebtNoticePdf";
 import { formatDate } from "@/lib/utils";
@@ -33,6 +34,7 @@ export default function MobileDebtList({
   onDelete,
   onRepaid,
   onManageRepayments,
+  onEditReceipt,
   canManage,
 }) {
   const statusColors = {
@@ -298,6 +300,17 @@ export default function MobileDebtList({
                     >
                       <Download size={16} />
                     </Button>
+                    {onEditReceipt && (
+                      <Button
+                        isIconOnly
+                        size="sm"
+                        className="font-bold bg-primary/10 text-primary"
+                        onPress={() => onEditReceipt(record)}
+                        title="Edit Receipt Number"
+                      >
+                        <Pencil size={16} />
+                      </Button>
+                    )}
                   </div>
                 )}
                 <Button

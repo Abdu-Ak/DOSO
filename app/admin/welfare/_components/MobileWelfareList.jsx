@@ -13,6 +13,7 @@ import {
   FileText,
   Loader2,
   Inbox,
+  Pencil,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
@@ -22,6 +23,7 @@ export default function MobileWelfareList({
   onApprove,
   onReject,
   onDelete,
+  onEditReceipt,
   canManage,
 }) {
   const statusColors = {
@@ -157,7 +159,19 @@ export default function MobileWelfareList({
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center justify-end pt-4 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+                {record.status === "approved" && onEditReceipt && (
+                  <Button
+                    size="sm"
+                    variant="flat"
+                    color="primary"
+                    onPress={() => onEditReceipt(record)}
+                    startContent={<Pencil size={14} />}
+                    className="font-bold"
+                  >
+                    Edit Receipt
+                  </Button>
+                )}
                 <Button
                   isIconOnly
                   size="sm"

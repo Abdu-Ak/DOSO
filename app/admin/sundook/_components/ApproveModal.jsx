@@ -20,6 +20,8 @@ const ApproveModal = ({
   setReceiptNumber,
   onApprove,
   isLoading,
+  errorMsg,
+  setErrorMsg,
 }) => {
   return (
     <Modal isOpen={isOpen} onOpenChange={onOpenChange} hideCloseButton>
@@ -47,8 +49,13 @@ const ApproveModal = ({
                 variant="bordered"
                 placeholder="Receipt number"
                 value={receiptNumber}
-                onChange={(e) => setReceiptNumber(e.target.value)}
+                onChange={(e) => {
+                  setReceiptNumber(e.target.value);
+                  if (setErrorMsg) setErrorMsg("");
+                }}
                 radius="sm"
+                isInvalid={!!errorMsg}
+                errorMessage={errorMsg}
               />
             </ModalBody>
             <ModalFooter>

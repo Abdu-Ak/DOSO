@@ -94,8 +94,20 @@ export async function POST(request) {
       if (!hasPermission(session.user, "sundook", "manage")) {
         return NextResponse.json({ error: "Permission denied" }, { status: 403 });
       }
+      
       // Admin creation
       const validatedData = adminCreateSundookSchema.parse(body);
+
+      if (validatedData.receipt_number) {
+        const { checkReceiptUniqueness } = await import("@/lib/receiptUtils");
+        const check = await checkReceiptUniqueness(
+          "sundook",
+          validatedData.receipt_number,
+        );
+        if (!check.isUnique) {
+          return NextResponse.json({ error: check.message }, { status: 400 });
+        }
+      }
 
       const newRecord = await Sundook.create({
         ...validatedData,

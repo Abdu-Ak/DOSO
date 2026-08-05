@@ -27,6 +27,7 @@ import {
   UserPen,
   FileDown,
   Recycle,
+  Pencil,
 } from "lucide-react";
 import { generateAlumniPdf } from "@/lib/pdf/generateAlumniPdf";
 import RenewMembershipModal from "@/components/admin/RenewMembershipModal";
@@ -74,12 +75,22 @@ export default function UserDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const {
     isOpen: isRenewOpen,
     onOpen: onRenewOpen,
     onOpenChange: onRenewOpenChange,
   } = useDisclosure();
+  const {
+    isOpen: isDeactivateOpen,
+    onOpen: onDeactivateOpen,
+    onOpenChange: onDeactivateOpenChange,
+  } = useDisclosure();
+  const [editingRenewal, setEditingRenewal] = React.useState(null);
+
+  const handleOpenRenewModal = (renewal = null) => {
+    setEditingRenewal(renewal);
+    onRenewOpen();
+  };
   const [pendingStatus, setPendingStatus] = React.useState(null);
   const [isPdfLoading, setIsPdfLoading] = React.useState(false);
 
@@ -101,7 +112,6 @@ export default function UserDetailPage() {
   const canManageAlumni = hasPermission(currentUser, "alumni", "manage");
   const canManageStudents = hasPermission(currentUser, "students", "manage");
 
-
   const { data: user, isLoading } = useQuery({
     queryKey: ["user", id],
     queryFn: async () => {
@@ -120,7 +130,7 @@ export default function UserDetailPage() {
   const handleStatusChange = (newStatus) => {
     if (isOwnProfile && newStatus === "Inactive") {
       setPendingStatus(newStatus);
-      onOpen();
+      onDeactivateOpen();
     } else {
       statusMutation.mutate({ id: user._id, status: newStatus });
     }
@@ -205,7 +215,7 @@ export default function UserDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-[400px] flex items-center justify-center">
+      <div className="min-h-100 flex items-center justify-center">
         <Loader2 className="animate-spin text-primary" size={40} />
       </div>
     );
@@ -264,18 +274,19 @@ export default function UserDetailPage() {
               PDF
             </Button>
           )}
-          {canManageUser(currentUser, user, "edit") && (isOwnProfile || canManageTarget) && (
-            <Button
-              as={Link}
-              href={`/admin/users/${id}/edit`}
-              color="primary"
-              startContent={<UserPen size={18} />}
-              className="font-bold shadow-lg shadow-primary/20"
-              radius="xl"
-            >
-              Edit
-            </Button>
-          )}
+          {canManageUser(currentUser, user, "edit") &&
+            (isOwnProfile || canManageTarget) && (
+              <Button
+                as={Link}
+                href={`/admin/users/${id}/edit`}
+                color="primary"
+                startContent={<UserPen size={18} />}
+                className="font-bold shadow-lg shadow-primary/20"
+                radius="xl"
+              >
+                Edit
+              </Button>
+            )}
         </div>
       </div>
 
@@ -325,7 +336,8 @@ export default function UserDetailPage() {
                   <span className="text-xs font-black uppercase tracking-wider text-slate-400">
                     Status
                   </span>
-                  {canManageUser(currentUser, user, "status") && (isOwnProfile || canManageTarget) ? (
+                  {canManageUser(currentUser, user, "status") &&
+                  (isOwnProfile || canManageTarget) ? (
                     <Dropdown>
                       <DropdownTrigger>
                         <Chip
@@ -401,7 +413,7 @@ export default function UserDetailPage() {
                         color="primary"
                         variant="flat"
                         startContent={<Recycle size={14} />}
-                        onPress={onRenewOpen}
+                        onPress={() => handleOpenRenewModal(null)}
                         className="font-bold rounded-lg h-8 px-3"
                       >
                         Renew
@@ -422,9 +434,21 @@ export default function UserDetailPage() {
                             <p className="font-bold text-sm text-slate-900 dark:text-white">
                               Year {renewal.year}
                             </p>
-                            <p className="text-xs text-slate-500">
-                              Receipt: {renewal.receipt_number}
-                            </p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-xs text-slate-500">
+                                Receipt: {renewal.receipt_number}
+                              </p>
+                              {canManageUser(currentUser, user, "edit") && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenRenewModal(renewal)}
+                                  className="text-primary hover:text-primary/80 transition-colors p-1"
+                                  title="Edit Receipt Number"
+                                >
+                                  <Pencil size={12} />
+                                </button>
+                              )}
+                            </div>
                           </div>
                           <div className="text-right">
                             <p className="text-xs text-slate-400 mt-0.5">
@@ -637,16 +661,20 @@ export default function UserDetailPage() {
       </div>
 
       <DeactivateConfirmModal
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
+        isOpen={isDeactivateOpen}
+        onOpenChange={onDeactivateOpenChange}
         onConfirm={confirmDeactivation}
       />
 
       <RenewMembershipModal
         isOpen={isRenewOpen}
         onOpenChange={onRenewOpenChange}
-        onConfirm={(data) => renewMutation.mutate(data)}
-        currentYear={new Date().getFullYear()}
+        onConfirm={async (data) => {
+          await renewMutation.mutateAsync(data);
+        }}
+        currentYear={editingRenewal?.year || new Date().getFullYear()}
+        initialReceiptNumber={editingRenewal?.receipt_number || ""}
+        isEdit={!!editingRenewal}
       />
     </div>
   );

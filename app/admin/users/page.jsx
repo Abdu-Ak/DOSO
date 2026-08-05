@@ -252,8 +252,8 @@ export default function UserManagement() {
       <RenewMembershipModal
         isOpen={!!renewModalUser}
         onOpenChange={(isOpen) => !isOpen && setRenewModalUser(null)}
-        onConfirm={(data) => {
-          renewMutation.mutate({
+        onConfirm={async (data) => {
+          await renewMutation.mutateAsync({
             id: renewModalUser._id,
             year: data.year,
             receipt_number: data.receipt_number,

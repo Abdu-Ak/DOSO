@@ -16,10 +16,17 @@ import {
   MoreVertical,
   Trash2,
   FileText,
+  Pencil,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
-export const getWelfareColumns = ({ onApprove, onReject, onDelete, canManage }) => [
+export const getWelfareColumns = ({
+  onApprove,
+  onReject,
+  onDelete,
+  onEditReceipt,
+  canManage,
+}) => [
   {
     header: "Alumni",
     accessorKey: "alumni.name",
@@ -67,6 +74,17 @@ export const getWelfareColumns = ({ onApprove, onReject, onDelete, canManage }) 
                     Reject Record
                   </DropdownItem>
                 )}
+                {record.status === "approved" && onEditReceipt && (
+                  <DropdownItem
+                    key="editReceipt"
+                    startContent={<Pencil size={16} />}
+                    onPress={() => onEditReceipt(record)}
+                    className="text-primary font-bold"
+                    color="primary"
+                  >
+                    Edit Receipt Number
+                  </DropdownItem>
+                )}
                 <DropdownItem
                   key="delete"
                   startContent={<Trash2 size={16} />}
@@ -102,7 +120,7 @@ export const getWelfareColumns = ({ onApprove, onReject, onDelete, canManage }) 
     accessorKey: "description",
     cell: (info) => (
       <span
-        className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate max-w-[200px] block"
+        className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate max-w-50 block"
         title={info.getValue()}
       >
         {info.getValue()}
@@ -131,7 +149,7 @@ export const getWelfareColumns = ({ onApprove, onReject, onDelete, canManage }) 
           variant="flat"
           color={colors[status] || "default"}
           size="sm"
-          className="font-black text-[10px] tracking-wider uppercase h-6 w-[80px]"
+          className="font-black text-[10px] tracking-wider uppercase h-6 w-20"
         >
           {status}
         </Chip>
@@ -150,7 +168,7 @@ export const getWelfareColumns = ({ onApprove, onReject, onDelete, canManage }) 
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
               <FileText size={10} /> Receipt
             </span>
-            <span className="text-xs text-slate-700 dark:text-slate-300 font-bold truncate max-w-[150px]">
+            <span className="text-xs text-slate-700 dark:text-slate-300 font-bold truncate max-w-37.5">
               {record.receipt_number}
             </span>
           </div>
@@ -163,7 +181,7 @@ export const getWelfareColumns = ({ onApprove, onReject, onDelete, canManage }) 
             <span className="text-[10px] font-bold text-danger uppercase tracking-wider flex items-center gap-1">
               <XCircle size={10} /> Reason
             </span>
-            <span className="text-xs text-slate-500 font-medium truncate max-w-[150px]">
+            <span className="text-xs text-slate-500 font-medium truncate max-w-37.5">
               {record.rejection_reason}
             </span>
           </div>

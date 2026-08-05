@@ -20,6 +20,8 @@ export default function ApproveModal({
   setReceiptNumber,
   onApprove,
   isLoading,
+  errorMsg,
+  setErrorMsg,
 }) {
   return (
     <Modal isOpen={isOpen} onOpenChange={onOpenChange} hideCloseButton>
@@ -54,7 +56,12 @@ export default function ApproveModal({
                   labelPlacement="outside"
                   radius="lg"
                   value={receiptNumber}
-                  onValueChange={setReceiptNumber}
+                  onValueChange={(val) => {
+                    setReceiptNumber(val);
+                    if (setErrorMsg) setErrorMsg("");
+                  }}
+                  isInvalid={!!errorMsg}
+                  errorMessage={errorMsg}
                   isRequired
                 />
               </div>
