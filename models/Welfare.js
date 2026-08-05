@@ -30,5 +30,7 @@ const welfareSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+welfareSchema.index({ receipt_number: 1 }, { sparse: true });
+
 export default mongoose.models.Welfare ||
   mongoose.model("Welfare", welfareSchema);

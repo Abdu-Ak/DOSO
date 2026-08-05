@@ -40,10 +40,40 @@ export async function POST(request, { params }) {
     }
 
     const parsedYear = parseInt(year);
+    const trimmedReceipt = receipt_number.trim();
+
+    // Check if receipt number is used by another user or in another year for this user
+    const conflictUser = await User.findOne({
+      _id: { $ne: id },
+      "membership_renewals.receipt_number": new RegExp(
+        `^${trimmedReceipt.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
+        "i",
+      ),
+    });
+
+    if (conflictUser) {
+      return NextResponse.json(
+        { error: `Receipt number '${trimmedReceipt}' is already in use` },
+        { status: 400 },
+      );
+    }
 
     // Initialize if undefined
     if (!user.membership_renewals) {
       user.membership_renewals = [];
+    }
+
+    const sameUserOtherYear = user.membership_renewals.find(
+      (r) =>
+        r.year !== parsedYear &&
+        r.receipt_number.toLowerCase() === trimmedReceipt.toLowerCase(),
+    );
+
+    if (sameUserOtherYear) {
+      return NextResponse.json(
+        { error: `Receipt number '${trimmedReceipt}' is already in use` },
+        { status: 400 },
+      );
     }
 
     // Check if the renewal already exists for this year
@@ -51,16 +81,18 @@ export async function POST(request, { params }) {
       (r) => r.year === parsedYear,
     );
 
+    let isUpdate = false;
+    let oldReceipt = "";
+
     if (existingRenewalIndex >= 0) {
-      // Update existing renewal
-      user.membership_renewals[existingRenewalIndex].receipt_number =
-        receipt_number;
+      isUpdate = true;
+      oldReceipt = user.membership_renewals[existingRenewalIndex].receipt_number;
+      user.membership_renewals[existingRenewalIndex].receipt_number = trimmedReceipt;
       user.membership_renewals[existingRenewalIndex].renewedAt = new Date();
     } else {
-      // Add new renewal
       user.membership_renewals.push({
         year: parsedYear,
-        receipt_number,
+        receipt_number: trimmedReceipt,
         renewedAt: new Date(),
       });
     }
@@ -70,16 +102,23 @@ export async function POST(request, { params }) {
 
     await user.save();
 
+    const logTitle = isUpdate ? "Membership Receipt Updated" : "Membership Renewed";
+    const logDesc = isUpdate
+      ? `Updated membership receipt for "${user.name}" (Year: ${parsedYear}) from "${oldReceipt}" to "${trimmedReceipt}"`
+      : `Renewed membership for "${user.name}" (Year: ${parsedYear}, Receipt: ${trimmedReceipt})`;
+
     await logActivity({
-      actionType: "RENEW",
+      actionType: isUpdate ? "UPDATE" : "RENEW",
       module: "User Management",
-      title: "Membership Renewed",
-      description: `Renewed membership for "${user.name}" (Year: ${parsedYear}, Receipt: ${receipt_number})`,
-      icon: "RefreshCw",
+      title: logTitle,
+      description: logDesc,
+      icon: isUpdate ? "Edit" : "RefreshCw",
     });
 
     return NextResponse.json({
-      message: "Membership renewed successfully",
+      message: isUpdate
+        ? "Receipt number updated successfully"
+        : "Membership renewed successfully",
       renewals: user.membership_renewals,
     });
   } catch (error) {

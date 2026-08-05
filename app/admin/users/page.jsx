@@ -38,6 +38,7 @@ export default function UserManagement() {
   const [status, setStatus] = useState("");
   const [district, setDistrict] = useState("");
   const [batch, setBatch] = useState("");
+  const [membershipStatus, setMembershipStatus] = useState("");
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
@@ -66,6 +67,7 @@ export default function UserManagement() {
       status,
       district,
       batch,
+      membershipStatus,
     ],
     queryFn: async () => {
       const response = await axios.get("/api/users", {
@@ -77,6 +79,7 @@ export default function UserManagement() {
           status,
           district,
           batch,
+          membershipStatus,
         },
       });
       return response.data;
@@ -147,6 +150,8 @@ export default function UserManagement() {
     setDistrict,
     batch,
     setBatch,
+    membershipStatus,
+    setMembershipStatus,
     setPage,
     showFilters,
     setShowFilters,
@@ -245,15 +250,15 @@ export default function UserManagement() {
       <ReportModal
         isOpen={isReportModalOpen}
         onClose={() => setIsReportModalOpen(false)}
-        filters={{ searchTerm, role, status, district, batch }}
+        filters={{ searchTerm, role, status, district, batch, membershipStatus }}
         currentUser={currentUser}
       />
 
       <RenewMembershipModal
         isOpen={!!renewModalUser}
         onOpenChange={(isOpen) => !isOpen && setRenewModalUser(null)}
-        onConfirm={(data) => {
-          renewMutation.mutate({
+        onConfirm={async (data) => {
+          await renewMutation.mutateAsync({
             id: renewModalUser._id,
             year: data.year,
             receipt_number: data.receipt_number,

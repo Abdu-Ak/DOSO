@@ -28,12 +28,8 @@ export default function EditUserPage() {
   });
 
   const { mutate, isPending } = useMutation({
-    mutationFn: async (formData) => {
-      const response = await axios.put(`/api/users/${id}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+    mutationFn: async (data) => {
+      const response = await axios.put(`/api/users/${id}`, data);
       return response.data;
     },
     onSuccess: (data) => {

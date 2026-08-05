@@ -20,6 +20,8 @@ export default function ApproveDebtModal({
   setReceiptNumber,
   onApprove,
   isLoading,
+  errorMsg,
+  setErrorMsg,
 }) {
   return (
     <Modal isOpen={isOpen} onOpenChange={onOpenChange} hideCloseButton>
@@ -71,6 +73,22 @@ export default function ApproveDebtModal({
                   </span>
                   .
                 </p>
+                {setReceiptNumber && (
+                  <Input
+                    label="Receipt Number (Optional)"
+                    placeholder="REC-XXXXX"
+                    variant="bordered"
+                    labelPlacement="outside"
+                    radius="lg"
+                    value={receiptNumber || ""}
+                    onValueChange={(val) => {
+                      setReceiptNumber(val);
+                      if (setErrorMsg) setErrorMsg("");
+                    }}
+                    isInvalid={!!errorMsg}
+                    errorMessage={errorMsg}
+                  />
+                )}
               </div>
             </ModalBody>
             <ModalFooter>

@@ -86,6 +86,8 @@ const DebtRequestSchema = new mongoose.Schema(
   },
 );
 
+DebtRequestSchema.index({ receipt_no: 1 }, { sparse: true });
+
 // Model for Debt Requests - Updated with repaid status support
 const model =
   mongoose.models.DebtRequest ||

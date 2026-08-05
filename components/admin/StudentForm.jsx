@@ -7,9 +7,11 @@ import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/card";
 import StudentSection from "@/app/admin/students/_components/StudentSection";
 import { useRouter } from "next/navigation";
+import { useCloudinaryUpload } from "@/lib/hooks/useCloudinaryUpload";
 
 const StudentForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
   const router = useRouter();
+  const { uploadImage, isUploading } = useCloudinaryUpload();
 
   const [imagePreview, setImagePreview] = useState(initialData?.image || null);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -54,17 +56,22 @@ const StudentForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
     setValue("image", null, { shouldValidate: true });
   };
 
-  const onFormSubmit = (data) => {
-    const formData = new FormData();
-    Object.keys(data).forEach((key) => {
-      if (key === "image") {
-        if (selectedFile) formData.append("image", selectedFile);
-      } else if (data[key] !== undefined && data[key] !== null) {
-        formData.append(key, data[key]);
-      }
-    });
-    onSubmit(formData);
+  const onFormSubmit = async (data) => {
+    let imageUrl = initialData?.image || "";
+    let imagePublicId = initialData?.imagePublicId || "";
+
+    if (selectedFile) {
+      const result = await uploadImage(selectedFile);
+      if (!result) return;
+      imageUrl = result.url;
+      imagePublicId = result.publicId;
+    }
+
+    const { image, ...rest } = data;
+    onSubmit({ ...rest, imageUrl, imagePublicId });
   };
+
+  const isSubmitting = loading || isUploading;
 
   return (
     <form
@@ -139,8 +146,8 @@ const StudentForm = ({ initialData, onSubmit, loading, isEdit = false }) => {
             <Button
               type="submit"
               color="primary"
-              isLoading={loading}
-              startContent={!loading && <Save size={18} />}
+              isLoading={isSubmitting}
+              startContent={!isSubmitting && <Save size={18} />}
               className="w-fit sm:w-auto font-bold shadow-lg h-11"
               radius="lg"
             >

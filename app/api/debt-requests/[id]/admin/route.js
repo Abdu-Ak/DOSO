@@ -49,6 +49,14 @@ export async function PATCH(request, { params }) {
       );
     }
 
+    if (receipt_no) {
+      const { checkReceiptUniqueness } = await import("@/lib/receiptUtils");
+      const check = await checkReceiptUniqueness("debt", receipt_no, id);
+      if (!check.isUnique) {
+        return NextResponse.json({ error: check.message }, { status: 400 });
+      }
+    }
+
     debtRequest.admin_status = status;
     debtRequest.admin_reason = reason;
     debtRequest.receipt_no = receipt_no;

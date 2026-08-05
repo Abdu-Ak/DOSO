@@ -16,9 +16,10 @@ import {
   XCircle,
   FileText,
   Trash2,
+  Pencil,
 } from "lucide-react";
 
-export const getSundookColumns = ({ onApprove, onReject, onDelete, canManage }) => [
+export const getSundookColumns = ({ onApprove, onReject, onDelete, onEditReceipt, canManage }) => [
   {
     header: "Alumni",
     accessorKey: "alumni.name",
@@ -63,6 +64,17 @@ export const getSundookColumns = ({ onApprove, onReject, onDelete, canManage }) 
                     className="text-danger font-bold"
                   >
                     Reject Record
+                  </DropdownItem>
+                )}
+                {record.status === "approved" && onEditReceipt && (
+                  <DropdownItem
+                    key="editReceipt"
+                    color="primary"
+                    startContent={<Pencil size={16} />}
+                    onPress={() => onEditReceipt(record)}
+                    className="text-primary font-bold"
+                  >
+                    Edit Receipt Number
                   </DropdownItem>
                 )}
                 <DropdownItem
@@ -142,7 +154,7 @@ export const getSundookColumns = ({ onApprove, onReject, onDelete, canManage }) 
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
               <FileText size={10} /> Receipt
             </span>
-            <span className="text-xs text-slate-700 dark:text-slate-300 font-bold truncate max-w-[150px]">
+            <span className="text-xs text-slate-700 dark:text-slate-300 font-bold truncate max-w-37.5">
               {record.receipt_number}
             </span>
           </div>
@@ -155,7 +167,7 @@ export const getSundookColumns = ({ onApprove, onReject, onDelete, canManage }) 
             <span className="text-[10px] font-bold text-danger uppercase tracking-wider flex items-center gap-1">
               <XCircle size={10} /> Reason
             </span>
-            <span className="text-xs text-slate-500 font-medium truncate max-w-[150px]">
+            <span className="text-xs text-slate-500 font-medium truncate max-w-37.5">
               {record.rejection_reason}
             </span>
           </div>

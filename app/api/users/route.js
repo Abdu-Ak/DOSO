@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
-import cloudinary from "@/lib/cloudinary";
 import bcrypt from "bcryptjs";
 import { logActivity } from "@/lib/activityLogger";
 import { getServerSession } from "next-auth";
@@ -47,6 +46,10 @@ export async function GET(request) {
     const district = searchParams.get("district") || "";
     const batch = searchParams.get("batch") || "";
     const industry = searchParams.get("industry") || "";
+    const membershipStatus =
+      searchParams.get("membershipStatus") ||
+      searchParams.get("membership") ||
+      "";
     const all = searchParams.get("all") === "true";
 
     const skip = (page - 1) * limit;
@@ -76,6 +79,15 @@ export async function GET(request) {
 
     if (district) {
       query.district = district;
+    }
+
+    const currentYear = new Date().getFullYear();
+    if (membershipStatus === "renewed" || membershipStatus === "valid") {
+      query.role = "alumni";
+      query["membership_renewals.year"] = currentYear;
+    } else if (membershipStatus === "expired" || membershipStatus === "pending") {
+      query.role = "alumni";
+      query["membership_renewals.year"] = { $ne: currentYear };
     }
 
     if (batch) {
@@ -153,8 +165,8 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const data = await request.formData();
-    const role = data.get("role");
+    const data = await request.json();
+    const { role, email, password, status, imageUrl, imagePublicId } = data;
 
     if (role === "admin") {
       if (!hasPermission(session.user, "permission_management", "manage")) {
@@ -165,10 +177,6 @@ export async function POST(request) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
     }
-    const email = data.get("email");
-    const password = data.get("password");
-    const status = data.get("status");
-    const imageFile = data.get("image");
 
     // Check if user already exists by email
     const existingUser = await User.findOne({ email: email.toLowerCase() });
@@ -184,11 +192,11 @@ export async function POST(request) {
       role,
       email: email.toLowerCase(),
       status,
-      phone: data.get("phone"),
+      phone: data.phone,
     };
 
     if (role === "admin") {
-      const userId = data.get("userId");
+      const userId = data.userId;
       const existingUserId = await User.findOne({ userId });
       if (existingUserId) {
         return NextResponse.json(
@@ -196,51 +204,33 @@ export async function POST(request) {
           { status: 400 },
         );
       }
-      userFields.name = data.get("name");
+      userFields.name = data.name;
       userFields.userId = userId;
+      userFields.permissions = data.permissions;
     } else if (role === "alumni") {
-      userFields.name = data.get("name");
-      userFields.house_name = data.get("house_name");
-      userFields.father_name = data.get("father_name");
-      userFields.address = data.get("address");
-      userFields.post_office = data.get("post_office");
-      userFields.district = data.get("district");
-      userFields.custom_district = data.get("custom_district");
-      userFields.pincode = data.get("pincode");
-      userFields.batch = data.get("batch");
-      userFields.education = data.get("education");
-      userFields.dob = data.get("dob") ? new Date(data.get("dob")) : undefined;
-      userFields.current_job = data.get("current_job");
-      userFields.custom_job = data.get("custom_job");
-      userFields.job_location = data.get("job_location");
-
+      userFields.name = data.name;
+      userFields.house_name = data.house_name;
+      userFields.father_name = data.father_name;
+      userFields.address = data.address;
+      userFields.post_office = data.post_office;
+      userFields.district = data.district;
+      userFields.custom_district = data.custom_district;
+      userFields.pincode = data.pincode;
+      userFields.batch = data.batch;
+      userFields.education = data.education;
+      userFields.dob = data.dob ? new Date(data.dob) : undefined;
+      userFields.current_job = data.current_job;
+      userFields.custom_job = data.custom_job;
+      userFields.job_location = data.job_location;
       userFields.userId = await generateUserId(role);
-    }
-
-    let imageData = { url: "", publicId: "" };
-    if (imageFile && imageFile.size > 0) {
-      const arrayBuffer = await imageFile.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      const uploadResult = await new Promise((resolve, reject) => {
-        cloudinary.uploader
-          .upload_stream({ folder: "doso_users" }, (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          })
-          .end(buffer);
-      });
-      imageData = {
-        url: uploadResult.secure_url,
-        publicId: uploadResult.public_id,
-      };
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({
       ...userFields,
       password: hashedPassword,
-      image: imageData.url,
-      imagePublicId: imageData.publicId,
+      image: imageUrl || "",
+      imagePublicId: imagePublicId || "",
     });
 
     await logActivity({

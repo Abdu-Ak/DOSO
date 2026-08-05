@@ -128,6 +128,17 @@ export async function POST(request) {
       // Admin creation
       const validatedData = adminCreateWelfareSchema.parse(body);
 
+      if (validatedData.receipt_number) {
+        const { checkReceiptUniqueness } = await import("@/lib/receiptUtils");
+        const check = await checkReceiptUniqueness(
+          "welfare",
+          validatedData.receipt_number,
+        );
+        if (!check.isUnique) {
+          return NextResponse.json({ error: check.message }, { status: 400 });
+        }
+      }
+
       const newRecord = await Welfare.create({
         ...validatedData,
         status: "approved", // Admin created entries are auto-approved

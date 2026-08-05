@@ -36,6 +36,11 @@ export async function PATCH(request, { params }) {
 
     record.status = status;
     if (status === "approved") {
+      const { checkReceiptUniqueness } = await import("@/lib/receiptUtils");
+      const check = await checkReceiptUniqueness("sundook", receipt_number, id);
+      if (!check.isUnique) {
+        return NextResponse.json({ error: check.message }, { status: 400 });
+      }
       record.receipt_number = receipt_number;
     } else {
       record.rejection_reason = rejection_reason;

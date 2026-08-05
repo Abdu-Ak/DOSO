@@ -21,6 +21,8 @@ export default function CreateRecordModal({
   setFormData,
   onSubmit,
   isLoading,
+  receiptError,
+  setReceiptError,
 }) {
   const isFormValid =
     formData.alumni &&
@@ -120,9 +122,12 @@ export default function CreateRecordModal({
                   labelPlacement="outside"
                   radius="sm"
                   value={formData.receipt_number}
-                  onValueChange={(val) =>
-                    setFormData({ ...formData, receipt_number: val })
-                  }
+                  onValueChange={(val) => {
+                    setFormData({ ...formData, receipt_number: val });
+                    if (setReceiptError) setReceiptError("");
+                  }}
+                  isInvalid={!!receiptError}
+                  errorMessage={receiptError}
                 />
               </div>
             </ModalBody>

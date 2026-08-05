@@ -13,12 +13,8 @@ export default function CreateUserPage() {
   const queryClient = useQueryClient();
 
   const { mutate, isPending } = useMutation({
-    mutationFn: async (formData) => {
-      const response = await axios.post("/api/users", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+    mutationFn: async (data) => {
+      const response = await axios.post("/api/users", data);
       return response.data;
     },
     onSuccess: () => {

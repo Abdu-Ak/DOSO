@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Student from "@/models/Student";
-import cloudinary from "@/lib/cloudinary";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { logActivity } from "@/lib/activityLogger";
@@ -123,12 +122,9 @@ export async function POST(request) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const data = await request.formData();
+    const data = await request.json();
 
-    const email = data.get("email");
-    const imageFile = data.get("image");
-    const district = data.get("district");
-    const dob = data.get("dob");
+    const { email, district, dob, imageUrl, imagePublicId } = data;
 
     if (email) {
       const existingStudent = await Student.findOne({
@@ -144,51 +140,30 @@ export async function POST(request) {
 
     const studentId = await generateStudentId();
 
-    let imageUrl = "";
-    let imagePublicId = "";
-
-    if (imageFile && imageFile.size > 0) {
-      const bytes = await imageFile.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-
-      const uploadPromise = new Promise((resolve, reject) => {
-        cloudinary.uploader
-          .upload_stream({ folder: "students" }, (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          })
-          .end(buffer);
-      });
-
-      const result = await uploadPromise;
-      imageUrl = result.secure_url;
-      imagePublicId = result.public_id;
-    }
-
     const studentData = {
-      name: data.get("name"),
+      name: data.name,
       email: email ? email.toLowerCase() : undefined,
-      phone: data.get("phone"),
+      phone: data.phone,
       dob: new Date(dob),
-      status: data.get("status") || "Pending",
-      current_madrasa_class: data.get("current_madrasa_class"),
-      current_school_class: data.get("current_school_class"),
-      house_name: data.get("house_name"),
-      address: data.get("address"),
-      district: district,
-      custom_district: data.get("custom_district"),
-      father_name: data.get("father_name"),
-      guardian_name: data.get("guardian_name"),
-      guardian_phone: data.get("guardian_phone"),
-      guardian_relation: data.get("guardian_relation"),
-      guardian_occupation: data.get("guardian_occupation"),
-      date_of_admission: new Date(data.get("date_of_admission")),
-      source: data.get("source") || "admin",
+      status: data.status || "Pending",
+      current_madrasa_class: data.current_madrasa_class,
+      current_school_class: data.current_school_class,
+      house_name: data.house_name,
+      address: data.address,
+      district,
+      custom_district: data.custom_district,
+      father_name: data.father_name,
+      guardian_name: data.guardian_name,
+      guardian_phone: data.guardian_phone,
+      guardian_relation: data.guardian_relation,
+      guardian_occupation: data.guardian_occupation,
+      date_of_admission: new Date(data.date_of_admission),
+      source: data.source || "admin",
       studentId,
-      aadhar_number: data.get("aadhar_number"),
-      identification_mark: data.get("identification_mark"),
-      image: imageUrl,
-      imagePublicId,
+      aadhar_number: data.aadhar_number,
+      identification_mark: data.identification_mark,
+      image: imageUrl || "",
+      imagePublicId: imagePublicId || "",
     };
 
     const student = await Student.create(studentData);

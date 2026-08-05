@@ -27,11 +27,12 @@ export default function CreateDebtRecordModal({
 }) {
   const {
     register,
+    control,
     handleSubmit,
+    reset,
     setValue,
     watch,
-    control,
-    reset,
+    setError,
     formState: { errors, isValid },
   } = useForm({
     resolver: zodResolver(adminCreateDebtSchema),
@@ -78,6 +79,17 @@ export default function CreateDebtRecordModal({
     onOpenChange(false);
   };
 
+  const handleFormSubmit = async (data) => {
+    try {
+      await onSubmit(data);
+    } catch (err) {
+      const msg = err?.response?.data?.error || err?.message;
+      if (msg) {
+        setError("receipt_no", { type: "manual", message: msg });
+      }
+    }
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -90,7 +102,7 @@ export default function CreateDebtRecordModal({
     >
       <ModalContent>
         {() => (
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={handleSubmit(handleFormSubmit)}>
             <ModalHeader className="flex items-center justify-between gap-3">
               <div className="flex flex-col gap-2">
                 <h3 className="text-lg font-body! font-semibold text-slate-800 dark:text-white">

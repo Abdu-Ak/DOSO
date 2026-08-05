@@ -14,10 +14,8 @@ export const useSettings = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (formData) => {
-      const response = await axios.put("/api/settings", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+    mutationFn: async (data) => {
+      const response = await axios.put("/api/settings", data);
       return response.data;
     },
     onSuccess: () => {

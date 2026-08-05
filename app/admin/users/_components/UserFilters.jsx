@@ -16,6 +16,8 @@ const UserFilters = ({
   setDistrict,
   batch,
   setBatch,
+  membershipStatus,
+  setMembershipStatus,
   setPage,
   showFilters = true,
   setShowFilters,
@@ -94,13 +96,13 @@ const UserFilters = ({
             setPage(1);
           }}
         >
-          <SelectItem key="" value="">
+          <SelectItem key="" value="" textValue="All Roles">
             All Roles
           </SelectItem>
-          <SelectItem key="admin" value="admin">
+          <SelectItem key="admin" value="admin" textValue="Admin">
             Admin
           </SelectItem>
-          <SelectItem key="alumni" value="alumni">
+          <SelectItem key="alumni" value="alumni" textValue="Alumni">
             Alumni
           </SelectItem>
         </Select>
@@ -116,17 +118,47 @@ const UserFilters = ({
             setPage(1);
           }}
         >
-          <SelectItem key="" value="">
+          <SelectItem key="" value="" textValue="All Status">
             All Status
           </SelectItem>
-          <SelectItem key="Active" value="Active">
+          <SelectItem key="Active" value="Active" textValue="Active">
             Active
           </SelectItem>
-          <SelectItem key="Pending" value="Pending">
+          <SelectItem key="Pending" value="Pending" textValue="Pending">
             Pending
           </SelectItem>
-          <SelectItem key="Inactive" value="Inactive">
+          <SelectItem key="Inactive" value="Inactive" textValue="Inactive">
             Inactive
+          </SelectItem>
+        </Select>
+
+        <Select
+          className="w-full sm:w-44"
+          placeholder="Membership"
+          variant="bordered"
+          radius="lg"
+          selectedKeys={membershipStatus ? [membershipStatus] : []}
+          onSelectionChange={(keys) => {
+            setMembershipStatus(Array.from(keys)[0] || "");
+            setPage(1);
+          }}
+        >
+          <SelectItem key="" value="" textValue="All Membership">
+            All Membership
+          </SelectItem>
+          <SelectItem
+            key="renewed"
+            value="renewed"
+            textValue={`Renewed (${new Date().getFullYear()})`}
+          >
+            Renewed ({new Date().getFullYear()})
+          </SelectItem>
+          <SelectItem
+            key="expired"
+            value="expired"
+            textValue="Expired / Pending"
+          >
+            Expired / Pending
           </SelectItem>
         </Select>
 
@@ -141,11 +173,11 @@ const UserFilters = ({
             setPage(1);
           }}
         >
-          <SelectItem key="" value="">
+          <SelectItem key="" value="" textValue="All Districts">
             All Districts
           </SelectItem>
           {districts.map((d) => (
-            <SelectItem key={d} value={d}>
+            <SelectItem key={d} value={d} textValue={d}>
               {d}
             </SelectItem>
           ))}

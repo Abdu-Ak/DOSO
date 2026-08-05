@@ -34,5 +34,7 @@ const sundookSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+sundookSchema.index({ receipt_number: 1 }, { sparse: true });
+
 export default mongoose.models.Sundook ||
   mongoose.model("Sundook", sundookSchema);
