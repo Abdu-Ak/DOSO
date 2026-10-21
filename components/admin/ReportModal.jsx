@@ -32,6 +32,13 @@ const ReportModal = ({
   const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState(null);
 
+  // Plain URLs in a CSV import as dead text. A HYPERLINK formula is the only
+  // way to get a clickable link, and Excel/LibreOffice/Sheets all evaluate it.
+  const csvImageLink = (url) => {
+    if (!url) return "";
+    return `=HYPERLINK("${String(url).replace(/"/g, "")}","View Photo")`;
+  };
+
   const REPORT_CONFIG = {
     users: {
       title: "Users Information Report",
@@ -40,6 +47,7 @@ const ReportModal = ({
       dataKey: "users",
       csvHeaders: [
         "User ID",
+        "Profile Image",
         "Name",
         "Email",
         "Phone",
@@ -70,6 +78,7 @@ const ReportModal = ({
       ],
       getCSVRow: (u) => [
         u.userId || "",
+        csvImageLink(u.image),
         u.name || "",
         u.email || "",
         u.phone || "",
@@ -109,6 +118,7 @@ const ReportModal = ({
         4: { cellWidth: 20 },
         5: { cellWidth: 18 },
       },
+      imageField: "self",
     },
     students: {
       title: "Students Information Report",
@@ -117,6 +127,7 @@ const ReportModal = ({
       dataKey: "students",
       csvHeaders: [
         "Student ID",
+        "Profile Image",
         "Name",
         "Email",
         "Phone",
@@ -142,6 +153,7 @@ const ReportModal = ({
       ],
       getCSVRow: (u) => [
         u.studentId || "",
+        csvImageLink(u.image),
         u.name || "",
         u.email || "",
         u.phone || "",
@@ -176,6 +188,7 @@ const ReportModal = ({
         4: { cellWidth: 32 },
         5: { cellWidth: 17 },
       },
+      imageField: "self",
     },
     sundook: {
       title: "Sundook Records Report",
@@ -409,10 +422,34 @@ const ReportModal = ({
     }
   };
 
-  const getUserImageBase64 = async (url) => {
+  // jsPDF can only decode JPEG/PNG. Cloudinary serves whatever format was
+  // uploaded (often WebP), so ask it to transcode to JPEG first.
+  const toJsPdfFriendlyUrl = (url) => {
+    if (
+      !url ||
+      !url.includes("res.cloudinary.com") ||
+      !url.includes("/image/upload/")
+    ) {
+      return url;
+    }
+    // Cloudinary also honours the URL extension, so swap that too
+    return url
+      .replace("/image/upload/", "/image/upload/f_jpg/")
+      .replace(/\.(webp|avif|gif|png|jpe?g)(\?.*)?$/i, ".jpg$2");
+  };
+
+  const getDataUrlFormat = (dataUrl) => {
+    const match = /^data:image\/([a-z0-9.+-]+)/i.exec(dataUrl || "");
+    const type = (match?.[1] || "").toLowerCase();
+    if (type === "jpeg" || type === "jpg") return "JPEG";
+    if (type === "png") return "PNG";
+    return null; // Anything else (webp, avif, gif) can't be embedded
+  };
+
+  const getImageBase64 = async (url) => {
     if (!url) return null;
     try {
-      const response = await fetch(url);
+      const response = await fetch(toJsPdfFriendlyUrl(url));
       const blob = await response.blob();
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -424,6 +461,22 @@ const ReportModal = ({
       console.error("User image fetch error:", err);
       return null;
     }
+  };
+
+  const resolveImageOwner = (item, config) => {
+    if (!config.imageField) return null;
+    return config.imageField === "self"
+      ? item
+      : item?.[config.imageField] || null;
+  };
+
+  const drawPhotoPlaceholder = (doc, x, y, size) => {
+    doc.setDrawColor(226, 232, 240);
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(x, y, size, size, 2, 2, "FD");
+    doc.setFontSize(6);
+    doc.setTextColor(148, 163, 184);
+    doc.text("No Photo", x + 2, y + 8);
   };
 
   const handleExportCSV = async () => {
@@ -537,20 +590,21 @@ const ReportModal = ({
       // Prepare images in advance
       const fetchedImages = {};
       if (currentConfig.imageField) {
+        const uniqueImages = new Map();
         for (const item of data) {
-          const u =
-            currentConfig.imageField === "alumni"
-              ? item.alumni
-              : currentConfig.imageField === "requester"
-                ? item.requester
-                : item;
-          if (u && u._id && u.image) {
-            try {
-              fetchedImages[u._id] = await getUserImageBase64(u.image);
-            } catch (e) {
-              console.error("Failed to pre-fetch image for item:", u._id, e);
-            }
-          }
+          const u = resolveImageOwner(item, currentConfig);
+          if (u?._id && u.image) uniqueImages.set(u._id, u.image);
+        }
+
+        // Fetch a few at a time instead of one-by-one to keep large reports fast
+        const entries = [...uniqueImages.entries()];
+        const CONCURRENCY = 8;
+        for (let i = 0; i < entries.length; i += CONCURRENCY) {
+          await Promise.all(
+            entries.slice(i, i + CONCURRENCY).map(async ([id, url]) => {
+              fetchedImages[id] = await getImageBase64(url);
+            }),
+          );
         }
       }
 
@@ -565,33 +619,24 @@ const ReportModal = ({
             cellData.column.index === 0 &&
             currentConfig.imageField
           ) {
-            const item = data[cellData.row.index];
-            const u =
-              currentConfig.imageField === "alumni"
-                ? item.alumni
-                : currentConfig.imageField === "requester"
-                  ? item.requester
-                  : item;
+            const u = resolveImageOwner(data[cellData.row.index], currentConfig);
+            if (!u?._id) return;
 
-            if (u && u._id) {
-              const base64Img = fetchedImages[u._id];
-              if (base64Img) {
-                const imgSize = 14;
-                const posX = cellData.cell.x + 2;
-                const posY = cellData.cell.y + 4;
-                doc.addImage(base64Img, "JPEG", posX, posY, imgSize, imgSize);
-              } else {
-                // Draw placeholder
-                const imgSize = 14;
-                const posX = cellData.cell.x + 2;
-                const posY = cellData.cell.y + 4;
-                doc.setDrawColor(226, 232, 240);
-                doc.setFillColor(248, 250, 252);
-                doc.roundedRect(posX, posY, imgSize, imgSize, 2, 2, "FD");
-                doc.setFontSize(6);
-                doc.setTextColor(148, 163, 184);
-                doc.text("No Photo", posX + 2, posY + 8);
+            const imgSize = 14;
+            const posX = cellData.cell.x + 2;
+            const posY = cellData.cell.y + 4;
+            const base64Img = fetchedImages[u._id];
+            const format = getDataUrlFormat(base64Img);
+
+            if (base64Img && format) {
+              try {
+                doc.addImage(base64Img, format, posX, posY, imgSize, imgSize);
+              } catch (err) {
+                console.error("Failed to draw user image:", u._id, err);
+                drawPhotoPlaceholder(doc, posX, posY, imgSize);
               }
+            } else {
+              drawPhotoPlaceholder(doc, posX, posY, imgSize);
             }
           }
         },
