@@ -15,6 +15,8 @@ const StudentSchema = new mongoose.Schema(
     phone: {
       type: String,
       trim: true,
+      unique: true,
+      sparse: true,
     },
     dob: {
       type: Date,
@@ -88,6 +90,8 @@ const StudentSchema = new mongoose.Schema(
     aadhar_number: {
       type: String,
       trim: true,
+      unique: true,
+      sparse: true,
     },
     identification_mark: {
       type: String,

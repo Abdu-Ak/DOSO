@@ -7,6 +7,12 @@ import { logActivity } from "@/lib/activityLogger";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { hasPermission } from "@/lib/permissions";
+import {
+  getDuplicateKeyField,
+  hasNormalizedPhoneConflict,
+  normalizeEmail,
+  normalizeIndianPhone,
+} from "@/lib/uniqueIdentityFields";
 
 export async function GET(request, { params }) {
   try {
@@ -67,25 +73,35 @@ export async function PUT(request, { params }) {
       job_location, imageUrl, imagePublicId, permissions,
     } = data;
 
-    // Check if new email/userId is taken by another user
-    const existingUser = await User.findOne({
-      _id: { $ne: id },
-      $or: [{ email: email.toLowerCase() }, { userId }],
-    });
+    const normalizedEmail = normalizeEmail(email);
 
-    if (existingUser) {
+    const existingEmail = await User.exists({
+      _id: { $ne: id },
+      email: normalizedEmail,
+    });
+    if (existingEmail) {
       return NextResponse.json(
-        { error: "Email or User ID already in use" },
-        { status: 400 },
+        { error: "Email address already in use" },
+        { status: 409 },
       );
     }
 
-    let updateData = {
+    const existingUserId = await User.exists({
+      _id: { $ne: id },
+      userId,
+    });
+    if (existingUserId) {
+      return NextResponse.json(
+        { error: "User ID already in use" },
+        { status: 409 },
+      );
+    }
+
+    const updateData = {
       name,
       userId,
-      email: email.toLowerCase(),
+      email: normalizedEmail,
       role,
-      phone,
       dob: dob ? new Date(dob) : null,
       status,
       house_name,
@@ -101,6 +117,50 @@ export async function PUT(request, { params }) {
       custom_job,
       job_location,
     };
+
+    const updateOperation = { $set: updateData };
+    const destinationIsAlumni = role === "alumni";
+
+    if (destinationIsAlumni) {
+      const normalizedPhone = normalizeIndianPhone(phone);
+      const currentPhone = normalizeIndianPhone(user.phone).value;
+      const rawPhoneUnchanged =
+        user.role === "alumni" &&
+        String(phone ?? "").trim() === String(user.phone ?? "").trim();
+      const normalizedPhoneUnchanged =
+        user.role === "alumni" &&
+        Boolean(normalizedPhone.value) &&
+        normalizedPhone.value === currentPhone;
+      const phoneChanged =
+        !rawPhoneUnchanged && !normalizedPhoneUnchanged;
+
+      if (phoneChanged) {
+        if (normalizedPhone.error || !normalizedPhone.value) {
+          return NextResponse.json(
+            { error: normalizedPhone.error || "Phone number is required" },
+            { status: 400 },
+          );
+        }
+
+        if (
+          await hasNormalizedPhoneConflict(User, normalizedPhone.value, {
+            excludeId: id,
+            query: { role: "alumni" },
+          })
+        ) {
+          return NextResponse.json(
+            { error: "Phone number already in use" },
+            { status: 409 },
+          );
+        }
+
+        updateData.phone = normalizedPhone.value;
+        updateData.phoneUniqueKey = normalizedPhone.value;
+      }
+    } else {
+      updateData.phone = phone;
+      updateOperation.$unset = { phoneUniqueKey: "" };
+    }
 
     if (session.user.role === "super_admin" || (session.user.id !== id && hasPermission(session.user, "permission_management", "manage"))) {
       if (permissions) {
@@ -121,7 +181,7 @@ export async function PUT(request, { params }) {
       updateData.imagePublicId = imagePublicId || "";
     }
 
-    const updatedUser = await User.findByIdAndUpdate(id, updateData, {
+    const updatedUser = await User.findByIdAndUpdate(id, updateOperation, {
       new: true,
       runValidators: true,
     });
@@ -140,8 +200,22 @@ export async function PUT(request, { params }) {
     });
   } catch (error) {
     console.error("PUT User Error:", error);
+
+    const duplicateField = getDuplicateKeyField(error);
+    if (duplicateField) {
+      const message =
+        duplicateField === "phoneUniqueKey"
+          ? "Phone number already in use"
+          : duplicateField === "email"
+            ? "Email address already in use"
+            : duplicateField === "userId"
+              ? "User ID already in use"
+              : "A user with the same unique information already exists";
+      return NextResponse.json({ error: message }, { status: 409 });
+    }
+
     return NextResponse.json(
-      { error: error.message || "Failed to update user" },
+      { error: "Failed to update user" },
       { status: 500 },
     );
   }
