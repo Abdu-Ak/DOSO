@@ -6,6 +6,12 @@ import { logActivity } from "@/lib/activityLogger";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { hasPermission } from "@/lib/permissions";
+import {
+  getDuplicateKeyField,
+  hasNormalizedPhoneConflict,
+  normalizeEmail,
+  normalizeIndianPhone,
+} from "@/lib/uniqueIdentityFields";
 
 export async function GET(request) {
   try {
@@ -166,7 +172,8 @@ export async function POST(request) {
     }
 
     const data = await request.json();
-    const { role, email, password, status, imageUrl, imagePublicId } = data;
+    const { role, password, status, imageUrl, imagePublicId } = data;
+    const email = normalizeEmail(data.email);
 
     if (role === "admin") {
       if (!hasPermission(session.user, "permission_management", "manage")) {
@@ -179,18 +186,18 @@ export async function POST(request) {
     }
 
     // Check if user already exists by email
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return NextResponse.json(
-        { error: "User with this email already exists" },
-        { status: 400 },
+        { error: "Email address already in use" },
+        { status: 409 },
       );
     }
 
     // Role-specific field extraction
     let userFields = {
       role,
-      email: email.toLowerCase(),
+      email,
       status,
       phone: data.phone,
     };
@@ -200,14 +207,35 @@ export async function POST(request) {
       const existingUserId = await User.findOne({ userId });
       if (existingUserId) {
         return NextResponse.json(
-          { error: "Username already exists" },
-          { status: 400 },
+          { error: "User ID already in use" },
+          { status: 409 },
         );
       }
       userFields.name = data.name;
       userFields.userId = userId;
       userFields.permissions = data.permissions;
     } else if (role === "alumni") {
+      const normalizedPhone = normalizeIndianPhone(data.phone);
+      if (normalizedPhone.error || !normalizedPhone.value) {
+        return NextResponse.json(
+          { error: normalizedPhone.error || "Phone number is required" },
+          { status: 400 },
+        );
+      }
+
+      if (
+        await hasNormalizedPhoneConflict(User, normalizedPhone.value, {
+          query: { role: "alumni" },
+        })
+      ) {
+        return NextResponse.json(
+          { error: "Phone number already in use" },
+          { status: 409 },
+        );
+      }
+
+      userFields.phone = normalizedPhone.value;
+      userFields.phoneUniqueKey = normalizedPhone.value;
       userFields.name = data.name;
       userFields.house_name = data.house_name;
       userFields.father_name = data.father_name;
@@ -247,8 +275,22 @@ export async function POST(request) {
     );
   } catch (error) {
     console.error("POST User Error:", error);
+
+    const duplicateField = getDuplicateKeyField(error);
+    if (duplicateField) {
+      const message =
+        duplicateField === "phoneUniqueKey"
+          ? "Phone number already in use"
+          : duplicateField === "email"
+            ? "Email address already in use"
+            : duplicateField === "userId"
+              ? "Generated user ID conflict. Please try again."
+              : "A user with the same unique information already exists";
+      return NextResponse.json({ error: message }, { status: 409 });
+    }
+
     return NextResponse.json(
-      { error: error.message || "Failed to create user" },
+      { error: "Failed to create user" },
       { status: 500 },
     );
   }

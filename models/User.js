@@ -28,6 +28,12 @@ const UserSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    // Applied only to new or changed alumni phone numbers. Existing duplicate
+    // phone values remain grandfathered and are not modified.
+    phoneUniqueKey: {
+      type: String,
+      select: false,
+    },
     dob: {
       type: Date,
     },
@@ -103,6 +109,18 @@ const UserSchema = new mongoose.Schema(
 UserSchema.index(
   { "membership_renewals.receipt_number": 1 },
   { sparse: true },
+);
+
+UserSchema.index(
+  { phoneUniqueKey: 1 },
+  {
+    name: "unique_enforced_alumni_phone",
+    unique: true,
+    partialFilterExpression: {
+      role: "alumni",
+      phoneUniqueKey: { $type: "string" },
+    },
+  },
 );
 
 export default mongoose.models.User || mongoose.model("User", UserSchema);

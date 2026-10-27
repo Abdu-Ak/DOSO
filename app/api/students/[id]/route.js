@@ -6,6 +6,13 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { logActivity } from "@/lib/activityLogger";
 import { hasPermission } from "@/lib/permissions";
+import {
+  getDuplicateKeyField,
+  hasNormalizedAadhaarConflict,
+  hasNormalizedPhoneConflict,
+  normalizeAadhaar,
+  normalizeIndianPhone,
+} from "@/lib/uniqueIdentityFields";
 
 export async function GET(request, { params }) {
   try {
@@ -56,17 +63,48 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: "Student not found" }, { status: 404 });
     }
 
-    const email = data.email;
-    if (email && email.toLowerCase() !== student.email) {
-      const existingStudent = await Student.findOne({
-        email: email.toLowerCase(),
-      });
-      if (existingStudent) {
-        return NextResponse.json(
-          { error: "Email already in use" },
-          { status: 400 },
-        );
-      }
+    const normalizedPhone = normalizeIndianPhone(data.phone);
+    const normalizedAadhaar = normalizeAadhaar(data.aadhar_number);
+
+    if (normalizedPhone.error) {
+      return NextResponse.json(
+        { error: normalizedPhone.error },
+        { status: 400 },
+      );
+    }
+    if (normalizedAadhaar.error) {
+      return NextResponse.json(
+        { error: normalizedAadhaar.error },
+        { status: 400 },
+      );
+    }
+
+    const currentPhone = normalizeIndianPhone(student.phone).value;
+    const currentAadhaar = normalizeAadhaar(student.aadhar_number).value;
+    const phoneChanged = normalizedPhone.value !== currentPhone;
+    const aadhaarChanged = normalizedAadhaar.value !== currentAadhaar;
+
+    if (
+      phoneChanged &&
+      (await hasNormalizedPhoneConflict(Student, normalizedPhone.value, {
+        excludeId: id,
+      }))
+    ) {
+      return NextResponse.json(
+        { error: "Phone number already in use" },
+        { status: 409 },
+      );
+    }
+    if (
+      aadhaarChanged &&
+      (await hasNormalizedAadhaarConflict(Student, normalizedAadhaar.value, {
+        excludeId: id,
+      }))
+    ) {
+      return NextResponse.json(
+        { error: "Aadhaar number already in use" },
+        { status: 409 },
+      );
     }
 
     let imageUrl = student.image;
@@ -84,8 +122,6 @@ export async function PUT(request, { params }) {
 
     const updateData = {
       name: data.name,
-      email: email ? email.toLowerCase() : student.email,
-      phone: data.phone,
       dob: data.dob ? new Date(data.dob) : student.dob,
       status: data.status || student.status,
       current_madrasa_class: data.current_madrasa_class,
@@ -104,11 +140,31 @@ export async function PUT(request, { params }) {
         : student.date_of_admission,
       image: imageUrl,
       imagePublicId,
-      aadhar_number: data.aadhar_number,
       identification_mark: data.identification_mark,
     };
 
-    const updatedStudent = await Student.findByIdAndUpdate(id, updateData, {
+    const unsetData = {};
+    if (phoneChanged) {
+      if (normalizedPhone.value) {
+        updateData.phone = normalizedPhone.value;
+      } else {
+        unsetData.phone = "";
+      }
+    }
+    if (aadhaarChanged) {
+      if (normalizedAadhaar.value) {
+        updateData.aadhar_number = normalizedAadhaar.value;
+      } else {
+        unsetData.aadhar_number = "";
+      }
+    }
+
+    const updateOperation = { $set: updateData };
+    if (Object.keys(unsetData).length) {
+      updateOperation.$unset = unsetData;
+    }
+
+    const updatedStudent = await Student.findByIdAndUpdate(id, updateOperation, {
       new: true,
       runValidators: true,
     });
@@ -124,8 +180,21 @@ export async function PUT(request, { params }) {
     return NextResponse.json({ success: true, student: updatedStudent });
   } catch (error) {
     console.error("PUT Student Error:", error);
+
+    const duplicateField = getDuplicateKeyField(error);
+    if (duplicateField) {
+      const messages = {
+        phone: "Phone number already in use",
+        aadhar_number: "Aadhaar number already in use",
+      };
+      return NextResponse.json(
+        { error: messages[duplicateField] || "Duplicate information detected" },
+        { status: 409 },
+      );
+    }
+
     return NextResponse.json(
-      { error: error.message || "Failed to update student" },
+      { error: "Failed to update student" },
       { status: 500 },
     );
   }

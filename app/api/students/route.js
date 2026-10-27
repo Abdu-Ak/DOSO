@@ -5,6 +5,13 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { logActivity } from "@/lib/activityLogger";
 import { hasPermission } from "@/lib/permissions";
+import {
+  getDuplicateKeyField,
+  hasNormalizedAadhaarConflict,
+  hasNormalizedPhoneConflict,
+  normalizeAadhaar,
+  normalizeIndianPhone,
+} from "@/lib/uniqueIdentityFields";
 
 const DISTRICT_CODES = {
   Thiruvananthapuram: "TVM",
@@ -124,26 +131,43 @@ export async function POST(request) {
 
     const data = await request.json();
 
-    const { email, district, dob, imageUrl, imagePublicId } = data;
+    const { district, dob, imageUrl, imagePublicId } = data;
+    const normalizedPhone = normalizeIndianPhone(data.phone);
+    const normalizedAadhaar = normalizeAadhaar(data.aadhar_number);
 
-    if (email) {
-      const existingStudent = await Student.findOne({
-        email: email.toLowerCase(),
-      });
-      if (existingStudent) {
-        return NextResponse.json(
-          { error: "Email already registered" },
-          { status: 400 },
-        );
-      }
+    if (normalizedPhone.error) {
+      return NextResponse.json(
+        { error: normalizedPhone.error },
+        { status: 400 },
+      );
+    }
+    if (normalizedAadhaar.error) {
+      return NextResponse.json(
+        { error: normalizedAadhaar.error },
+        { status: 400 },
+      );
+    }
+
+    if (await hasNormalizedPhoneConflict(Student, normalizedPhone.value)) {
+      return NextResponse.json(
+        { error: "Phone number already in use" },
+        { status: 409 },
+      );
+    }
+    if (
+      await hasNormalizedAadhaarConflict(Student, normalizedAadhaar.value)
+    ) {
+      return NextResponse.json(
+        { error: "Aadhaar number already in use" },
+        { status: 409 },
+      );
     }
 
     const studentId = await generateStudentId();
 
     const studentData = {
       name: data.name,
-      email: email ? email.toLowerCase() : undefined,
-      phone: data.phone,
+      phone: normalizedPhone.value,
       dob: new Date(dob),
       status: data.status || "Pending",
       current_madrasa_class: data.current_madrasa_class,
@@ -160,7 +184,7 @@ export async function POST(request) {
       date_of_admission: new Date(data.date_of_admission),
       source: data.source || "admin",
       studentId,
-      aadhar_number: data.aadhar_number,
+      aadhar_number: normalizedAadhaar.value,
       identification_mark: data.identification_mark,
       image: imageUrl || "",
       imagePublicId: imagePublicId || "",
@@ -179,8 +203,22 @@ export async function POST(request) {
     return NextResponse.json({ success: true, student }, { status: 201 });
   } catch (error) {
     console.error("POST Student Error:", error);
+
+    const duplicateField = getDuplicateKeyField(error);
+    if (duplicateField) {
+      const messages = {
+        phone: "Phone number already in use",
+        aadhar_number: "Aadhaar number already in use",
+        studentId: "Generated student ID conflict. Please try again.",
+      };
+      return NextResponse.json(
+        { error: messages[duplicateField] || "Duplicate information detected" },
+        { status: 409 },
+      );
+    }
+
     return NextResponse.json(
-      { error: error.message || "Failed to create student" },
+      { error: "Failed to create student" },
       { status: 500 },
     );
   }

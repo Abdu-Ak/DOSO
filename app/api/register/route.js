@@ -4,6 +4,14 @@ import User from "@/models/User";
 import Student from "@/models/Student";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import {
+  getDuplicateKeyField,
+  hasNormalizedAadhaarConflict,
+  hasNormalizedPhoneConflict,
+  normalizeAadhaar,
+  normalizeEmail,
+  normalizeIndianPhone,
+} from "@/lib/uniqueIdentityFields";
 
 async function generateStudentId() {
   const prefix = `DOSO-ST`;
@@ -52,7 +60,8 @@ export async function POST(request) {
     await dbConnect();
     const data = await request.json();
 
-    const { role, email, imageUrl = "", imagePublicId = "" } = data;
+    const { role, imageUrl = "", imagePublicId = "" } = data;
+    const email = normalizeEmail(data.email);
 
     if (!["student", "alumni"].includes(role)) {
       return NextResponse.json(
@@ -69,20 +78,52 @@ export async function POST(request) {
       if (existingEntry) {
         return NextResponse.json(
           {
-            error: `${role.charAt(0).toUpperCase() + role.slice(1)} with this email already exists`,
+            error: "Email address already in use",
           },
-          { status: 400 },
+          { status: 409 },
         );
       }
     }
 
     if (role === "student") {
+      const normalizedPhone = normalizeIndianPhone(data.phone);
+      const normalizedAadhaar = normalizeAadhaar(data.aadhar_number);
+
+      if (normalizedPhone.error) {
+        return NextResponse.json(
+          { error: normalizedPhone.error },
+          { status: 400 },
+        );
+      }
+      if (normalizedAadhaar.error) {
+        return NextResponse.json(
+          { error: normalizedAadhaar.error },
+          { status: 400 },
+        );
+      }
+
+      if (
+        await hasNormalizedPhoneConflict(Student, normalizedPhone.value)
+      ) {
+        return NextResponse.json(
+          { error: "Phone number already in use" },
+          { status: 409 },
+        );
+      }
+      if (
+        await hasNormalizedAadhaarConflict(Student, normalizedAadhaar.value)
+      ) {
+        return NextResponse.json(
+          { error: "Aadhaar number already in use" },
+          { status: 409 },
+        );
+      }
+
       const studentId = await generateStudentId();
 
       await Student.create({
         name: data.name,
-        phone: data.phone,
-        email: email ? email.toLowerCase() : undefined,
+        phone: normalizedPhone.value,
         dob: new Date(data.dob),
         status: "Pending",
         current_madrasa_class: data.current_madrasa_class,
@@ -99,6 +140,8 @@ export async function POST(request) {
         date_of_admission: new Date(data.date_of_admission),
         source: "public",
         studentId,
+        aadhar_number: normalizedAadhaar.value,
+        identification_mark: data.identification_mark,
         image: imageUrl,
         imagePublicId,
       });
@@ -110,10 +153,30 @@ export async function POST(request) {
     }
 
     // Alumni registration
+    const normalizedPhone = normalizeIndianPhone(data.phone);
+    if (normalizedPhone.error || !normalizedPhone.value) {
+      return NextResponse.json(
+        { error: normalizedPhone.error || "Phone number is required" },
+        { status: 400 },
+      );
+    }
+
+    if (
+      await hasNormalizedPhoneConflict(User, normalizedPhone.value, {
+        query: { role: "alumni" },
+      })
+    ) {
+      return NextResponse.json(
+        { error: "Phone number already in use" },
+        { status: 409 },
+      );
+    }
+
     const userFields = {
       role,
-      email: email ? email.toLowerCase() : undefined,
-      phone: data.phone,
+      email,
+      phone: normalizedPhone.value,
+      phoneUniqueKey: normalizedPhone.value,
       name: data.name,
       house_name: data.house_name,
       father_name: data.father_name,
@@ -150,8 +213,25 @@ export async function POST(request) {
     );
   } catch (error) {
     console.error("Public Registration Error:", error);
+
+    const duplicateField = getDuplicateKeyField(error);
+    if (duplicateField) {
+      const messages = {
+        email: "Email address already in use",
+        phone: "Phone number already in use",
+        phoneUniqueKey: "Phone number already in use",
+        aadhar_number: "Aadhaar number already in use",
+        studentId: "Generated student ID conflict. Please try again.",
+        userId: "Generated alumni ID conflict. Please try again.",
+      };
+      return NextResponse.json(
+        { error: messages[duplicateField] || "Duplicate information detected" },
+        { status: 409 },
+      );
+    }
+
     return NextResponse.json(
-      { error: error.message || "Registration failed" },
+      { error: "Registration failed" },
       { status: 500 },
     );
   }
